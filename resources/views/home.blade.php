@@ -9,8 +9,8 @@
     <div class="absolute top-1/2 right-0 w-80 h-80 bg-[#7A4A10]/5 rounded-full blur-3xl"></div>
 
     <div class="max-w-5xl mx-auto text-center relative z-10 space-y-6">
-        <span class="bg-[#7A4A10]/10 text-[#7A4A10] text-xs px-4 py-2 rounded-full font-extrabold uppercase tracking-wider border border-[#7A4A10]/20">
-            🎓 Pasar barang preloved unsoed purwokerto
+        <span class="bg-[#7A4A10]/10 text-[#7A4A10] text-[11px] px-5 py-2 rounded-full font-bold uppercase tracking-wider border border-[#7A4A10]/20">
+            Pasar Preloved Kampus Unsoed
         </span>
         <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-tight font-heading">
             Hemat Kantong, Peduli Lingkungan <br>
@@ -20,21 +20,20 @@
             Temukan buku kuliah, elektronik, kebutuhan kos, hingga fashion dari sesama mahasiswa Unsoed. Transaksi mudah, aman, dan tanpa ongkir dengan sistem COD di kampus!
         </p>
 
-        <!-- Search Form -->
-        <div class="max-w-xl mx-auto pt-4">
-            <form action="{{ route('home') }}" method="GET" class="relative flex items-center border border-[#D4A017]/35 bg-[#FBF6EC] backdrop-blur-md rounded-2xl shadow-md p-1.5 focus-within:border-[#7A4A10] focus-within:ring-4 focus-within:ring-[#7A4A10]/10 transition-all duration-300">
-                <span class="pl-4 text-[#7A4A10]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </span>
-                <input type="text" name="search" id="home-search" value="{{ request('search') }}" placeholder="Cari kalkulator, buku praktikum, baju..." class="w-full pl-3 pr-4 text-sm text-[#2E1A06] bg-transparent focus:outline-none placeholder-[#7A4A10]/60">
-                <button type="submit" class="bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-xs font-bold px-6 py-3 rounded-xl transition duration-200">Cari Barang</button>
-            </form>
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+            <a href="#catalog-section" class="px-8 py-3.5 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-extrabold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-350 transform hover:-translate-y-0.5">
+                Mulai Belanja
+            </a>
+            <a href="{{ route('products.create') }}" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
+                Jual Barang
+            </a>
         </div>
     </div>
 </section>
 
 <!-- Filter Kategori & Grid Produk -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<section id="catalog-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 pb-4 border-b border-[#D4A017]/20">
         <div>
             <h2 class="text-2xl font-black text-[#2E1A06] font-heading">Katalog Preloved Kampus</h2>
@@ -250,21 +249,23 @@
         renderProducts();
         
         const navSearch = document.getElementById('navbar-search');
+        const mobileNavSearch = document.getElementById('mobile-navbar-search');
+
+        const syncSearch = (value) => {
+            searchQuery = value;
+            if (navSearch) navSearch.value = value;
+            if (mobileNavSearch) mobileNavSearch.value = value;
+            renderProducts();
+        };
+
         if (navSearch) {
             navSearch.value = searchQuery;
-            navSearch.addEventListener('input', (e) => {
-                searchQuery = e.target.value;
-                renderProducts();
-            });
+            navSearch.addEventListener('input', (e) => syncSearch(e.target.value));
         }
 
-        const homeSearch = document.getElementById('home-search');
-        if (homeSearch) {
-            homeSearch.addEventListener('input', (e) => {
-                searchQuery = e.target.value;
-                if(navSearch) navSearch.value = searchQuery;
-                renderProducts();
-            });
+        if (mobileNavSearch) {
+            mobileNavSearch.value = searchQuery;
+            mobileNavSearch.addEventListener('input', (e) => syncSearch(e.target.value));
         }
     });
 </script>
