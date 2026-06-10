@@ -137,6 +137,30 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+
+// Halaman Chat (In-App Messaging)
+Route::get('/chat', function () {
+    return view('chat.index');
+})->name('chat.index');
+
+// Halaman Profil Mahasiswa
+Route::get('/profile', function () {
+    return view('profile.index');
+})->name('profile.index');
+
+// Halaman Dashboard Penjual (Seller)
+Route::get('/seller/dashboard', function () {
+    return view('seller.dashboard');
+})->name('seller.dashboard');
+
+// Halaman Dashboard Admin
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+})->name('admin.dashboard');
+
 // Halaman Upload Produk Baru
 Route::get('/products/create', function () {
     return view('products.create');

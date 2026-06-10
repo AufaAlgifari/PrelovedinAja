@@ -20,6 +20,12 @@ class User extends Authenticatable
         'unsoed_major',
         'avatar_url',
         'rating_cache',
+        'role',
+        'is_verified',
+        'no_kampus',
+        'verification_token',
+        'token_expired_at',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -31,6 +37,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
         'rating_cache'      => 'float',
+        'is_verified'       => 'boolean',
+        'token_expired_at'  => 'datetime',
+        'last_login_at'     => 'datetime',
     ];
 
     // ── Relationships ──────────────────────────────────────
@@ -53,16 +62,22 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class, 'buyer_id');
     }
 
-    // Pesan yang dikirim user ini
-    public function sentMessages()
+    // Chat room sebagai pembeli
+    public function chatsAsBuyer()
     {
-        return $this->hasMany(Chat::class, 'sender_id');
+        return $this->hasMany(Chat::class, 'buyer_id');
     }
 
-    // Pesan yang diterima user ini
-    public function receivedMessages()
+    // Chat room sebagai penjual
+    public function chatsAsSeller()
     {
-        return $this->hasMany(Chat::class, 'receiver_id');
+        return $this->hasMany(Chat::class, 'seller_id');
+    }
+
+    // Pesan-pesan yang dikirim user ini
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
     }
 
     // Ulasan yang pernah ditulis user ini

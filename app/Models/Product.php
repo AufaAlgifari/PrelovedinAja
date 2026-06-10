@@ -16,13 +16,16 @@ class Product extends Model
         'price',
         'condition',
         'category',
+        'category_id',
         'status',
         'image_urls',
+        'views_count',
     ];
 
     protected $casts = [
         'image_urls' => 'array',  // otomatis encode/decode JSON
         'price'      => 'integer',
+        'views_count'=> 'integer',
     ];
 
     // ── Relationships ──────────────────────────────────────
@@ -30,6 +33,11 @@ class Product extends Model
     public function seller()
     {
         return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function categoryRel()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function carts()

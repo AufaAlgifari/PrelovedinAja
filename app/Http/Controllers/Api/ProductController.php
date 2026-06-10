@@ -59,15 +59,40 @@ class ProductController extends Controller
             'condition'   => 'required|in:New,Like New,Good,Well Used',
             'category'    => 'required|string|max:100',
             'images'      => 'required|array|min:1|max:5',
-            'images.*'    => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Upload gambar
+        // Upload gambar (mendukung file biner multipart maupun base64 fallback)
         $imageUrls = [];
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('products', 'public');
-            $imageUrls[] = Storage::url($path);
+        
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                if ($image->isValid()) {
+                    $path = $image->store('products', 'public');
+                    $imageUrls[] = Storage::url($path);
+                }
+            }
+        } else {
+            foreach ($data['images'] as $imgData) {
+                if (is_string($imgData) && str_starts_with($imgData, 'data:image')) {
+                    // Ekstraksi data base64
+                    @list($type, $imgData) = explode(';', $imgData);
+                    @list(, $imgData)      = explode(',', $imgData);
+                    $imageDecoded = base64_decode($imgData);
+                    $fileName = 'products/' . uniqid() . '.png';
+                    Storage::disk('public')->put($fileName, $imageDecoded);
+                    $imageUrls[] = Storage::url($fileName);
+                } else if (is_string($imgData)) {
+                    $imageUrls[] = $imgData;
+                }
+            }
         }
+
+        if (empty($imageUrls)) {
+            $imageUrls[] = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+        }
+
+        // Cari category_id berdasarkan nama kategori
+        $categoryModel = \App\Models\Category::where('name', $data['category'])->first();
 
         $product = Product::create([
             'seller_id'   => $request->user()->id,
@@ -76,6 +101,7 @@ class ProductController extends Controller
             'price'       => $data['price'],
             'condition'   => $data['condition'],
             'category'    => $data['category'],
+            'category_id' => $categoryModel ? $categoryModel->id : null,
             'status'      => 'Available',
             'image_urls'  => $imageUrls,
         ]);
