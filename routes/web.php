@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
+use App\Http\Controllers\PaymentController;
 
 // Helper function to return beautiful mock products
 function getMockProducts() {
@@ -198,3 +199,22 @@ Route::get('/cart', function () {
 Route::get('/transactions/history', function () {
     return view('transactions.riwayat');
 })->name('transactions.history');
+
+// ────────────────────────────────────────
+// Payment Routes (Midtrans)
+// ────────────────────────────────────────
+Route::middleware('auth')->group(function () {
+    // Show checkout page
+    Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+    
+    // Create snap token
+    Route::post('/payment/create-snap-token', [PaymentController::class, 'createSnapToken'])->name('payment.create-snap-token');
+    
+    // Payment callbacks
+    Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+    Route::get('/payment/pending', [PaymentController::class, 'paymentPending'])->name('payment.pending');
+    Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
+});
+
+// Midtrans webhook (no auth needed)
+Route::post('/payment/notification', [PaymentController::class, 'handleNotification'])->name('payment.notification');

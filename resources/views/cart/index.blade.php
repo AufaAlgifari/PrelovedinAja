@@ -197,17 +197,9 @@
             return;
         }
 
-        let checkoutSuccessCount = 0;
-        let lastTrxId = 'TRX-' + Math.floor(Math.random() * 900000 + 100000);
-        let totalVal = 0;
-
-        for (const item of cart) {
-            totalVal += parseInt(item.price) * item.quantity;
-            try {
-                // Call actual Transaction API
-                const response = await fetch('/api/v1/transactions', {
-                    method: 'POST',
-                    headers: {
+        // Redirect to new Midtrans checkout page
+        window.location.href = "{{ route('checkout') }}";
+    }
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${token}`
