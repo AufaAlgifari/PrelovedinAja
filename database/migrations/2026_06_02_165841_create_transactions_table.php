@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('buyer_id')->constrained('users');
-            $table->foreignId('product_id')->constrained('products');
-            $table->unsignedBigInteger('total_amount');
-            $table->string('payment_method');  // e.g. Transfer, QRIS, COD
-            $table->enum('payment_status', ['Pending', 'Paid', 'Failed'])->default('Pending');
-            $table->enum('transaction_status', ['Processing', 'Completed', 'Cancelled'])->default('Processing');
-            $table->enum('shipping_method', ['COD', 'Courier']);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('cart_id')->constrained()->onDelete('cascade');
+            $table->string('transaction_id')->unique();
+            $table->string('order_id_midtrans')->unique();
+            $table->decimal('amount', 15, 2);
+            $table->string('status')->default('pending'); // pending, success, failed, expired
+            $table->string('payment_type')->nullable();
+            $table->json('snap_token')->nullable();
             $table->timestamps();
         });
     }
