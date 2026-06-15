@@ -66,7 +66,7 @@
         </form>
         
         <div class="mt-6 text-center text-xs text-[#2E1A06]/70">
-            Belum punya akun? <a href="#" onclick="showRegisterMock()" class="text-[#7A4A10] font-extrabold hover:text-[#2E1A06] hover:underline">Daftar Akun Baru</a>
+            Belum punya akun? <a href="{{ route('register') }}" onclick="showRegisterMock()" class="text-[#7A4A10] font-extrabold hover:text-[#2E1A06] hover:underline">Daftar Akun Baru</a>
         </div>
     </div>
 </div>

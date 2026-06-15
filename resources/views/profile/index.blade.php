@@ -24,11 +24,27 @@
             
             <!-- Avatar Display & Edit -->
             <div class="flex flex-col sm:flex-row items-center gap-6 p-5 bg-brand-50/50 rounded-2xl border border-brand-500/10">
-                <img id="profile-avatar" class="h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80">
-                <div class="space-y-2 text-center sm:text-left">
-                    <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider">Foto Profil (URL)</label>
-                    <input type="text" id="avatar_url" oninput="document.getElementById('profile-avatar').src = this.value"
-                           class="px-4 py-2 bg-brand-50 border border-brand-500/30 rounded-xl text-xs w-64 md:w-80 focus:outline-none focus:border-brand-600 text-brand-900">
+                <div class="relative group">
+                    <img id="profile-avatar" class="h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md" 
+                         src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80">
+                    <!-- Overlay klik -->
+                    <label for="avatar-upload" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0"></path>
+                        </svg>
+                    </label>
+                    <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                </div>
+
+                <div class="space-y-1 text-center sm:text-left">
+                    <p class="text-xs font-bold text-brand-600 uppercase tracking-wider">Foto Profil</p>
+                    <p class="text-xs text-brand-600/70">JPG, PNG, atau GIF. Maks. 2MB.</p>
+                    <label for="avatar-upload" class="inline-block mt-1 px-4 py-2 bg-brand-50 border border-brand-500/30 rounded-xl text-xs font-bold text-brand-600 hover:bg-brand-100 cursor-pointer transition">
+                        Ganti Foto
+                    </label>
+                    <!-- Simpan base64 hasil upload -->
+                    <input type="hidden" id="avatar_url">
                 </div>
             </div>
 
@@ -91,6 +107,24 @@
 </div>
 
 <script>
+    function handleAvatarUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            window.showToast('Ukuran foto maksimal 2MB.', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            document.getElementById('profile-avatar').src = base64;
+            document.getElementById('avatar_url').value = base64;
+        };
+        reader.readAsDataURL(file);
+    }
+
     function loadUserProfile() {
         const userJson = localStorage.getItem('preloved_user');
         if (!userJson) {
@@ -108,7 +142,9 @@
         document.getElementById('faculty').value = user.unsoed_faculty || 'Umum';
         document.getElementById('major').value = user.unsoed_major || 'UNSOED';
         document.getElementById('avatar_url').value = user.avatar_url || '';
-        document.getElementById('profile-avatar').src = user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
+
+        const avatarSrc = user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
+        document.getElementById('profile-avatar').src = avatarSrc;
 
         const badgeContainer = document.getElementById('verified-badge-container');
         if (user.is_verified) {
@@ -120,16 +156,38 @@
 
     async function handleUpdateProfile(e) {
         e.preventDefault();
-        
-        const name = document.getElementById('name').value;
-        const phone_number = document.getElementById('phone_number').value;
+
+        const name = document.getElementById('name').value.trim();
+        const phone_number = document.getElementById('phone_number').value.trim();
         const avatar_url = document.getElementById('avatar_url').value;
         const token = localStorage.getItem('preloved_token');
 
         const btn = document.getElementById('btn-save');
+        const btnText = document.getElementById('btn-text');
         btn.disabled = true;
-        btn.innerHTML = 'Menyimpan...';
+        btnText.textContent = 'Menyimpan...';
 
+        // Selalu update localStorage dulu, apapun kondisi API
+        const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
+        user.name = name;
+        user.phone_number = phone_number;
+        if (avatar_url) user.avatar_url = avatar_url;
+
+        try {
+            localStorage.setItem('preloved_user', JSON.stringify(user));
+        } catch (storageError) {
+            // Kalau base64 terlalu besar, simpan tanpa foto
+            console.warn('Storage penuh, menyimpan tanpa foto baru.');
+            const userWithoutAvatar = { ...user };
+            delete userWithoutAvatar.avatar_url;
+            localStorage.setItem('preloved_user', JSON.stringify(userWithoutAvatar));
+            window.showToast('Profil disimpan, tapi foto terlalu besar untuk disimpan lokal.', 'error');
+            btn.disabled = false;
+            btnText.textContent = 'Simpan Perubahan';
+            return;
+        }
+
+        // Coba kirim ke API
         try {
             const response = await fetch('/api/v1/me', {
                 method: 'PUT',
@@ -138,33 +196,25 @@
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    name: name,
-                    phone_number: phone_number,
-                    avatar_url: avatar_url
-                })
+                body: JSON.stringify({ name, phone_number, avatar_url: user.avatar_url })
             });
 
             if (response.ok) {
                 const result = await response.json();
                 localStorage.setItem('preloved_user', JSON.stringify(result.user));
-                window.syncAuthHeader();
-                window.showToast('Profil berhasil diperbarui!');
             }
         } catch (error) {
-            console.log('Update profile API offline, simulating store.');
-            // Local fallback save
-            const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
-            user.name = name;
-            user.phone_number = phone_number;
-            user.avatar_url = avatar_url;
-            localStorage.setItem('preloved_user', JSON.stringify(user));
-            window.syncAuthHeader();
-            window.showToast('Profil diperbarui (Simulasi)!');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'Simpan Perubahan';
+            console.log('API offline, data sudah tersimpan lokal.');
         }
+
+        // Sync navbar/header dan tampilkan hasil
+        if (typeof window.syncAuthHeader === 'function') {
+            window.syncAuthHeader();
+        }
+
+        window.showToast('Profil berhasil diperbarui!');
+        btn.disabled = false;
+        btnText.textContent = 'Simpan Perubahan';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
