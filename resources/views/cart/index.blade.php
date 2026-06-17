@@ -197,57 +197,9 @@
             return;
         }
 
-        // Redirect to new Midtrans checkout page
-        window.location.href = "{{ route('checkout') }}";
-    }
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        product_id: parseInt(item.id),
-                        payment_method: 'COD',
-                        shipping_method: 'COD'
-                    })
-                });
-                
-                const result = await response.json();
-                if (response.ok && result.transaction) {
-                    checkoutSuccessCount++;
-                    lastTrxId = 'TRX-' + result.transaction.id;
-                }
-            } catch (error) {
-                console.log('Checkout API failed or offline for item:', item.id, error);
-            }
-        }
-
-        // Save also to local storage for offline fallback/history view
-        let transactions = JSON.parse(localStorage.getItem('preloved_transactions') || '[]');
-        cart.forEach(item => {
-            transactions.unshift({
-                id: lastTrxId,
-                title: item.title,
-                method: 'COD (Fakultas Penjual)',
-                price: item.price,
-                status: 'Completed',
-                image: item.image,
-                hasReviewed: false
-            });
-        });
-        localStorage.setItem('preloved_transactions', JSON.stringify(transactions));
-
-        const totalFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalVal);
-        document.getElementById('modal-trx-id').textContent = lastTrxId;
-        document.getElementById('modal-total-price').textContent = totalFormatted;
-
-        // Clear cart
-        localStorage.removeItem('preloved_cart');
-        window.updateCartBadge();
-
-        // Show Modal
-        const modal = document.getElementById('checkout-modal');
-        modal.classList.remove('hidden');
-        window.showToast('Checkout berhasil diproses!');
+        // Untuk Phase 1, kita arahkan ke halaman checkout produk pertama di cart atau mock
+        // Karena spec minta checkout/{product}, kita ambil item pertama saja sebagai contoh
+        window.location.href = `/checkout/${cart[0].id}`;
     }
 
     function closeCheckoutModal() {
