@@ -10,24 +10,27 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'buyer_id',
+        'user_id',
         'product_id',
-        'total_amount',
-        'payment_method',
-        'payment_status',
-        'transaction_status',
-        'shipping_method',
+        'cart_id',
+        'transaction_id',
+        'order_id_midtrans',
+        'amount',
+        'status',
+        'payment_type',
+        'snap_token',
     ];
 
     protected $casts = [
-        'total_amount' => 'integer',
+        'amount' => 'integer',
+        'snap_token' => 'string',
     ];
 
     // ── Relationships ──────────────────────────────────────
 
-    public function buyer()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'buyer_id');
+        return $this->belongsTo(User::class);
     }
 
     public function product()
@@ -45,12 +48,11 @@ class Transaction extends Model
 
     public function isCompleted(): bool
     {
-        return $this->transaction_status === 'Completed';
+        return $this->status === 'success';
     }
 
     public function canBeReviewed(): bool
     {
-        // Hanya bisa diulas jika sudah Completed dan belum punya review
         return $this->isCompleted() && is_null($this->review);
     }
 }

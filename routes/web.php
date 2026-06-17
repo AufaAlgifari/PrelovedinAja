@@ -149,10 +149,10 @@ Route::get('/chat', function () {
 })->name('chat.index');
 
 // ── Checkout (Beli Sekarang) ────────────────────────────────
-Route::middleware('auth')->group(function () {
-    Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
-        ->name('checkout.index');
-});
+Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
+    ->name('checkout.index');
+Route::post('/checkout/{product}/process', [CheckoutController::class, 'processPayment'])
+    ->name('checkout.process');
 
 // Halaman Profil Mahasiswa
 Route::get('/profile', function () {
@@ -175,26 +175,8 @@ Route::get('/products/create', function () {
 })->name('products.create');
 
 // Halaman Detail Produk
-Route::get('/products/{id}', function ($id) {
-    try {
-        if ($id >= 100) {
-            $product = Product::with('seller')->find($id);
-            if ($product) {
-                return view('products.show', ['product' => $product, 'isDb' => true]);
-            }
-        }
-    } catch (\Exception $e) {
-        // Fallback to mock search
-    }
-
-    $mocks = getMockProducts();
-    $found = collect($mocks)->firstWhere('id', (int)$id);
-    if (!$found) {
-        $found = $mocks[0];
-    }
-    
-    $product = (object)json_decode(json_encode($found));
-    return view('products.show', ['product' => $product, 'isDb' => false]);
+Route::get('/products/{product}', function (Product $product) {
+    return view('products.show', ['product' => $product, 'isDb' => true]);
 })->name('products.show');
 
 // Halaman Keranjang Belanja
@@ -206,6 +188,10 @@ Route::get('/cart', function () {
 Route::get('/transactions/history', function () {
     return view('transactions.riwayat');
 })->name('transactions.history');
+
+Route::get('/transactions/waiting', function () {
+    return view('transactions.waiting');
+})->name('transactions.waiting');
 
 // ────────────────────────────────────────
 // Payment Routes (Midtrans)
