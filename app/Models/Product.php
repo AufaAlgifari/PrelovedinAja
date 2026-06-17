@@ -45,9 +45,9 @@ class Product extends Model
         return $this->hasMany(Cart::class);
     }
 
-    public function transaction()
+    public function transactions()
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasMany(Transaction::class);
     }
 
     public function chats()

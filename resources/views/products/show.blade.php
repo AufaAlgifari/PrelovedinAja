@@ -98,9 +98,9 @@
                 <button onclick="addProductToCart()" class="w-full bg-[#FBF6EC] border-2 border-[#7A4A10] text-[#7A4A10] hover:bg-[#F5E4B0] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-sm transition transform hover:-translate-y-0.5">
                     🛒 Tambah Ke Keranjang
                 </button>
-                <button onclick="openChatModal()" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    💬 Chat Penjual (COD Kampus)
-                </button>
+                <a href="{{ route('checkout.index', $product->id) }}" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-center">
+                    ⚡ Beli Sekarang
+                </a>
             </div>
         </div>
     </div>

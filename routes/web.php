@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CheckoutController;
 
 // Helper function to return beautiful mock products
 function getMockProducts() {
@@ -146,6 +147,12 @@ Route::get('/register', function () {
 Route::get('/chat', function () {
     return view('chat.index');
 })->name('chat.index');
+
+// ── Checkout (Beli Sekarang) ────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
+        ->name('checkout.index');
+});
 
 // Halaman Profil Mahasiswa
 Route::get('/profile', function () {
