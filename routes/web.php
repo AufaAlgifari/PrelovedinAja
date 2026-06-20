@@ -115,12 +115,17 @@ function getMockProducts() {
 
 // Halaman Utama / Home (Menampilkan produk preloved)
 Route::get('/', function () {
+    $search = request('search');
     $dbProducts = [];
     try {
-        $dbProducts = Product::with('seller')
-            ->where('status', 'Available')
-            ->latest()
-            ->get();
+        $query = Product::with('seller')
+            ->where('status', 'Available');
+        
+        if (!empty($search)) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+        
+        $dbProducts = $query->latest()->get();
     } catch (\Exception $e) {
         // Fallback to empty if DB fails
     }
@@ -133,6 +138,37 @@ Route::get('/', function () {
 
     return view('home', compact('dbProducts', 'mockObjects'));
 })->name('home');
+
+// Halaman Daftar Produk / Katalog
+Route::get('/products', function () {
+    $search = request('search');
+    $dbProducts = [];
+    try {
+        $query = Product::with('seller')
+            ->where('status', 'Available');
+        
+        if (!empty($search)) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+        
+        $dbProducts = $query->latest()->get();
+    } catch (\Exception $e) {
+        // Fallback to empty if DB fails
+    }
+
+    $mocks = getMockProducts();
+    // Map mocks to objects to look exactly like Eloquent collections
+    $mockObjects = collect($mocks)->map(function ($item) {
+        return (object)$item;
+    });
+
+    return view('products.index', compact('dbProducts', 'mockObjects'));
+})->name('products.index');
+
+// Halaman Tentang Kami
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
 
 // Halaman Login & Register
 Route::get('/login', function () {
@@ -175,8 +211,32 @@ Route::get('/products/create', function () {
 })->name('products.create');
 
 // Halaman Detail Produk
-Route::get('/products/{product}', function (Product $product) {
-    return view('products.show', ['product' => $product, 'isDb' => true]);
+Route::get('/products/{id}', function ($id) {
+    $product = null;
+    $isDb = false;
+    try {
+        $product = Product::with('seller')->find($id);
+        if ($product) {
+            $isDb = true;
+        }
+    } catch (\Exception $e) {
+        // DB error fallback
+    }
+
+    if (!$product) {
+        $mocks = getMockProducts();
+        $mock = collect($mocks)->firstWhere('id', (int)$id);
+        if ($mock) {
+            $product = (object)$mock;
+            $isDb = false;
+        }
+    }
+
+    if (!$product) {
+        abort(404, 'Produk tidak ditemukan');
+    }
+
+    return view('products.show', compact('product', 'isDb'));
 })->name('products.show');
 
 // Halaman Keranjang Belanja

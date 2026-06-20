@@ -97,9 +97,35 @@ class AuthController extends Controller
             'phone_number'   => 'sometimes|nullable|string|max:20',
             'unsoed_faculty' => 'sometimes|nullable|string|max:255',
             'unsoed_major'   => 'sometimes|nullable|string|max:255',
-            'avatar_url'     => 'sometimes|nullable|string|url',
+            'avatar_url'     => 'sometimes|nullable|string',
             'password'       => 'sometimes|string|min:8|confirmed',
         ]);
+
+        if (isset($data['avatar_url']) && str_starts_with($data['avatar_url'], 'data:image/')) {
+            try {
+                $base64 = $data['avatar_url'];
+                $position = strpos($base64, ',');
+                $header = substr($base64, 0, $position);
+                $dataStr = substr($base64, $position + 1);
+
+                preg_match('/data:image\/(.*?);/', $header, $matches);
+                $ext = $matches[1] ?? 'png';
+                if ($ext === 'jpeg') $ext = 'jpg';
+
+                $fileData = base64_decode($dataStr);
+                $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $ext;
+
+                $dir = public_path('uploads/avatars');
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                file_put_contents($dir . '/' . $fileName, $fileData);
+
+                $data['avatar_url'] = asset('uploads/avatars/' . $fileName);
+            } catch (\Exception $e) {
+                unset($data['avatar_url']);
+            }
+        }
 
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);

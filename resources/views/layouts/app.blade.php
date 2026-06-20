@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @yield('head')
     <script>
+        window.isHomepage = {{ Request::routeIs('home') ? 'true' : 'false' }};
         tailwind.config = {
             theme: {
                 extend: {
@@ -92,7 +93,7 @@
         }
         @keyframes slideUpFade {
             from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            to { opacity: 1; transform: none; }
         }
         .skeleton {
             background: linear-gradient(90deg, var(--surface-color) 25%, var(--bg-color) 50%, var(--surface-color) 75%);
@@ -129,9 +130,16 @@
                     </a>
                 </div>
 
-                <!-- Live Search Bar -->
-                <div class="flex-1 max-w-xl hidden md:block">
-                    <form action="{{ route('home') }}" method="GET" class="relative">
+                <!-- Guest Navigation Links (Desktop) -->
+                <div id="nav-guest-links" class="hidden md:flex items-center gap-10 text-sm font-semibold">
+                    <a href="{{ route('home') }}" class="text-brand-900 hover:text-brand-600 transition">Beranda</a>
+                    <a href="{{ route('products.index') }}" class="text-brand-900 hover:text-brand-600 transition">Produk</a>
+                    <a href="{{ route('about') }}" class="text-brand-900 hover:text-brand-600 transition">Tentang Kami</a>
+                </div>
+
+                <!-- Live Search Bar (Desktop - Logged-In Only) -->
+                <div id="nav-search-container" class="flex-1 max-w-xl hidden md:block">
+                    <form action="{{ route('products.index') }}" method="GET" class="relative">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-brand-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -146,7 +154,7 @@
                 <div class="flex items-center gap-2 sm:gap-4">
                     
                     <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" class="p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all flex items-center justify-center">
+                    <button onclick="toggleDarkMode()" id="nav-btn-dark" class="p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all flex items-center justify-center">
                         <svg id="dark-mode-icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
                         </svg>
@@ -155,24 +163,38 @@
                         </svg>
                     </button>
                     
-                    <!-- Tombol Upload (Jual) -->
-                    <a href="{{ route('products.create') }}" id="nav-btn-sell" class="hidden sm:inline-flex items-center gap-1.5 text-brand-50 text-xs font-bold px-4 py-2.5 rounded-full btn-gradient shadow-sm shadow-brand-600/20">
-                        Jual Barang
-                    </a>
-
                     <!-- Keranjang Belanja -->
-                    <a href="{{ route('cart.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        <span id="cart-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
-                    </a>
+                    <div id="nav-btn-cart" class="hidden">
+                        <a href="{{ route('cart.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.116 60.116 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                            </svg>
+                            <span id="cart-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
+                        </a>
+                    </div>
 
-                    <!-- User Profile Dropdown / Login -->
-                    <div class="relative hidden sm:block" id="nav-auth-container">
+                    <!-- Pesan / Chat Link -->
+                    <div id="nav-btn-chat" class="hidden">
+                        <a href="{{ route('chat.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Guest Authentication Actions (Desktop) -->
+                    <div id="nav-guest-actions" class="hidden sm:flex items-center gap-3">
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 text-sm font-semibold rounded-full border border-brand-500/30 transition-all duration-200">
                             Masuk
                         </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-2.5 btn-gradient text-xs font-bold rounded-full shadow-sm shadow-brand-600/20">
+                            Daftar
+                        </a>
+                    </div>
+
+                    <!-- User Profile Dropdown (Logged-In Only) -->
+                    <div class="relative hidden sm:block" id="nav-auth-container">
+                        <!-- Profile avatar and menu dropdown injected via JS -->
                     </div>
 
                     <!-- Mobile Hamburger Menu Button -->
@@ -187,8 +209,9 @@
 
         <!-- Mobile Drawer Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-brand-100 border-t border-brand-500/20 px-4 pt-2 pb-6 space-y-4 shadow-inner">
-            <div class="pt-2">
-                <form action="{{ route('home') }}" method="GET" class="relative">
+            <!-- Mobile Search Bar (Only Logged In) -->
+            <div id="mobile-search-container" class="pt-2 hidden">
+                <form action="{{ route('products.index') }}" method="GET" class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -198,10 +221,20 @@
                            class="w-full pl-9 pr-4 py-2 bg-brand-50 text-xs text-brand-900 rounded-full border border-brand-500/30 focus:border-brand-600 focus:outline-none">
                 </form>
             </div>
+            
+            <!-- Mobile Guest Links (Only Guest) -->
+            <div id="mobile-guest-links" class="hidden flex flex-col gap-3 pt-2">
+                <a href="{{ route('home') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Beranda</a>
+                <a href="{{ route('products.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Produk</a>
+                <a href="{{ route('about') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Tentang Kami</a>
+            </div>
+
+            <!-- Mobile Authentication & Profile Actions -->
             <div class="flex flex-col gap-2.5 pt-1" id="mobile-auth-container">
                 <!-- Injected via JS -->
             </div>
         </div>
+
     </nav>
 
     <!-- Main Content -->
@@ -364,28 +397,103 @@
             window.updateCartBadge();
         };
 
+        // Helpers to show/hide elements overriding Tailwind utility classes
+        window.hideNavElement = function(el) {
+            if (el) el.style.setProperty('display', 'none', 'important');
+        };
+        
+        window.showNavElement = function(el, displayStyle = '') {
+            if (el) {
+                el.style.removeProperty('display');
+                if (displayStyle) {
+                    el.style.setProperty('display', displayStyle, 'important');
+                }
+            }
+        };
         // Sync auth state
         window.syncAuthHeader = function() {
             const userJson = localStorage.getItem('preloved_user');
-            const authContainer = document.getElementById('nav-auth-container');
+            
+            // Desktop elements
+            const navGuestLinks = document.getElementById('nav-guest-links');
+            const navGuestActions = document.getElementById('nav-guest-actions');
+            const navSearchContainer = document.getElementById('nav-search-container');
+            const navBtnDark = document.getElementById('nav-btn-dark');
+            const navBtnCart = document.getElementById('nav-btn-cart');
+            const navBtnChat = document.getElementById('nav-btn-chat');
+            const navAuthContainer = document.getElementById('nav-auth-container');
+            
+            // Mobile elements
+            const mobileSearchContainer = document.getElementById('mobile-search-container');
+            const mobileGuestLinks = document.getElementById('mobile-guest-links');
             const mobileAuthContainer = document.getElementById('mobile-auth-container');
-            const sellBtn = document.getElementById('nav-btn-sell');
 
             if (userJson) {
                 const user = JSON.parse(userJson);
-                if (sellBtn) sellBtn.classList.remove('hidden');
+                
+                // Show logged-in elements
+                if (window.isHomepage) {
+                    window.hideNavElement(navSearchContainer);
+                    window.hideNavElement(mobileSearchContainer);
+                    window.showNavElement(navGuestLinks, 'flex');
+                    window.showNavElement(mobileGuestLinks, 'flex');
+                } else {
+                    window.showNavElement(navSearchContainer);
+                    window.showNavElement(mobileSearchContainer, 'block');
+                    window.hideNavElement(navGuestLinks);
+                    window.hideNavElement(mobileGuestLinks);
+                }
+
+                window.showNavElement(navBtnDark);
+                window.showNavElement(navBtnCart, 'block');
+                window.showNavElement(navBtnChat, 'block');
+                window.showNavElement(navAuthContainer);
+                
+                // Hide guest actions (Masuk/Daftar)
+                window.hideNavElement(navGuestActions);
 
                 const verifyBadge = user.is_verified ? '<span class="ml-1.5 bg-brand-600 text-brand-50 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full">Verified</span>' : '';
-                const dashboardLink = user.role === 'admin' 
-                    ? `<a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Admin Dashboard</a>`
-                    : `<a href="{{ route('seller.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Seller Dashboard</a>`;
+                
+                // Check if user has filled sell form (listed any products)
+                const hasFilledSellForm = localStorage.getItem('has_filled_sell_form') === 'true' || JSON.parse(localStorage.getItem('preloved_custom_products') || '[]').length > 0;
+                
+                let dashboardLink = '';
+                if (user.role === 'admin') {
+                    dashboardLink = `<a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Admin Dashboard</a>`;
+                } else if (hasFilledSellForm) {
+                    dashboardLink = `<a href="{{ route('seller.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Seller Dashboard</a>`;
+                }
+
+                let mobileDashboardLink = '';
+                if (user.role === 'admin') {
+                    mobileDashboardLink = `<a href="/admin/dashboard" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Admin Dashboard</a>`;
+                } else if (hasFilledSellForm) {
+                    mobileDashboardLink = `<a href="{{ route('seller.dashboard') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Seller Dashboard</a>`;
+                }
+
+                const hasCustomAvatar = user.avatar_url && !user.avatar_url.includes('unsplash.com');
+                const avatarHtml = hasCustomAvatar
+                    ? `<img class="h-9 w-9 rounded-full object-cover border-2 border-brand-500 shadow-sm" src="${user.avatar_url}" alt="${user.name}">`
+                    : `<div class="h-9 w-9 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-2 border-brand-500 shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                       </div>`;
+
+                const mobileAvatarHtml = hasCustomAvatar
+                    ? `<img class="h-10 w-10 rounded-full object-cover border border-brand-500" src="${user.avatar_url}">`
+                    : `<div class="h-10 w-10 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border border-brand-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                       </div>`;
 
                 // Render Desktop Profile Dropdown
-                if (authContainer) {
-                    authContainer.innerHTML = `
+                if (navAuthContainer) {
+                    navAuthContainer.innerHTML = `
                         <div class="relative inline-block text-left">
                             <button onclick="document.getElementById('profile-dropdown').classList.toggle('hidden')" class="flex items-center gap-2 focus:outline-none hover:bg-brand-100 p-1.5 rounded-full transition duration-150">
-                                <img class="h-9 w-9 rounded-full object-cover border-2 border-brand-500 shadow-sm" src="${user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}" alt="${user.name}">
+                                ${avatarHtml}
                                 <div class="text-left hidden lg:block pr-2">
                                     <p class="text-xs font-bold text-brand-900 leading-3 flex items-center">${user.name} ${verifyBadge}</p>
                                     <p class="text-[9px] font-medium text-brand-650 mt-1">${user.unsoed_faculty || 'Fakultas'} - ${user.unsoed_major || 'UNSOED'}</p>
@@ -399,7 +507,6 @@
                                 <div class="py-1">
                                     <a href="{{ route('profile.index') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Profil Saya</a>
                                     ${dashboardLink}
-                                    <a href="{{ route('chat.index') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Chat Masuk</a>
                                     <a href="{{ route('transactions.history') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Riwayat Transaksi</a>
                                 </div>
                                 <div class="py-1">
@@ -416,24 +523,16 @@
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `
                         <div class="flex items-center gap-3 p-3 bg-brand-50 border border-brand-500/20 rounded-2xl">
-                            <img class="h-10 w-10 rounded-full object-cover border border-brand-500" src="${user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}">
+                            ${mobileAvatarHtml}
                             <div class="flex-1">
                                 <p class="text-xs font-extrabold text-brand-900 flex items-center">${user.name} ${verifyBadge}</p>
-                                <p class="text-[9px] text-brand-600">${user.unsoed_faculty} / ${user.unsoed_major}</p>
+                                <p class="text-[9px] text-brand-650">${user.unsoed_faculty || 'Fakultas'} / ${user.unsoed_major || 'UNSOED'}</p>
                             </div>
                         </div>
-                        <a href="{{ route('products.create') }}" class="w-full text-center py-2.5 bg-brand-600 text-brand-50 font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
-                            Jual Barang Baru
-                        </a>
-                        <a href="{{ route('profile.index') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">
+                        <a href="{{ route('profile.index') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block mt-3">
                             Profil Saya
                         </a>
-                        <a href="${user.role === 'admin' ? '/admin/dashboard' : '/seller/dashboard'}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">
-                            Dashboard Akun
-                        </a>
-                        <a href="{{ route('chat.index') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">
-                            Chat Masuk
-                        </a>
+                        ${mobileDashboardLink}
                         <a href="{{ route('transactions.history') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">
                             Riwayat Transaksi
                         </a>
@@ -443,15 +542,18 @@
                     `;
                 }
             } else {
-                if (sellBtn) sellBtn.classList.add('hidden');
+                // Hide logged-in elements
+                window.hideNavElement(navSearchContainer);
+                window.hideNavElement(navBtnDark);
+                window.hideNavElement(navBtnCart);
+                window.hideNavElement(navBtnChat);
+                window.hideNavElement(navAuthContainer);
+                window.hideNavElement(mobileSearchContainer);
                 
-                if (authContainer) {
-                    authContainer.innerHTML = `
-                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 hover:shadow-md text-xs font-bold rounded-full border border-brand-500/30 transition-all duration-200">
-                            Masuk
-                        </a>
-                    `;
-                }
+                // Show guest elements
+                window.showNavElement(navGuestLinks);
+                window.showNavElement(navGuestActions);
+                window.showNavElement(mobileGuestLinks, 'flex');
 
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `

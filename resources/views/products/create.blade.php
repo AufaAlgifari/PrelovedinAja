@@ -195,6 +195,7 @@
             });
 
             if (response.ok) {
+                localStorage.setItem('has_filled_sell_form', 'true');
                 window.showToast('Barang Anda berhasil dipublikasikan!');
                 setTimeout(() => {
                     window.location.href = "{{ route('home') }}";
@@ -228,6 +229,7 @@
         const customProducts = JSON.parse(localStorage.getItem('preloved_custom_products') || '[]');
         customProducts.unshift(newProductObj);
         localStorage.setItem('preloved_custom_products', JSON.stringify(customProducts));
+        localStorage.setItem('has_filled_sell_form', 'true');
 
         setTimeout(() => {
             btnSubmit.disabled = false;
