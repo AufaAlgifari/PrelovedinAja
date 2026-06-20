@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\NotificationController;
 
 // ── Public Routes (tidak perlu login) ─────────────────────
 Route::prefix('v1')->group(function () {
@@ -60,5 +62,13 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // Reports
     Route::post('/reports',             [ReportController::class, 'store']);
+    Route::patch('/admin/reports/{id}/resolve', [ReportController::class, 'resolve'])->middleware('admin');
+
+    // Notifications
+    Route::get('/notifications',        [NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all',  [NotificationController::class, 'markAllAsRead']);
 
 });
+
+Broadcast::routes(['prefix' => 'api/v1', 'middleware' => ['auth:sanctum']]);

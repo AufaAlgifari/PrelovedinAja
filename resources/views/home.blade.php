@@ -22,10 +22,10 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-wrap justify-center gap-4 pt-4">
-            <a href="#catalog-section" class="px-8 py-3.5 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-extrabold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-350 transform hover:-translate-y-0.5">
+            <a href="#catalog-section" id="btn-mulai-belanja" class="px-8 py-3.5 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-extrabold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-350 transform hover:-translate-y-0.5">
                 Mulai Belanja
             </a>
-            <a href="{{ route('products.create') }}" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
+            <a href="{{ route('products.create') }}" id="btn-jual-barang" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
                 Jual Barang
             </a>
         </div>
@@ -76,7 +76,7 @@
                 Ubah buku semester lalu, baju lama, atau elektronik lama menjadi uang saku. Sangat mudah, cukup upload gambar, tentukan harga, dan ketemuan di kampus!
             </p>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('products.create') }}" class="px-6 py-3 bg-[#D4A017] hover:bg-[#b88910] text-[#2E1A06] font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5">
+                <a href="{{ route('products.create') }}" id="btn-mulai-jual-sekarang" class="px-6 py-3 bg-[#D4A017] hover:bg-[#b88910] text-[#2E1A06] font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5">
                     ➕ Mulai Jual Sekarang
                 </a>
                 <a href="#" class="px-6 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-bold text-xs rounded-xl border border-[#D4A017]/30 transition">
@@ -247,6 +247,22 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         renderProducts();
+        
+        // Redirect logic for start shopping/sell buttons if guest
+        const isLoggedIn = !!localStorage.getItem('preloved_token');
+        const btnMulaiBelanja = document.getElementById('btn-mulai-belanja');
+        const btnJualBarang = document.getElementById('btn-jual-barang');
+        const btnMulaiJualSekarang = document.getElementById('btn-mulai-jual-sekarang');
+
+        if (btnMulaiBelanja) {
+            btnMulaiBelanja.href = isLoggedIn ? '#catalog-section' : '{{ route("login") }}';
+        }
+        if (btnJualBarang) {
+            btnJualBarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+        }
+        if (btnMulaiJualSekarang) {
+            btnMulaiJualSekarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+        }
         
         const navSearch = document.getElementById('navbar-search');
         const mobileNavSearch = document.getElementById('mobile-navbar-search');

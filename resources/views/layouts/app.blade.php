@@ -6,6 +6,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Preloved.in Aja - Pasar Kampus UNSOED</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <script>
+        const reverbKey = "{{ env('VITE_REVERB_APP_KEY') ?: env('REVERB_APP_KEY') }}";
+        const reverbHost = "{{ env('VITE_REVERB_HOST') ?: env('REVERB_HOST', '127.0.0.1') }}";
+        const reverbPort = "{{ env('VITE_REVERB_PORT') ?: env('REVERB_PORT', '8080') }}";
+        const reverbScheme = "{{ env('VITE_REVERB_SCHEME') ?: env('REVERB_SCHEME', 'http') }}";
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @yield('head')
     <script>
@@ -168,6 +176,9 @@
                         <span id="cart-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
                     </a>
 
+                    <!-- Notification Bell Container -->
+                    <div class="relative hidden sm:block" id="nav-notification-container"></div>
+
                     <!-- User Profile Dropdown / Login -->
                     <div class="relative hidden sm:block" id="nav-auth-container">
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 text-sm font-semibold rounded-full border border-brand-500/30 transition-all duration-200">
@@ -198,6 +209,9 @@
                            class="w-full pl-9 pr-4 py-2 bg-brand-50 text-xs text-brand-900 rounded-full border border-brand-500/30 focus:border-brand-600 focus:outline-none">
                 </form>
             </div>
+            <!-- Mobile Notifications Section -->
+            <div id="mobile-notifications-section" class="pt-1"></div>
+
             <div class="flex flex-col gap-2.5 pt-1" id="mobile-auth-container">
                 <!-- Injected via JS -->
             </div>
@@ -370,6 +384,8 @@
             const authContainer = document.getElementById('nav-auth-container');
             const mobileAuthContainer = document.getElementById('mobile-auth-container');
             const sellBtn = document.getElementById('nav-btn-sell');
+            const notifContainer = document.getElementById('nav-notification-container');
+            const mobileNotifSection = document.getElementById('mobile-notifications-section');
 
             if (userJson) {
                 const user = JSON.parse(userJson);
@@ -412,6 +428,30 @@
                     `;
                 }
 
+                // Render Desktop Notification Bell Dropdown
+                if (notifContainer) {
+                    notifContainer.classList.remove('hidden');
+                    notifContainer.innerHTML = `
+                        <div class="relative inline-block text-left">
+                            <button id="notification-bell-btn" onclick="document.getElementById('notification-dropdown').classList.toggle('hidden'); window.fetchNotifications();" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group focus:outline-none flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <span id="notification-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
+                            </button>
+                            <div id="notification-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-brand-50 border border-brand-500/25 divide-y divide-brand-500/10 focus:outline-none z-50 overflow-hidden">
+                                <div class="px-4 py-3 bg-brand-100/30 flex justify-between items-center">
+                                    <span class="text-xs font-extrabold text-brand-900 font-heading">Notifikasi</span>
+                                    <button onclick="event.stopPropagation(); window.markAllNotificationsRead();" class="text-[10px] font-bold text-brand-600 hover:text-brand-900 focus:outline-none">Tandai Semua Dibaca</button>
+                                </div>
+                                <div id="notification-items-list" class="max-h-64 overflow-y-auto divide-y divide-brand-500/10">
+                                    <div class="p-4 text-center text-xs text-brand-600 font-medium">Memuat notifikasi...</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 // Render Mobile Profile Menu Links
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `
@@ -442,8 +482,20 @@
                         </button>
                     `;
                 }
+
+                // Initialize Echo and load notifications
+                window.initEcho();
+                window.fetchNotifications();
+
             } else {
                 if (sellBtn) sellBtn.classList.add('hidden');
+                if (notifContainer) {
+                    notifContainer.classList.add('hidden');
+                    notifContainer.innerHTML = '';
+                }
+                if (mobileNotifSection) {
+                    mobileNotifSection.innerHTML = '';
+                }
                 
                 if (authContainer) {
                     authContainer.innerHTML = `
@@ -463,10 +515,13 @@
                         </a>
                     `;
                 }
+
+                window.disconnectEcho();
             }
         };
 
         window.logoutUser = function() {
+            window.disconnectEcho();
             localStorage.removeItem('preloved_user');
             localStorage.removeItem('preloved_token');
             window.showToast('Berhasil keluar akun.');
@@ -476,10 +531,303 @@
             }, 500);
         };
 
+        // Real-time notifications and Laravel Echo implementation
+        window.notificationsList = [];
+
+        window.initEcho = function() {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+
+            if (window.Echo) return;
+
+            if (typeof Echo === 'undefined' || typeof Pusher === 'undefined') {
+                console.warn('Echo or Pusher CDN not loaded yet.');
+                return;
+            }
+
+            window.Pusher = Pusher;
+            window.Echo = new Echo({
+                broadcaster: 'reverb',
+                key: reverbKey || 'preloved_key',
+                wsHost: reverbHost || window.location.hostname,
+                wsPort: parseInt(reverbPort) || 8080,
+                wssPort: parseInt(reverbPort) || 8080,
+                forceTLS: reverbScheme === 'https',
+                enabledTransports: ['ws', 'wss'],
+                authEndpoint: '/api/v1/broadcasting/auth',
+                auth: {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                }
+            });
+
+            const userJson = localStorage.getItem('preloved_user');
+            if (userJson) {
+                const user = JSON.parse(userJson);
+                window.subscribeToUserChannel(user.id);
+            }
+        };
+
+        window.disconnectEcho = function() {
+            if (window.Echo) {
+                window.Echo.disconnect();
+                window.Echo = null;
+            }
+        };
+
+        window.subscribeToUserChannel = function(userId) {
+            if (!window.Echo) return;
+
+            window.Echo.private(`App.Models.User.${userId}`)
+                .notification((notification) => {
+                    console.log('Real-time Notification received:', notification);
+                    
+                    // Show custom toast feedback
+                    window.showToast(notification.message || 'Anda memiliki notifikasi baru.');
+                    
+                    // Subtle sound feedback
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                        oscillator.start();
+                        oscillator.stop(audioCtx.currentTime + 0.3);
+                    } catch (e) {}
+
+                    // Reload notifications list
+                    window.fetchNotifications();
+                });
+        };
+
+        window.fetchNotifications = async function() {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/v1/notifications', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    window.notificationsList = result.data;
+                    window.renderNotifications();
+                }
+            } catch (e) {
+                console.error('Failed to fetch notifications:', e);
+            }
+        };
+
+        window.renderNotifications = function() {
+            const itemsList = document.getElementById('notification-items-list');
+            const badge = document.getElementById('notification-badge');
+            const mobileContainer = document.getElementById('mobile-notifications-section');
+
+            const unreadNotifications = window.notificationsList.filter(n => !n.read_at);
+            const unreadCount = unreadNotifications.length;
+
+            if (badge) {
+                badge.textContent = unreadCount;
+                if (unreadCount > 0) {
+                    badge.classList.remove('scale-0');
+                    badge.classList.add('scale-100');
+                } else {
+                    badge.classList.remove('scale-100');
+                    badge.classList.add('scale-0');
+                }
+            }
+
+            if (!itemsList) return;
+
+            if (window.notificationsList.length === 0) {
+                itemsList.innerHTML = `
+                    <div class="p-6 text-center text-xs text-brand-650 font-medium flex flex-col items-center gap-1.5">
+                        <svg class="w-8 h-8 text-brand-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span>Belum ada notifikasi baru</span>
+                    </div>
+                `;
+                if (mobileContainer) {
+                    mobileContainer.innerHTML = '';
+                }
+                return;
+            }
+
+            let itemsHtml = '';
+            window.notificationsList.forEach(n => {
+                const data = n.data;
+                const isUnread = !n.read_at;
+                const timeAgo = window.formatTimeAgo(new Date(n.created_at));
+                const bgClass = isUnread ? 'bg-brand-500/10 hover:bg-brand-500/15' : 'hover:bg-brand-100/50';
+                const unreadDot = isUnread ? '<span class="h-2.5 w-2.5 rounded-full bg-brand-600 flex-shrink-0 animate-pulse"></span>' : '';
+                
+                itemsHtml += `
+                    <div onclick="event.stopPropagation(); window.handleNotificationClick('${n.id}', '${data.chat_id || ''}', '${data.product_id || ''}', '${data.report_id || ''}')" 
+                         class="px-4 py-3.5 text-xs cursor-pointer transition duration-150 flex items-start gap-3 border-b border-brand-500/10 ${bgClass}">
+                        <div class="flex-grow">
+                            <p class="font-extrabold text-brand-900 flex items-center justify-between gap-2">
+                                <span>${data.title || 'Pemberitahuan'}</span>
+                                <span class="text-[9px] font-normal text-brand-600 flex-shrink-0">${timeAgo}</span>
+                            </p>
+                            <p class="text-brand-700 mt-1 leading-relaxed font-semibold">${data.message}</p>
+                        </div>
+                        ${unreadDot}
+                    </div>
+                `;
+            });
+
+            itemsList.innerHTML = itemsHtml;
+
+            // Render in Mobile Drawer
+            if (mobileContainer) {
+                let mobileHtml = `
+                    <div class="px-4 py-3 bg-brand-50/50 border border-brand-500/20 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <span class="text-xs font-black text-brand-900 font-heading">Notifikasi (${unreadCount} Baru)</span>
+                            ${unreadCount > 0 ? `<button onclick="window.markAllNotificationsRead()" class="text-[10px] font-extrabold text-brand-600 hover:underline">Baca Semua</button>` : ''}
+                        </div>
+                        <div class="divide-y divide-brand-500/10 max-h-48 overflow-y-auto">
+                `;
+                window.notificationsList.slice(0, 5).forEach(n => {
+                    const data = n.data;
+                    const isUnread = !n.read_at;
+                    const timeAgo = window.formatTimeAgo(new Date(n.created_at));
+                    const fontClass = isUnread ? 'font-bold' : 'font-normal';
+                    mobileHtml += `
+                        <div onclick="window.handleNotificationClick('${n.id}', '${data.chat_id || ''}', '${data.product_id || ''}', '${data.report_id || ''}')" 
+                             class="py-2.5 cursor-pointer flex justify-between items-start gap-2">
+                            <div class="flex-grow">
+                                <p class="text-xs ${fontClass} text-brand-900 leading-tight">${data.title}</p>
+                                <p class="text-[10px] text-brand-700 truncate max-w-[220px] mt-0.5">${data.message}</p>
+                            </div>
+                            <span class="text-[8px] text-brand-600 flex-shrink-0 mt-0.5">${timeAgo}</span>
+                        </div>
+                    `;
+                });
+                mobileHtml += `
+                        </div>
+                    </div>
+                `;
+                mobileContainer.innerHTML = mobileHtml;
+            }
+        };
+
+        window.handleNotificationClick = async function(id, chatId, productId, reportId) {
+            // Mark notification as read
+            await window.markNotificationRead(id);
+
+            // Close notification dropdown
+            const dropdown = document.getElementById('notification-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+
+            // Redirect to appropriate screen
+            if (chatId) {
+                window.location.href = `/chats?chat_id=${chatId}`;
+            } else if (productId) {
+                window.location.href = `/products/${productId}`;
+            } else if (reportId) {
+                const userJson = localStorage.getItem('preloved_user');
+                if (userJson) {
+                    const user = JSON.parse(userJson);
+                    if (user.role === 'admin') {
+                        window.location.href = `/admin/dashboard?report_id=${reportId}`;
+                    } else {
+                        window.location.href = `/profile`;
+                    }
+                }
+            } else {
+                window.location.reload();
+            }
+        };
+
+        window.markNotificationRead = async function(id) {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/v1/notifications/${id}/read`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const notification = window.notificationsList.find(n => n.id === id);
+                    if (notification) {
+                        notification.read_at = new Date().toISOString();
+                    }
+                    window.renderNotifications();
+                }
+            } catch (e) {
+                console.error('Failed to mark notification read:', e);
+            }
+        };
+
+        window.markAllNotificationsRead = async function() {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/v1/notifications/read-all', {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    window.notificationsList.forEach(n => {
+                        if (!n.read_at) n.read_at = new Date().toISOString();
+                    });
+                    window.renderNotifications();
+                    window.showToast('Semua notifikasi ditandai dibaca.');
+                }
+            } catch (e) {
+                console.error('Failed to mark all read:', e);
+            }
+        };
+
+        window.formatTimeAgo = function(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = Math.floor(seconds / 31536000);
+
+            if (interval >= 1) return interval + " thn";
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return interval + " bln";
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return interval + " hari";
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return interval + " jam";
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return interval + " mnt";
+            return "baru";
+        };
+
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('profile-dropdown');
             if (dropdown && !e.target.closest('#nav-auth-container')) {
                 dropdown.classList.add('hidden');
+            }
+            
+            const notifDropdown = document.getElementById('notification-dropdown');
+            if (notifDropdown && !e.target.closest('#nav-notification-container')) {
+                notifDropdown.classList.add('hidden');
             }
         });
 
