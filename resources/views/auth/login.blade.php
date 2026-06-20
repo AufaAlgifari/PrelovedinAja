@@ -4,7 +4,6 @@
 <div class="min-h-[calc(100vh-80px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#FBF6EC]">
     <div class="max-w-md w-full space-y-8 bg-[#F5E4B0] p-8 sm:p-10 rounded-3xl border border-[#D4A017]/25 shadow-xl relative overflow-hidden">
         
-        <!-- Decorative subtle background elements -->
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#D4A017]/10 rounded-full blur-2xl"></div>
         <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-[#7A4A10]/10 rounded-full blur-2xl"></div>
 
@@ -91,7 +90,7 @@
         btnLoader.classList.remove('hidden');
 
         try {
-            // Attempt to hit the Laravel API login
+            // Menembak endpoint Laravel API login
             const response = await fetch('/api/v1/login', {
                 method: 'POST',
                 headers: {
@@ -105,7 +104,7 @@
             const result = await response.json();
 
             if (response.ok && result.token) {
-                // Success with real DB auth
+                // HANYA JIKA AUTH DATABASE ASLI BERHASIL
                 localStorage.setItem('preloved_token', result.token);
                 localStorage.setItem('preloved_user', JSON.stringify(result.user));
                 window.showToast('Login Berhasil! Selamat berbelanja.');
@@ -113,55 +112,62 @@
                     window.location.href = "{{ route('home') }}";
                 }, 1000);
                 return;
+            } else {
+                // TAMPILKAN ERROR ASLI (Misal: Email atau password salah)
+                window.showToast(result.message || 'Email atau password salah.', 'error');
+                
+                btnSubmit.disabled = false;
+                btnText.textContent = 'Masuk Sekarang';
+                btnLoader.classList.add('hidden');
+                return;
             }
         } catch (error) {
-            console.log('Database auth offline or error:', error);
-        }
+            console.log('Database auth offline atau terjadi error jaringan:', error);
 
-        // --- FALLBACK INTERACTIVE MODE ---
-        // If API fails or is not connected to active database, we log them in with mock student details!
-        let cleanName = 'Mahasiswa Unsoed';
-        let emailUsername = email.split('@')[0];
-        
-        if (emailUsername) {
-            cleanName = emailUsername
-                .split('.')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-        }
-
-        const faculties = ['Teknik', 'Ekonomi dan Bisnis', 'Ilmu Sosial dan Ilmu Politik', 'Pertanian', 'Hukum'];
-        const majors = ['Informatika', 'Manajemen', 'Ilmu Komunikasi', 'Agroteknologi', 'Ilmu Hukum'];
-        const randIndex = Math.floor(Math.random() * faculties.length);
-
-        const mockUser = {
-            id: 99,
-            name: cleanName,
-            email: email,
-            phone_number: '0812-3456-7890',
-            unsoed_faculty: faculties[randIndex],
-            unsoed_major: majors[randIndex],
-            avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
-            rating_cache: 5.0,
-            role: 'student',
-            is_verified: true,
-            no_kampus: 'H1D024' + Math.floor(100 + Math.random() * 900)
-        };
-
-        setTimeout(() => {
-            localStorage.setItem('preloved_token', 'mock_token_12345');
-            localStorage.setItem('preloved_user', JSON.stringify(mockUser));
+            // --- FALLBACK INTERACTIVE MODE ---
+            // Hanya dieksekusi jika server backend/API tidak merespons (Offline)
+            let cleanName = 'Mahasiswa Unsoed';
+            let emailUsername = email.split('@')[0];
             
-            // Clean loader state
-            btnSubmit.disabled = false;
-            btnText.textContent = 'Masuk Sekarang';
-            btnLoader.classList.add('hidden');
-            
-            window.showToast('Login Berhasil (Mode Demo Kampus)!');
+            if (emailUsername) {
+                cleanName = emailUsername
+                    .split('.')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
+
+            const faculties = ['Teknik', 'Ekonomi dan Bisnis', 'Ilmu Sosial dan Ilmu Politik', 'Pertanian', 'Hukum'];
+            const majors = ['Informatika', 'Manajemen', 'Ilmu Komunikasi', 'Agroteknologi', 'Ilmu Hukum'];
+            const randIndex = Math.floor(Math.random() * faculties.length);
+
+            const mockUser = {
+                id: 99,
+                name: cleanName,
+                email: email,
+                phone_number: '0812-3456-7890',
+                unsoed_faculty: faculties[randIndex],
+                unsoed_major: majors[randIndex],
+                avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
+                rating_cache: 5.0,
+                role: 'student',
+                is_verified: true,
+                no_kampus: 'H1D024' + Math.floor(100 + Math.random() * 900)
+            };
+
             setTimeout(() => {
-                window.location.href = "{{ route('home') }}";
-            }, 1000);
-        }, 800);
+                localStorage.setItem('preloved_token', 'mock_token_12345');
+                localStorage.setItem('preloved_user', JSON.stringify(mockUser));
+                
+                btnSubmit.disabled = false;
+                btnText.textContent = 'Masuk Sekarang';
+                btnLoader.classList.add('hidden');
+                
+                window.showToast('Login Berhasil (Mode Demo Kampus)!');
+                setTimeout(() => {
+                    window.location.href = "{{ route('home') }}";
+                }, 1000);
+            }, 800);
+        }
     }
 </script>
 @endsection

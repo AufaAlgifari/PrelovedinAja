@@ -15,6 +15,7 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name'           => 'required|string|max:255',
+            'no_kampus'      => 'required|string|max:50|unique:users,no_kampus', // Ditambahkan agar data NIM masuk database
             'email'          => [
                 'required',
                 'email',
@@ -28,8 +29,13 @@ class AuthController extends Controller
             'unsoed_major'   => 'nullable|string|max:255',
         ], [
             'email.regex' => 'Email harus menggunakan domain institusi (.ac.id).',
+            'no_kampus.unique' => 'NIM / Nomor Kampus sudah terdaftar.',
         ]);
 
+        // Enkripsi password sebelum disimpan ke database
+        $data['password'] = Hash::make($data['password']);
+
+        // Simpan data ke tabel users
         $user = User::create($data);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -57,7 +63,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Hapus token lama, buat token baru (single session)
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 

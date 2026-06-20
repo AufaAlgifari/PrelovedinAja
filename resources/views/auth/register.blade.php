@@ -4,7 +4,6 @@
 <div class="min-h-[calc(100vh-80px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-brand-50 transition-colors duration-300">
     <div class="max-w-xl w-full space-y-8 bg-brand-100 p-8 sm:p-10 rounded-3xl border border-brand-500/25 shadow-xl relative overflow-hidden transition-colors duration-300">
         
-        <!-- Decorative subtle background elements -->
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl"></div>
         <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-600/10 rounded-full blur-2xl"></div>
 
@@ -19,35 +18,30 @@
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Name -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Nama Lengkap</label>
                     <input type="text" id="name" required placeholder="Misal: Aufa Algifari" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
                 </div>
 
-                <!-- NIM / No Kampus -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">NIM / Nomor Kampus</label>
                     <input type="text" id="no_kampus" required placeholder="Misal: H1D024001" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900 font-bold uppercase">
                 </div>
 
-                <!-- Email -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Email Institusi UNSOED</label>
                     <input type="email" id="email" required pattern=".*\.ac\.id$" title="Harus menggunakan email institusi berakhiran .ac.id" placeholder="nama@mhs.unsoed.ac.id" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
                 </div>
 
-                <!-- Phone -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Nomor WhatsApp</label>
                     <input type="text" id="phone_number" required placeholder="Misal: 08123456789" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
                 </div>
 
-                <!-- Faculty -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Fakultas</label>
                     <select id="unsoed_faculty" required class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
@@ -61,21 +55,18 @@
                     </select>
                 </div>
 
-                <!-- Major -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Jurusan / Program Studi</label>
                     <input type="text" id="unsoed_major" required placeholder="Misal: Teknik Informatika" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
                 </div>
 
-                <!-- Password -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Password</label>
                     <input type="password" id="password" required placeholder="••••••••" 
                            class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 focus:outline-none transition-all text-brand-900">
                 </div>
 
-                <!-- Confirm Password -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Konfirmasi Password</label>
                     <input type="password" id="password_confirmation" required placeholder="••••••••" 
@@ -111,7 +102,11 @@
         const password_confirmation = document.getElementById('password_confirmation').value;
 
         if (password !== password_confirmation) {
-            window.showToast('Konfirmasi password tidak cocok.', 'error');
+            if (window.showToast) {
+                window.showToast('Konfirmasi password tidak cocok.', 'error');
+            } else {
+                alert('Konfirmasi password tidak cocok.');
+            }
             return;
         }
 
@@ -124,13 +119,13 @@
         btnLoader.classList.remove('hidden');
 
         try {
-            // Attempt to hit Laravel Register API
+            // Mengirim request ke API Laravel
             const response = await fetch('/api/v1/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
                     name,
@@ -144,51 +139,71 @@
                 })
             });
 
+            // Antisipasi jika route mengembalikan HTML error 404/500 agar parser JSON tidak crash
+            if (!response.ok && response.status === 404) {
+                throw new Error('Jalur rute API v1 tidak ditemukan di server (404).');
+            }
+
             const result = await response.json();
 
             if (response.ok && result.token) {
+                // Berhasil masuk ke database asli
                 localStorage.setItem('preloved_token', result.token);
                 localStorage.setItem('preloved_user', JSON.stringify(result.user));
-                window.showToast('Registrasi Berhasil! Selamat datang.');
+                
+                if (window.showToast) window.showToast('Registrasi Berhasil! Selamat datang.');
+                
                 setTimeout(() => {
                     window.location.href = "{{ route('home') }}";
                 }, 1000);
-                return;
+                return; 
             } else {
-                window.showToast(result.message || 'Registrasi gagal. Periksa data Anda.', 'error');
+                // Menampilkan error validasi dari Laravel (Misal: email sudah terdaftar, dll)
+                if (window.showToast) {
+                    window.showToast(result.message || 'Registrasi gagal. Periksa data Anda.', 'error');
+                } else {
+                    alert(result.message || 'Registrasi gagal.');
+                }
+                
+                btnSubmit.disabled = false;
+                btnText.textContent = 'Daftar Akun Mahasiswa';
+                btnLoader.classList.add('hidden');
+                return; 
             }
         } catch (error) {
-            console.log('Database register API offline, falling back to local simulation.');
-        }
+            // Pindah ke Demo Mode HANYA jika server mengalami kendala rute / offline (Network Error)
+            console.log('Terjadi masalah internal server atau API offline, dialihkan ke simulasi lokal:', error.message);
+            
+            const mockUser = {
+                id: 100,
+                name: name,
+                email: email,
+                phone_number: phone_number,
+                unsoed_faculty: unsoed_faculty,
+                unsoed_major: unsoed_major,
+                avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
+                rating_cache: 5.0,
+                role: 'student',
+                is_verified: true,
+                no_kampus: no_kampus
+            };
 
-        // --- FALLBACK INTERACTIVE MODE ---
-        const mockUser = {
-            id: 100,
-            name: name,
-            email: email,
-            phone_number: phone_number,
-            unsoed_faculty: unsoed_faculty,
-            unsoed_major: unsoed_major,
-            avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
-            rating_cache: 5.0,
-            role: 'student',
-            is_verified: true,
-            no_kampus: no_kampus
-        };
-
-        setTimeout(() => {
             localStorage.setItem('preloved_token', 'mock_token_register_123');
             localStorage.setItem('preloved_user', JSON.stringify(mockUser));
             
-            btnSubmit.disabled = false;
-            btnText.textContent = 'Daftar Akun Mahasiswa';
-            btnLoader.classList.add('hidden');
-            
-            window.showToast('Registrasi Berhasil (Demo Mode)!');
+            if (window.showToast) {
+                window.showToast('Registrasi Berhasil (Demo Mode - Offline)!');
+            } else {
+                alert('Registrasi Berhasil (Demo Mode - Offline)!');
+            }
+
             setTimeout(() => {
+                btnSubmit.disabled = false;
+                btnText.textContent = 'Daftar Akun Mahasiswa';
+                btnLoader.classList.add('hidden');
                 window.location.href = "{{ route('home') }}";
             }, 1000);
-        }, 800);
+        }
     }
 </script>
 @endsection
