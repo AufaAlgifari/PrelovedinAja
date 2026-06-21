@@ -41,19 +41,6 @@
             --cta-color: rgba(var(--cta-color-rgb), 1);
             --text-color: rgba(var(--text-color-rgb), 1);
         }
-        body.dark {
-            --bg-color-rgb: 46, 26, 6;
-            --surface-color-rgb: 62, 36, 9;
-            --primary-color-rgb: 212, 160, 23;
-            --cta-color-rgb: 245, 228, 176;
-            --text-color-rgb: 251, 246, 236;
-
-            --bg-color: rgba(var(--bg-color-rgb), 1);
-            --surface-color: rgba(var(--surface-color-rgb), 1);
-            --primary-color: rgba(var(--primary-color-rgb), 1);
-            --cta-color: rgba(var(--cta-color-rgb), 1);
-            --text-color: rgba(var(--text-color-rgb), 1);
-        }
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color);
@@ -143,16 +130,7 @@
                 <!-- Right Nav Elements -->
                 <div class="flex items-center gap-2 sm:gap-4">
                     
-                    <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" id="nav-btn-dark" class="p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all flex items-center justify-center">
-                        <svg id="dark-mode-icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
-                        </svg>
-                        <svg id="dark-mode-icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                        </svg>
-                    </button>
-                    
+
                     <!-- Keranjang Belanja -->
                     <div id="nav-btn-cart" class="hidden">
                         <a href="{{ route('cart.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
@@ -266,34 +244,6 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
-        // Toggle dark mode
-        window.toggleDarkMode = function() {
-            document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            localStorage.setItem('preloved_dark_mode', isDark ? 'enabled' : 'disabled');
-            updateDarkModeIcons();
-        };
-
-        function updateDarkModeIcons() {
-            const isDark = document.body.classList.contains('dark');
-            const sunIcon = document.getElementById('dark-mode-icon-sun');
-            const moonIcon = document.getElementById('dark-mode-icon-moon');
-            if(sunIcon && moonIcon) {
-                if(isDark) {
-                    sunIcon.classList.remove('hidden');
-                    moonIcon.classList.add('hidden');
-                } else {
-                    sunIcon.classList.add('hidden');
-                    moonIcon.classList.remove('hidden');
-                }
-            }
-        }
-
-        // Apply dark mode initially
-        if (localStorage.getItem('preloved_dark_mode') === 'enabled') {
-            document.body.classList.add('dark');
-        }
-
         // Mobile drawer menu
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
@@ -307,10 +257,10 @@
             toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
             
             if (type === 'success') {
-                toast.className += ' bg-emerald-50 text-emerald-800 border-emerald-100 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-800';
+                toast.className += ' bg-emerald-50 text-emerald-800 border-emerald-100';
                 toast.innerHTML = `<span class="text-emerald-500">✓</span><span>${message}</span>`;
             } else if (type === 'error') {
-                toast.className += ' bg-rose-50 text-rose-800 border-rose-100 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-850';
+                toast.className += ' bg-rose-50 text-rose-800 border-rose-100';
                 toast.innerHTML = `<span class="text-rose-500">✕</span><span>${message}</span>`;
             } else {
                 toast.className += ' bg-brand-100 text-brand-900 border-brand-500/30';
@@ -396,7 +346,6 @@
             // Desktop elements
             const navGuestLinks = document.getElementById('nav-guest-links');
             const navGuestActions = document.getElementById('nav-guest-actions');
-            const navBtnDark = document.getElementById('nav-btn-dark');
             const navBtnCart = document.getElementById('nav-btn-cart');
             const navBtnChat = document.getElementById('nav-btn-chat');
             const navAuthContainer = document.getElementById('nav-auth-container');
@@ -412,7 +361,6 @@
                 window.showNavElement(navGuestLinks, 'flex');
                 window.showNavElement(mobileGuestLinks, 'flex');
 
-                window.showNavElement(navBtnDark);
                 window.showNavElement(navBtnCart, 'block');
                 window.showNavElement(navBtnChat, 'block');
                 window.showNavElement(navAuthContainer);
@@ -515,7 +463,6 @@
                 window.showNavElement(navGuestActions);
                 window.showNavElement(mobileGuestLinks, 'flex');
                 
-                window.hideNavElement(navBtnDark);
                 window.hideNavElement(navBtnCart);
                 window.hideNavElement(navBtnChat);
                 window.hideNavElement(navAuthContainer);
@@ -553,9 +500,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             window.updateCartBadge();
             window.syncAuthHeader();
-            updateDarkModeIcons();
-            
-
         });
     </script>
 </body>
