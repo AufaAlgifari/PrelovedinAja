@@ -62,3 +62,31 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/reports',             [ReportController::class, 'store']);
 
 });
+
+// ── Admin Routes (wajib login + role admin) ───────────────
+Route::prefix('v1/admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+
+    Route::get('/stats', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'stats']);
+
+    // Listings
+    Route::get('/products', [\App\Http\Controllers\Api\Admin\ProductController::class, 'index']);
+    Route::delete('/products/{product}', [\App\Http\Controllers\Api\Admin\ProductController::class, 'destroy']);
+
+    // Users
+    Route::get('/users', [\App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+    Route::patch('/users/{user}/suspend', [\App\Http\Controllers\Api\Admin\UserController::class, 'suspend']);
+    Route::patch('/users/{user}/unsuspend', [\App\Http\Controllers\Api\Admin\UserController::class, 'unsuspend']);
+
+    // Transactions
+    Route::get('/transactions', [\App\Http\Controllers\Api\Admin\TransactionController::class, 'index']);
+    Route::get('/transactions/stats', [\App\Http\Controllers\Api\Admin\TransactionController::class, 'stats']);
+
+    // Reports
+    Route::get('/reports', [\App\Http\Controllers\Api\Admin\ReportController::class, 'index']);
+    Route::patch('/reports/{report}/resolve', [\App\Http\Controllers\Api\Admin\ReportController::class, 'resolve']);
+    Route::patch('/reports/{report}/reject', [\App\Http\Controllers\Api\Admin\ReportController::class, 'reject']);
+
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Api\Admin\AuditLogController::class, 'index']);
+
+});
