@@ -262,7 +262,7 @@
 </section>
 
 <!-- Filter Kategori & Grid Produk -->
-<section id="catalog-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
+<section id="catalog-section" class="hidden max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 scroll-mt-24">
     <div id="catalog-header" class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 pb-4 border-b border-[#D4A017]/20">
         <div>
             <h2 class="text-2xl font-black text-[#2E1A06] font-heading">Katalog Preloved Kampus</h2>
@@ -279,8 +279,8 @@
         </div>
     </div>
 
-    <!-- Product Grid: 2 columns on mobile, 3 on tablet, 4 on desktop -->
-    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
+    <!-- Product Grid: 2 columns on mobile, 3 on tablet, 5 on desktop (2 rows x 5 cols) -->
+    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
         <!-- Products will be dynamically populated here via Javascript (combining DB, Mocks, and LocalStorage) -->
     </div>
 
@@ -289,6 +289,14 @@
         <div class="w-16 h-16 bg-[#F5E4B0] rounded-full flex items-center justify-center mx-auto mb-4 text-[#7A4A10] text-2xl">🔍</div>
         <h3 class="text-base font-bold text-[#2E1A06]">Barang tidak ditemukan</h3>
         <p class="text-xs text-[#7A4A10] mt-1">Coba cari kata kunci lain atau ubah kategori filter Anda.</p>
+    </div>
+
+    <!-- Lihat Lebih Banyak Button -->
+    <div class="flex justify-center mt-10">
+        <a href="{{ route('products.index') }}"
+           class="inline-flex items-center px-8 py-3 bg-white border-2 border-[#7A4A10] text-[#7A4A10] font-bold text-sm rounded-full hover:bg-[#7A4A10] hover:text-[#FBF6EC] transition-all duration-300 shadow-sm hover:shadow-md">
+            Lihat Lebih Banyak
+        </a>
     </div>
 </section>
 
@@ -497,14 +505,16 @@
         grid.classList.remove('hidden');
         emptyState.classList.add('hidden');
 
+        allProducts = allProducts.slice(0, 10);
+
         allProducts.forEach(p => {
             const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
             
-            let badgeClass = 'bg-[#FBF6EC] text-[#2E1A06] border-[#D4A017]/35';
-            if(p.condition === 'New') badgeClass = 'bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]';
-            else if(p.condition === 'Like New') badgeClass = 'bg-[#D4A017] text-[#2E1A06] border-[#D4A017]';
-            else if(p.condition === 'Good') badgeClass = 'bg-[#FBF6EC] text-[#7A4A10] border-[#D4A017]/30';
-            else if(p.condition === 'Well Used') badgeClass = 'bg-transparent text-[#2E1A06] border-[#2E1A06]/30';
+            let badgeClass = 'bg-gray-100 text-gray-600 border-gray-300';
+            if(p.condition === 'New')       badgeClass = 'bg-blue-100 text-blue-700 border-blue-300';
+            else if(p.condition === 'Like New')  badgeClass = 'bg-green-100 text-green-700 border-green-300';
+            else if(p.condition === 'Good')      badgeClass = 'bg-amber-100 text-amber-700 border-amber-300';
+            else if(p.condition === 'Well Used') badgeClass = 'bg-gray-100 text-gray-500 border-gray-300';
 
             const imageUrl = p.image_urls && p.image_urls.length > 0 ? p.image_urls[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             const rating = p.seller && p.seller.rating_cache ? p.seller.rating_cache : '4.8';
@@ -512,40 +522,36 @@
             const isVerified = p.seller && p.seller.is_verified ? '<span class="text-[8px] bg-[#7A4A10] text-[#FBF6EC] px-1 rounded-full ml-1">✓</span>' : '';
 
             const card = document.createElement('div');
-            card.className = "bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/20 shadow-sm overflow-hidden flex flex-col justify-between card-premium hover:shadow-lg relative group";
+            card.className = "bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200 relative group";
             
             const detailUrl = `/products/${p.id}`;
 
             card.innerHTML = `
-                <span class="absolute top-3 left-3 z-10 px-2.5 py-1 border rounded-full text-[9px] font-extrabold uppercase tracking-wider shadow-sm ${badgeClass}">
+                <span class="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 border rounded-full text-[8px] font-bold uppercase tracking-wide shadow-sm ${badgeClass}">
                     ${p.condition}
                 </span>
 
-                <a href="${detailUrl}" class="block aspect-square w-full bg-[#FBF6EC] overflow-hidden relative">
+                <a href="${detailUrl}" class="block aspect-[4/3] w-full bg-gray-50 overflow-hidden relative">
                     <img src="${imageUrl}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
-                    <div class="absolute inset-0 bg-[#2E1A06]/5 group-hover:bg-transparent transition-all"></div>
                 </a>
 
-                <div class="p-3 sm:p-5 flex-grow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between text-[9px] text-[#7A4A10] font-bold mb-1.5">
-                            <span class="truncate max-w-[100px] flex items-center">${sellerName} ${isVerified}</span>
-                            <span>★ ${rating}</span>
-                        </div>
-                        
-                        <h4 class="font-extrabold text-[#2E1A06] text-xs sm:text-sm hover:text-[#7A4A10] transition line-clamp-2 leading-snug font-heading">
-                            <a href="${detailUrl}">${p.title}</a>
-                        </h4>
+                <div class="p-3 flex flex-col gap-1.5">
+                    <!-- Baris 1: Nama penjual + Rating -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] text-gray-400 font-medium truncate">${sellerName}</span>
+                        <span class="text-[10px] text-[#D4A017] font-bold shrink-0 ml-1">☆ ${rating}</span>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-[#D4A017]/10 flex items-center justify-between">
-                        <div>
-                            <span class="text-[8px] font-bold text-[#7A4A10] block uppercase">Harga</span>
-                            <span class="text-xs sm:text-sm font-black text-[#7A4A10]">${formattedPrice}</span>
-                        </div>
-                        
-                        <button onclick="quickAddCart(event, ${JSON.stringify(p).replace(/"/g, '&quot;')})" 
-                                class="p-2 bg-[#FBF6EC] text-[#7A4A10] border border-[#D4A017]/30 hover:bg-[#7A4A10] hover:text-[#FBF6EC] rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center">
+                    <!-- Baris 2: Nama produk -->
+                    <h4 class="font-bold text-[#2E1A06] text-xs leading-snug line-clamp-2 hover:text-[#7A4A10] transition">
+                        <a href="${detailUrl}">${p.title}</a>
+                    </h4>
+
+                    <!-- Baris 3: Harga + Keranjang -->
+                    <div class="flex items-center justify-between mt-0.5">
+                        <span class="text-sm font-bold text-[#E8400C]">${formattedPrice}</span>
+                        <button onclick="quickAddCart(event, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
+                                class="p-1.5 bg-[#FBF6EC] border border-[#D4A017]/40 text-[#D4A017] hover:bg-[#D4A017] hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center shrink-0">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>

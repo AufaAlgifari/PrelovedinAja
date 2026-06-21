@@ -109,6 +109,74 @@ function getMockProducts() {
                 'unsoed_faculty' => 'Hukum',
                 'unsoed_major' => 'Ilmu Hukum'
             ]
+        ],
+        [
+            'id' => 7,
+            'title' => 'Tas Ransel Eiger Cordura 25L Navy',
+            'description' => 'Tas ransel Eiger seri Cordura 25 liter warna Navy. Anti air, banyak kompartemen, ada slot laptop 14 inch. Kondisi 90%, tali masih kencang, resleting mulus. Cocok untuk kuliah atau hiking ringan.',
+            'price' => 280000,
+            'condition' => 'Good',
+            'category' => 'Apparel',
+            'status' => 'Available',
+            'image_urls' => ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80'],
+            'seller' => (object)[
+                'name' => 'Bagas - FISIP Unsoed',
+                'avatar_url' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&h=150&q=80',
+                'rating_cache' => 4.7,
+                'unsoed_faculty' => 'FISIP',
+                'unsoed_major' => 'Ilmu Komunikasi'
+            ]
+        ],
+        [
+            'id' => 8,
+            'title' => 'Sepatu Sneakers New Balance 574 Core Grey',
+            'description' => 'New Balance 574 Core warna grey classic, size 42. Beli di toko resmi 3 bulan lalu, dipakai hanya 5x ke kampus. Masih sangat mulus, sol belum tipis, isi kotak original.',
+            'price' => 550000,
+            'condition' => 'Like New',
+            'category' => 'Apparel',
+            'status' => 'Available',
+            'image_urls' => ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80'],
+            'seller' => (object)[
+                'name' => 'Rizky - FEB Unsoed',
+                'avatar_url' => 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&h=150&q=80',
+                'rating_cache' => 4.8,
+                'unsoed_faculty' => 'Ekonomi dan Bisnis',
+                'unsoed_major' => 'Akuntansi'
+            ]
+        ],
+        [
+            'id' => 9,
+            'title' => 'Rice Cooker Mini Cosmos 0.6L Pink',
+            'description' => 'Rice cooker mini kapasitas 0.6 liter, pas untuk 1-2 porsi. Hemat listrik hanya 150 watt, ada fungsi warm otomatis. Warna pink, mulus, cocok untuk penghuni kost putri.',
+            'price' => 95000,
+            'condition' => 'Good',
+            'category' => 'Dorm Life',
+            'status' => 'Available',
+            'image_urls' => ['https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&w=600&q=80'],
+            'seller' => (object)[
+                'name' => 'Nadia - FIK Unsoed',
+                'avatar_url' => 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=150&h=150&q=80',
+                'rating_cache' => 4.9,
+                'unsoed_faculty' => 'Ilmu Kesehatan',
+                'unsoed_major' => 'Keperawatan'
+            ]
+        ],
+        [
+            'id' => 10,
+            'title' => 'Buku TOEFL Preparation Barron\'s 2023 Edition',
+            'description' => 'Buku persiapan TOEFL Barron edisi 2023, lengkap dengan CD latihan soal. Kondisi sangat baik, hanya dibaca sekali. Dilengkapi tips & trik serta 6 full-length practice test.',
+            'price' => 85000,
+            'condition' => 'Like New',
+            'category' => 'Textbooks',
+            'status' => 'Available',
+            'image_urls' => ['https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80'],
+            'seller' => (object)[
+                'name' => 'Dewi - FIB Unsoed',
+                'avatar_url' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=150&h=150&q=80',
+                'rating_cache' => 5.0,
+                'unsoed_faculty' => 'Ilmu Budaya',
+                'unsoed_major' => 'Sastra Inggris'
+            ]
         ]
     ];
 }
