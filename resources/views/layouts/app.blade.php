@@ -10,6 +10,7 @@
     @yield('head')
     <script>
         window.isHomepage = {{ Request::routeIs('home') ? 'true' : 'false' }};
+        window.isAboutPage = {{ Request::routeIs('about') ? 'true' : 'false' }};
         tailwind.config = {
             theme: {
                 extend: {
@@ -137,18 +138,7 @@
                     <a href="{{ route('about') }}" class="text-brand-900 hover:text-brand-600 transition">Tentang Kami</a>
                 </div>
 
-                <!-- Live Search Bar (Desktop - Logged-In Only) -->
-                <div id="nav-search-container" class="flex-1 max-w-xl hidden md:block">
-                    <form action="{{ route('products.index') }}" method="GET" class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-brand-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </span>
-                        <input type="text" name="search" id="navbar-search" placeholder="Cari buku kuliah, laptop, kalkulator..." 
-                               class="w-full pl-11 pr-4 py-2.5 bg-brand-50 hover:bg-white text-sm text-brand-900 rounded-full border border-brand-500/30 focus:border-brand-600 focus:outline-none transition-all duration-200">
-                    </form>
-                </div>
+
 
                 <!-- Right Nav Elements -->
                 <div class="flex items-center gap-2 sm:gap-4">
@@ -209,18 +199,7 @@
 
         <!-- Mobile Drawer Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-brand-100 border-t border-brand-500/20 px-4 pt-2 pb-6 space-y-4 shadow-inner">
-            <!-- Mobile Search Bar (Only Logged In) -->
-            <div id="mobile-search-container" class="pt-2 hidden">
-                <form action="{{ route('products.index') }}" method="GET" class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </span>
-                    <input type="text" name="search" id="mobile-navbar-search" placeholder="Cari barang..." 
-                           class="w-full pl-9 pr-4 py-2 bg-brand-50 text-xs text-brand-900 rounded-full border border-brand-500/30 focus:border-brand-600 focus:outline-none">
-                </form>
-            </div>
+
             
             <!-- Mobile Guest Links (Only Guest) -->
             <div id="mobile-guest-links" class="hidden flex flex-col gap-3 pt-2">
@@ -417,32 +396,21 @@
             // Desktop elements
             const navGuestLinks = document.getElementById('nav-guest-links');
             const navGuestActions = document.getElementById('nav-guest-actions');
-            const navSearchContainer = document.getElementById('nav-search-container');
             const navBtnDark = document.getElementById('nav-btn-dark');
             const navBtnCart = document.getElementById('nav-btn-cart');
             const navBtnChat = document.getElementById('nav-btn-chat');
             const navAuthContainer = document.getElementById('nav-auth-container');
             
             // Mobile elements
-            const mobileSearchContainer = document.getElementById('mobile-search-container');
             const mobileGuestLinks = document.getElementById('mobile-guest-links');
             const mobileAuthContainer = document.getElementById('mobile-auth-container');
 
             if (userJson) {
                 const user = JSON.parse(userJson);
                 
-                // Show logged-in elements
-                if (window.isHomepage) {
-                    window.hideNavElement(navSearchContainer);
-                    window.hideNavElement(mobileSearchContainer);
-                    window.showNavElement(navGuestLinks, 'flex');
-                    window.showNavElement(mobileGuestLinks, 'flex');
-                } else {
-                    window.showNavElement(navSearchContainer);
-                    window.showNavElement(mobileSearchContainer, 'block');
-                    window.hideNavElement(navGuestLinks);
-                    window.hideNavElement(mobileGuestLinks);
-                }
+                // Show logged-in elements - Always show navigation links
+                window.showNavElement(navGuestLinks, 'flex');
+                window.showNavElement(mobileGuestLinks, 'flex');
 
                 window.showNavElement(navBtnDark);
                 window.showNavElement(navBtnCart, 'block');
@@ -543,17 +511,14 @@
                 }
             } else {
                 // Hide logged-in elements
-                window.hideNavElement(navSearchContainer);
+                window.showNavElement(navGuestLinks);
+                window.showNavElement(navGuestActions);
+                window.showNavElement(mobileGuestLinks, 'flex');
+                
                 window.hideNavElement(navBtnDark);
                 window.hideNavElement(navBtnCart);
                 window.hideNavElement(navBtnChat);
                 window.hideNavElement(navAuthContainer);
-                window.hideNavElement(mobileSearchContainer);
-                
-                // Show guest elements
-                window.showNavElement(navGuestLinks);
-                window.showNavElement(navGuestActions);
-                window.showNavElement(mobileGuestLinks, 'flex');
 
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `
@@ -590,16 +555,7 @@
             window.syncAuthHeader();
             updateDarkModeIcons();
             
-            const mobSearch = document.getElementById('mobile-navbar-search');
-            if (mobSearch) {
-                mobSearch.addEventListener('input', (e) => {
-                    const navSearch = document.getElementById('navbar-search');
-                    if (navSearch) {
-                        navSearch.value = e.target.value;
-                        navSearch.dispatchEvent(new Event('input'));
-                    }
-                });
-            }
+
         });
     </script>
 </body>

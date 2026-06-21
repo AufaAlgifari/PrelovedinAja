@@ -510,11 +510,19 @@
         allProducts.forEach(p => {
             const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
             
-            let badgeClass = 'bg-gray-100 text-gray-600 border-gray-300';
-            if(p.condition === 'New')       badgeClass = 'bg-blue-100 text-blue-700 border-blue-300';
-            else if(p.condition === 'Like New')  badgeClass = 'bg-green-100 text-green-700 border-green-300';
-            else if(p.condition === 'Good')      badgeClass = 'bg-amber-100 text-amber-700 border-amber-300';
-            else if(p.condition === 'Well Used') badgeClass = 'bg-gray-100 text-gray-500 border-gray-300';
+            let displayCondition = p.condition;
+            if (displayCondition === 'New' || displayCondition === 'Like New') {
+                displayCondition = 'Baru';
+            } else if (displayCondition === 'Good') {
+                displayCondition = 'Bekas';
+            } else if (displayCondition === 'Well Used') {
+                displayCondition = 'Usang';
+            }
+
+            let badgeClass = 'bg-gray-100 text-gray-500 border-gray-300';
+            if (displayCondition === 'Baru') badgeClass = 'bg-green-100 text-green-700 border-green-300';
+            else if (displayCondition === 'Bekas') badgeClass = 'bg-amber-100 text-amber-700 border-amber-300';
+            else if (displayCondition === 'Usang') badgeClass = 'bg-gray-100 text-gray-500 border-gray-300';
 
             const imageUrl = p.image_urls && p.image_urls.length > 0 ? p.image_urls[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
             const rating = p.seller && p.seller.rating_cache ? p.seller.rating_cache : '4.8';
@@ -528,7 +536,7 @@
 
             card.innerHTML = `
                 <span class="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 border rounded-full text-[8px] font-bold uppercase tracking-wide shadow-sm ${badgeClass}">
-                    ${p.condition}
+                    ${displayCondition}
                 </span>
 
                 <a href="${detailUrl}" class="block aspect-[4/3] w-full bg-gray-50 overflow-hidden relative">
@@ -551,9 +559,9 @@
                     <div class="flex items-center justify-between mt-0.5">
                         <span class="text-sm font-bold text-[#E8400C]">${formattedPrice}</span>
                         <button onclick="quickAddCart(event, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
-                                class="p-1.5 bg-[#FBF6EC] border border-[#D4A017]/40 text-[#D4A017] hover:bg-[#D4A017] hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                class="p-1.5 bg-[#FBF6EC] border border-[#2E1A06]/30 text-[#2E1A06] hover:bg-[#2E1A06] hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.116 60.116 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                             </svg>
                         </button>
                     </div>
