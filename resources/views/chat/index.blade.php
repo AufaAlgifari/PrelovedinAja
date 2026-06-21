@@ -57,6 +57,9 @@
 </div>
 
 <script>
+    let querySeller = @json($seller ?? null);
+    let queryProduct = @json($product ?? null);
+
     let activeChatRoomId = null;
     let activeContactId = null;
     let pollInterval = null;
@@ -76,11 +79,81 @@
 
             if (response.ok) {
                 const conversations = await response.json();
+
+                // Add query parameter check
+                if (querySeller && querySeller.id) {
+                    const targetSellerId = parseInt(querySeller.id);
+                    const targetProductId = queryProduct ? parseInt(queryProduct.id) : null;
+
+                    let found = conversations.find(c => c.contact.id === targetSellerId && (!targetProductId || (c.product && c.product.id === targetProductId)));
+
+                    if (!found) {
+                        // Prepend a temporary conversation
+                        const tempConv = {
+                            id: 'new_temp',
+                            contact: querySeller,
+                            product: queryProduct,
+                            latest_message: null
+                        };
+                        conversations.unshift(tempConv);
+                    }
+                }
+
                 renderConversationsList(conversations);
+
+                // Auto-select the conversation if query parameters exist
+                if (querySeller && querySeller.id) {
+                    const targetSellerId = parseInt(querySeller.id);
+                    const targetProductId = queryProduct ? parseInt(queryProduct.id) : null;
+
+                    let found = conversations.find(c => c.contact.id === targetSellerId && (!targetProductId || (c.product && c.product.id === targetProductId)));
+                    if (found) {
+                        const productTitle = found.product ? found.product.title : 'Produk Preloved';
+                        const contactAvatar = found.contact.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
+                        selectConversation(found.id, found.contact.id, found.contact.name, contactAvatar, productTitle);
+
+                        // Clear variables so re-renders don't keep prepending
+                        querySeller = null;
+                        queryProduct = null;
+                    }
+                }
             }
         } catch (error) {
             console.log('Conversations API offline, using local mock data.');
-            renderConversationsList(getMockConversations());
+            let conversations = getMockConversations();
+
+            // Offline mock simulation for querySeller too
+            if (querySeller && querySeller.id) {
+                const targetSellerId = parseInt(querySeller.id);
+                const targetProductId = queryProduct ? parseInt(queryProduct.id) : null;
+
+                let found = conversations.find(c => c.contact.id === targetSellerId && (!targetProductId || (c.product && c.product.id === targetProductId)));
+                if (!found) {
+                    const tempConv = {
+                        id: 'new_temp',
+                        contact: querySeller,
+                        product: queryProduct,
+                        latest_message: null
+                    };
+                    conversations.unshift(tempConv);
+                }
+            }
+            renderConversationsList(conversations);
+
+            if (querySeller && querySeller.id) {
+                const targetSellerId = parseInt(querySeller.id);
+                const targetProductId = queryProduct ? parseInt(queryProduct.id) : null;
+
+                let found = conversations.find(c => c.contact.id === targetSellerId && (!targetProductId || (c.product && c.product.id === targetProductId)));
+                if (found) {
+                    const productTitle = found.product ? found.product.title : 'Produk Preloved';
+                    const contactAvatar = found.contact.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
+                    selectConversation(found.id, found.contact.id, found.contact.name, contactAvatar, productTitle);
+
+                    querySeller = null;
+                    queryProduct = null;
+                }
+            }
         }
     }
 
@@ -174,6 +247,16 @@
         if(!activeContactId) return;
         const token = localStorage.getItem('preloved_token');
 
+        if (activeChatRoomId === 'new_temp') {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = `
+                <div class="m-auto text-center py-10 text-xs text-brand-600">
+                    Belum ada riwayat pesan. Kirim pesan pertama untuk bernegosiasi!
+                </div>
+            `;
+            return;
+        }
+
         try {
             const response = await fetch(`/api/v1/chats/${activeContactId}`, {
                 headers: {
@@ -239,6 +322,14 @@
         input.value = '';
 
         try {
+            const body = {
+                receiver_id: activeContactId,
+                message: text
+            };
+            if (queryProduct) {
+                body.product_id = queryProduct.id;
+            }
+
             const response = await fetch('/api/v1/chats', {
                 method: 'POST',
                 headers: {
@@ -246,17 +337,32 @@
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    receiver_id: activeContactId,
-                    message: text
-                })
+                body: JSON.stringify(body)
             });
 
             if (response.ok) {
+                const result = await response.json();
+                if (activeChatRoomId === 'new_temp') {
+                    activeChatRoomId = result.chat.id;
+                }
                 loadMessages();
             }
         } catch (error) {
             console.log('Offline send simulation.');
+            const container = document.getElementById('messages-container');
+            if (container.querySelector('.m-auto')) {
+                container.innerHTML = '';
+            }
+            const bubble = document.createElement('div');
+            bubble.className = `flex justify-end w-full`;
+            bubble.innerHTML = `
+                <div class="max-w-[70%] p-3.5 rounded-2xl border shadow-sm text-xs bg-brand-600 border-brand-600 text-brand-50 rounded-tr-none">
+                    <p class="leading-relaxed whitespace-pre-wrap">${text}</p>
+                    <span class="block text-[8px] mt-1.5 text-right opacity-70">${new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+            `;
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
         }
     }
 

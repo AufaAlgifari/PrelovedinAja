@@ -25,8 +25,8 @@
             
             @if(isset($product->image_urls) && count($product->image_urls) > 1)
             <div class="grid grid-cols-4 gap-2">
-                @foreach($product->image_urls as $img)
-                <button onclick="document.getElementById('main-image').src = '{{ $img }}'" class="aspect-square rounded-xl bg-[#FBF6EC] border border-[#D4A017]/20 overflow-hidden hover:border-[#7A4A10] focus:outline-none transition">
+                @foreach($product->image_urls as $index => $img)
+                <button onclick="changeMainImage(this, '{{ $img }}')" class="thumbnail-btn aspect-square rounded-xl bg-[#FBF6EC] border {{ $index === 0 ? 'border-[#7A4A10] border-2 shadow-sm' : 'border-[#D4A017]/20' }} overflow-hidden hover:border-[#7A4A10] focus:outline-none transition">
                     <img src="{{ $img }}" alt="Thumbnail" class="w-full h-full object-cover">
                 </button>
                 @endforeach
@@ -94,27 +94,36 @@
             </div>
 
             <!-- CTA Buttons -->
-            <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button onclick="addProductToCart()" class="w-full bg-[#FBF6EC] border-2 border-[#7A4A10] text-[#7A4A10] hover:bg-[#F5E4B0] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-sm transition transform hover:-translate-y-0.5">
-                    🛒 Tambah Ke Keranjang
-                </button>
-                <a href="{{ route('checkout.index', $product->id) }}" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-center">
-                    ⚡ Beli Sekarang
-                </a>
+            <div class="mt-10 space-y-4">
+                <!-- Baris Atas: Chat Penjual (Aksi Komunikasi Terpisah) -->
+                <div>
+                    <a href="{{ route('chat.index', ['seller_id' => $product->seller_id, 'product_id' => $product->id]) }}" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-center">
+                        💬 Chat Penjual
+                    </a>
+                </div>
+                <!-- Baris Bawah: Aksi Transaksi -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="addProductToCart()" class="w-full bg-[#FBF6EC] border-2 border-[#7A4A10] text-[#7A4A10] hover:bg-[#F5E4B0] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-sm transition transform hover:-translate-y-0.5">
+                        🛒 Tambah Ke Keranjang
+                    </button>
+                    <a href="{{ route('checkout.index', $product->id) }}" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-center">
+                        ⚡ Beli Sekarang
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Chat Contact & In-App Messaging Modal -->
-<div id="chat-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm">
-    <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-6 shadow-2xl relative overflow-hidden transform scale-95 transition-all text-[#2E1A06]">
+<div id="chat-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm">
+    <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-6 shadow-2xl relative transform scale-95 transition-all text-[#2E1A06]" style="max-height: 85vh; overflow-y: auto;">
         <div class="text-center space-y-4">
             <div class="inline-flex items-center justify-center p-3 bg-[#FBF6EC] text-[#7A4A10] rounded-full border border-[#D4A017]/20">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
             </div>
             <h3 class="text-lg font-black font-heading text-[#2E1A06]">Hubungi Penjual</h3>
-            <p class="text-xs text-[#2E1A06]/85">Kirim pesan instan langsung di aplikasi (In-App) atau hubungi nomor WhatsApp mahasiswa untuk membuat janji temu COD.</p>
+            <p class="text-xs text-[#2E1A06]/85">Pilih kirim pesan instan langsung di aplikasi (In-App) atau hubungi nomor WhatsApp mahasiswa untuk membuat janji temu COD.</p>
             
             <!-- In-App Message Input -->
             <div class="bg-[#FBF6EC] p-4 rounded-2xl border border-[#D4A017]/20 text-left space-y-3">
@@ -148,8 +157,8 @@
 </div>
 
 <!-- Report Product Modal (ERD Compliance) -->
-<div id="report-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm">
-    <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-6 shadow-2xl relative overflow-hidden text-[#2E1A06]">
+<div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm">
+    <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-6 shadow-2xl relative text-[#2E1A06]" style="max-height: 85vh; overflow-y: auto;">
         <div class="text-center space-y-4">
             <div class="inline-flex items-center justify-center p-3 bg-rose-50 text-rose-700 rounded-full border border-rose-100">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -202,6 +211,16 @@
         window.addToCart(currentProduct);
     }
 
+    function changeMainImage(btn, imgUrl) {
+        document.getElementById('main-image').src = imgUrl;
+        document.querySelectorAll('.thumbnail-btn').forEach(t => {
+            t.classList.remove('border-[#7A4A10]', 'border-2', 'shadow-sm');
+            t.classList.add('border-[#D4A017]/20');
+        });
+        btn.classList.remove('border-[#D4A017]/20');
+        btn.classList.add('border-[#7A4A10]', 'border-2', 'shadow-sm');
+    }
+
     function openChatModal() {
         const user = localStorage.getItem('preloved_user');
         if(!user) {
@@ -209,10 +228,12 @@
             return;
         }
         document.getElementById('chat-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeChatModal() {
         document.getElementById('chat-modal').classList.add('hidden');
+        document.body.style.overflow = '';
     }
 
     async function sendInAppMessage() {
@@ -267,10 +288,12 @@
             return;
         }
         document.getElementById('report-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeReportModal() {
         document.getElementById('report-modal').classList.add('hidden');
+        document.body.style.overflow = '';
     }
 
     async function submitReport(e) {

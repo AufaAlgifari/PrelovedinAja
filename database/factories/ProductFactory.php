@@ -21,6 +21,17 @@ class ProductFactory extends Factory
         $categories = ['Textbooks', 'Electronics', 'Apparel', 'Dorm Life'];
         $conditions = ['New', 'Like New', 'Good', 'Well Used'];
 
+        $availableImages = [
+            'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1571175432240-a38f381c855a?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1629904853716-f0bc54fea481?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80'
+        ];
+        $count = $this->faker->numberBetween(2, 4);
+        $randomImages = $this->faker->randomElements($availableImages, $count);
+
         return [
             'seller_id' => User::factory(),
             'title' => $this->faker->words(3, true),
@@ -30,9 +41,7 @@ class ProductFactory extends Factory
             'category' => $this->faker->randomElement($categories),
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
             'status' => 'Available',
-            'image_urls' => [
-                'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80'
-            ],
+            'image_urls' => $randomImages,
             'views_count' => $this->faker->numberBetween(0, 100),
         ];
     }

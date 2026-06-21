@@ -341,17 +341,20 @@
             const cart = window.getCart();
             const existing = cart.find(item => item.id == product.id);
             if (existing) {
-                existing.quantity += 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    image: product.image_urls ? product.image_urls[0] : (product.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80'),
-                    seller: product.seller ? product.seller.name : (product.seller_name || 'Mahasiswa Unsoed'),
-                    quantity: 1
-                });
+                if (showFeedback) window.showToast(`"${product.title}" sudah ada di keranjang.`);
+                return;
             }
+            cart.push({
+                id: product.id,
+                title: product.title,
+                price: product.price,
+                image: product.image_urls ? product.image_urls[0] : (product.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80'),
+                seller: product.seller ? (product.seller.name || product.seller) : (product.seller_name || 'Mahasiswa Unsoed'),
+                seller_id: product.seller ? product.seller.id : (product.seller_id || 1),
+                seller_faculty: product.seller ? (product.seller.unsoed_faculty || 'FT') : 'FT',
+                condition: product.condition || 'Bekas',
+                quantity: 1
+            });
             localStorage.setItem('preloved_cart', JSON.stringify(cart));
             window.updateCartBadge();
             if (showFeedback) window.showToast(`Berhasil menambahkan "${product.title}" ke keranjang!`);

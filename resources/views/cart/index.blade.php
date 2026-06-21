@@ -17,31 +17,28 @@
         <!-- Right Side: Order Summary -->
         <div class="space-y-4 text-[#2E1A06]">
             <div class="bg-[#F5E4B0] p-6 rounded-3xl border border-[#D4A017]/25 shadow-xl space-y-6">
-                <h3 class="text-md font-bold border-b border-[#D4A017]/10 pb-3 font-heading">Ringkasan Pembayaran</h3>
+                <h3 class="text-md font-bold border-b border-[#D4A017]/10 pb-3 font-heading">Ringkasan Pesanan</h3>
                 
-                <div class="space-y-3 text-xs text-[#2E1A06]/80 font-medium">
+                <div class="space-y-4 text-xs text-[#2E1A06]/85 font-medium">
                     <div class="flex justify-between">
-                        <span>Subtotal Barang</span>
+                        <span id="summary-item-count">Total Harga (0 Barang)</span>
                         <span id="summary-subtotal" class="font-bold text-[#2E1A06]">Rp 0</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Biaya Layanan COD Kampus</span>
-                        <span class="font-bold text-[#7A4A10] bg-[#FBF6EC] px-2.5 py-0.5 rounded-full border border-[#D4A017]/20">Gratis (COD)</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Biaya Administrasi</span>
-                        <span class="font-bold text-[#2E1A06]">Rp 0</span>
+                    
+                    <div class="border-t border-[#D4A017]/15 pt-4 flex justify-between items-baseline">
+                        <span class="text-xs font-black text-[#2E1A06] uppercase tracking-wider">Total Belanja</span>
+                        <span id="summary-total" class="text-2xl font-black text-[#7A4A10]">Rp 0</span>
                     </div>
                 </div>
 
-                <div class="border-t border-[#D4A017]/15 pt-4 flex justify-between items-baseline">
-                    <span class="text-xs font-bold text-[#7A4A10] uppercase tracking-wider">Total Pembayaran</span>
-                    <span id="summary-total" class="text-2xl font-black text-[#7A4A10]">Rp 0</span>
+                <div class="space-y-3">
+                    <button onclick="triggerCheckout()" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 text-center flex items-center justify-center gap-2">
+                        Lanjut Pembayaran
+                    </button>
+                    <p class="text-[10px] text-center text-[#7A4A10] font-medium leading-relaxed">
+                        Selesaikan transaksi dengan COD di lingkungan kampus demi keamanan bersama. Biaya COD & Layanan: <strong>Gratis</strong>
+                    </p>
                 </div>
-                
-                <button onclick="triggerCheckout()" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 text-center flex items-center justify-center gap-2">
-                    ✅ Checkout Sekarang
-                </button>
             </div>
             
             <div class="bg-[#F5E4B0]/40 border border-[#D4A017]/20 rounded-2xl p-4 text-[11px] text-[#2E1A06]/90 leading-relaxed font-medium">
@@ -118,60 +115,62 @@
 
         cart.forEach(item => {
             const itemPrice = parseInt(item.price);
-            const totalItemPrice = itemPrice * item.quantity;
-            subtotal += totalItemPrice;
+            subtotal += itemPrice;
 
             const priceFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(itemPrice);
 
-            const row = document.createElement('div');
-            row.className = "bg-[#F5E4B0] p-5 rounded-3xl border border-[#D4A017]/25 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 card-premium";
-            row.innerHTML = `
-                <div class="flex items-center gap-4 w-full sm:w-auto text-[#2E1A06]">
-                    <img src="${item.image}" alt="${item.title}" class="w-20 h-20 rounded-2xl object-cover border border-[#D4A017]/20 bg-[#FBF6EC] flex-shrink-0">
+            let displayCond = item.condition || 'Bekas';
+            if (displayCond === 'New' || displayCond === 'Like New') displayCond = 'Baru';
+            else if (displayCond === 'Good') displayCond = 'Bekas';
+            else if (displayCond === 'Well Used') displayCond = 'Usang';
+
+            let condBadgeClass = 'bg-gray-100 text-gray-500 border-gray-300';
+            if (displayCond === 'Baru') condBadgeClass = 'bg-green-100 text-green-700 border-green-300';
+            else if (displayCond === 'Bekas') condBadgeClass = 'bg-amber-100 text-amber-700 border-amber-300';
+
+            const sellerFaculty = item.seller_faculty ? item.seller_faculty.toUpperCase() : 'FT';
+
+            const card = document.createElement('div');
+            card.className = "bg-[#F5E4B0] p-5 rounded-3xl border border-[#D4A017]/25 shadow-sm flex gap-4 relative text-[#2E1A06] card-premium";
+            
+            card.innerHTML = `
+                <img src="${item.image}" alt="${item.title}" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border border-[#D4A017]/20 bg-[#FBF6EC] flex-shrink-0">
+                <div class="flex-1 flex flex-col justify-between min-w-0">
                     <div>
-                        <span class="text-[9px] text-[#7A4A10] font-bold uppercase tracking-wider block mb-1">👤 Penjual: ${item.seller}</span>
-                        <h4 class="font-extrabold text-[#2E1A06] text-sm hover:text-[#7A4A10] transition max-w-sm line-clamp-1 font-heading">${item.title}</h4>
-                        <p class="text-sm font-black text-[#7A4A10] mt-1">${priceFormatted}</p>
+                        <!-- Title & Delete Button Container -->
+                        <div class="flex justify-between items-start gap-4">
+                            <h4 class="font-extrabold text-[#2E1A06] text-sm sm:text-base hover:text-[#7A4A10] transition line-clamp-2 font-heading">${item.title}</h4>
+                            <button onclick="deleteItem(${item.id})" class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-2 rounded-xl transition-all shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Badges -->
+                        <div class="flex flex-wrap gap-2 mt-1.5">
+                            <span class="px-2 py-0.5 border rounded-full text-[9px] font-extrabold uppercase ${condBadgeClass}">${displayCond}</span>
+                            <span class="px-2 py-0.5 border border-[#D4A017]/30 bg-[#FBF6EC]/60 text-[#7A4A10] text-[9px] font-extrabold rounded-full flex items-center gap-1">📍 ${sellerFaculty} UNSOED</span>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Quantity & Delete -->
-                <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-[#D4A017]/10 sm:border-t-0 pt-3 sm:pt-0">
-                    <div class="flex items-center border border-[#D4A017]/30 bg-[#FBF6EC] rounded-xl p-1">
-                        <button onclick="changeQty(${item.id}, -1)" class="w-8 h-8 flex items-center justify-center text-[#7A4A10] hover:text-[#2E1A06] font-bold focus:outline-none transition rounded-lg hover:bg-[#F5E4B0]">-</button>
-                        <span class="px-3 text-xs font-extrabold text-[#2E1A06]">${item.quantity}</span>
-                        <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 flex items-center justify-center text-[#7A4A10] hover:text-[#2E1A06] font-bold focus:outline-none transition rounded-lg hover:bg-[#F5E4B0]">+</button>
+
+                    <!-- Price & Chat Button -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3 border-t border-[#D4A017]/10">
+                        <p class="text-sm sm:text-base font-black text-[#7A4A10]">${priceFormatted}</p>
+                        <a href="{{ route('chat.index') }}?seller_id=${item.seller_id || 1}&product_id=${item.id}" class="bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] px-4 py-2 rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center font-semibold">
+                            💬 Chat Penjual
+                        </a>
                     </div>
-                    
-                    <button onclick="deleteItem(${item.id})" class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-2.5 rounded-xl transition-all flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
                 </div>
             `;
-            itemsList.appendChild(row);
+            itemsList.appendChild(card);
         });
 
         // Set summary
         const subtotalFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(subtotal);
         document.getElementById('summary-subtotal').textContent = subtotalFormatted;
         document.getElementById('summary-total').textContent = subtotalFormatted;
-    }
-
-    function changeQty(productId, delta) {
-        const cart = window.getCart();
-        const item = cart.find(item => item.id == productId);
-        if(item) {
-            item.quantity += delta;
-            if(item.quantity <= 0) {
-                deleteItem(productId);
-                return;
-            }
-            localStorage.setItem('preloved_cart', JSON.stringify(cart));
-            window.updateCartBadge();
-            renderCart();
-        }
+        document.getElementById('summary-item-count').textContent = `Total Harga (${cart.length} Barang)`;
     }
 
     function deleteItem(productId) {
