@@ -73,10 +73,17 @@
         </div>
 
         <div class="text-center relative pt-4">
-            <div class="inline-flex items-center justify-center p-3 bg-[#FBF6EC] text-[#7A4A10] rounded-2xl mb-4 border border-[#D4A017]/20">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 14a15.82 15.82 0 00-1.5-.5M6.7 20A13.96 13.96 0 013 15.07m12.188-4.188c.847-.847 1.312-1.956 1.312-3.128 0-2.435-1.977-4.413-4.413-4.413S7.674 5.317 7.674 7.752c0 1.171.465 2.28 1.312 3.128m7.2 0l-.022.022m0 0l-7.176 7.176"></path>
-                </svg>
+            <div class="inline-flex items-center justify-center p-3 bg-[#FBF6EC] rounded-2xl mb-4 border-2 border-[#7A4A10] shadow-md">
+                <a href="{{ route('home') }}" class="hover:opacity-90 transition block">
+                    <svg class="w-8 h-8" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 20L165 42L100 64L35 42L100 20Z" fill="var(--primary-color)" />
+                        <path d="M52 48.5V68C52 70.5 49.5 72 47 72C44.5 72 42 70.5 42 68V45" stroke="var(--cta-color)" stroke-width="4.5" stroke-linecap="round"/>
+                        <circle cx="47" cy="72" r="6.5" fill="var(--text-color)"/>
+                        <path d="M68 62C68 38 132 38 132 62" stroke="var(--surface-color)" stroke-width="15" stroke-linecap="round"/>
+                        <path d="M42 62H158L168 165C168 171 163 175 157 175H43C37 175 32 171 32 165L42 62Z" fill="var(--primary-color)"/>
+                        <path d="M72 88H108C122 88 132 98 132 110C132 122 122 132 108 132H72V88ZM72 132V150" stroke="var(--bg-color)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
             </div>
             <h2 class="text-3xl font-extrabold text-[#2E1A06] tracking-tight font-heading">Selamat Datang</h2>
             <p class="text-xs text-[#2E1A06] font-bold uppercase tracking-wider mt-2 flex items-center justify-center gap-1.5 bg-[#FBF6EC] px-4 py-2 rounded-full w-max mx-auto border border-[#D4A017]/20">

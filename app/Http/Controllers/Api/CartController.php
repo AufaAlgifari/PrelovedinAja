@@ -50,9 +50,13 @@ class CartController extends Controller
             ->exists();
 
         if ($exists) {
+            $existingCart = Cart::where('user_id', $request->user()->id)
+                ->where('product_id', $product->id)
+                ->first();
             return response()->json([
                 'message' => 'Produk ini sudah ada di keranjang kamu.',
-            ], 422);
+                'cart'    => $existingCart->load('product'),
+            ], 200);
         }
 
         $cart = Cart::create([

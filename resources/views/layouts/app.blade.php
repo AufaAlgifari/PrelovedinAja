@@ -276,54 +276,115 @@
         };
 
         // Cart utilities
-        window.getCart = function() {
-            return JSON.parse(localStorage.getItem('preloved_cart') || '[]');
-        };
-
-        window.updateCartBadge = function() {
-            const cart = window.getCart();
+        window.updateCartBadge = async function() {
+            const token = localStorage.getItem('preloved_token');
             const badge = document.getElementById('cart-badge');
             const mobileBadge = document.getElementById('mobile-cart-badge');
-            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-
-            if (badge) {
-                badge.textContent = totalItems;
-                if (totalItems > 0) {
-                    badge.classList.remove('scale-0');
-                    badge.classList.add('scale-100');
-                } else {
+            
+            if (!token) {
+                if (badge) {
+                    badge.textContent = '0';
                     badge.classList.remove('scale-100');
                     badge.classList.add('scale-0');
                 }
+                if (mobileBadge) mobileBadge.textContent = '0';
+                return;
             }
-            if (mobileBadge) mobileBadge.textContent = totalItems;
-        };
 
-        window.addToCart = function(product, showFeedback = true) {
-            const cart = window.getCart();
-            const existing = cart.find(item => item.id == product.id);
-            if (existing) {
-                existing.quantity += 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    image: product.image_urls ? product.image_urls[0] : (product.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80'),
-                    seller: product.seller ? product.seller.name : (product.seller_name || 'Mahasiswa Unsoed'),
-                    quantity: 1
+            try {
+                const response = await fetch('/api/v1/cart', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
+                if (response.ok) {
+                    const carts = await response.json();
+                    const totalItems = carts.length;
+                    if (badge) {
+                        badge.textContent = totalItems;
+                        if (totalItems > 0) {
+                            badge.classList.remove('scale-0');
+                            badge.classList.add('scale-100');
+                        } else {
+                            badge.classList.remove('scale-100');
+                            badge.classList.add('scale-0');
+                        }
+                    }
+                    if (mobileBadge) mobileBadge.textContent = totalItems;
+                }
+            } catch (error) {
+                console.error('Error updating cart badge:', error);
             }
-            localStorage.setItem('preloved_cart', JSON.stringify(cart));
-            window.updateCartBadge();
-            if (showFeedback) window.showToast(`Berhasil menambahkan "${product.title}" ke keranjang!`);
         };
 
-        window.removeFromCart = function(productId) {
-            let cart = window.getCart();
-            cart = cart.filter(item => item.id != productId);
-            localStorage.setItem('preloved_cart', JSON.stringify(cart));
-            window.updateCartBadge();
+        window.addToCart = async function(product, showFeedback = true) {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) {
+                window.showToast('Silakan login terlebih dahulu untuk menambahkan barang ke keranjang.', 'error');
+                setTimeout(() => {
+                    window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.pathname);
+                }, 1000);
+                return false;
+            }
+
+            try {
+                const response = await fetch('/api/v1/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        product_id: product.id
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    await window.updateCartBadge();
+                    if (showFeedback) {
+                        window.showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!');
+                    }
+                    return true;
+                } else {
+                    window.showToast(data.message || 'Gagal menambahkan produk ke keranjang.', 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                window.showToast('Terjadi kesalahan saat menambahkan ke keranjang.', 'error');
+                return false;
+            }
+        };
+
+        window.removeFromCart = async function(cartId) {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return false;
+
+            try {
+                const response = await fetch(`/api/v1/cart/${cartId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    await window.updateCartBadge();
+                    window.showToast(data.message || 'Item berhasil dihapus dari keranjang.');
+                    return true;
+                } else {
+                    window.showToast(data.message || 'Gagal menghapus item.', 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error removing from cart:', error);
+                return false;
+            }
         };
 
         // Helpers to show/hide elements overriding Tailwind utility classes

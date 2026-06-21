@@ -98,86 +98,100 @@
 </div>
 
 <script>
-    function renderCart() {
-        const cart = window.getCart();
+    let loadedCartItems = [];
+
+    async function renderCart() {
+        const token = localStorage.getItem('preloved_token');
         const container = document.getElementById('cart-container');
         const emptyState = document.getElementById('cart-empty-state');
         const itemsList = document.getElementById('cart-items-list');
 
-        if(cart.length === 0) {
+        if (!token) {
             container.classList.add('hidden');
             emptyState.classList.remove('hidden');
             return;
         }
 
-        container.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-        itemsList.innerHTML = '';
+        try {
+            const response = await fetch('/api/v1/cart', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-        let subtotal = 0;
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data keranjang');
+            }
 
-        cart.forEach(item => {
-            const itemPrice = parseInt(item.price);
-            const totalItemPrice = itemPrice * item.quantity;
-            subtotal += totalItemPrice;
+            loadedCartItems = await response.json();
 
-            const priceFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(itemPrice);
-
-            const row = document.createElement('div');
-            row.className = "bg-[#F5E4B0] p-5 rounded-3xl border border-[#D4A017]/25 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 card-premium";
-            row.innerHTML = `
-                <div class="flex items-center gap-4 w-full sm:w-auto text-[#2E1A06]">
-                    <img src="${item.image}" alt="${item.title}" class="w-20 h-20 rounded-2xl object-cover border border-[#D4A017]/20 bg-[#FBF6EC] flex-shrink-0">
-                    <div>
-                        <span class="text-[9px] text-[#7A4A10] font-bold uppercase tracking-wider block mb-1">👤 Penjual: ${item.seller}</span>
-                        <h4 class="font-extrabold text-[#2E1A06] text-sm hover:text-[#7A4A10] transition max-w-sm line-clamp-1 font-heading">${item.title}</h4>
-                        <p class="text-sm font-black text-[#7A4A10] mt-1">${priceFormatted}</p>
-                    </div>
-                </div>
-                
-                <!-- Quantity & Delete -->
-                <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-[#D4A017]/10 sm:border-t-0 pt-3 sm:pt-0">
-                    <div class="flex items-center border border-[#D4A017]/30 bg-[#FBF6EC] rounded-xl p-1">
-                        <button onclick="changeQty(${item.id}, -1)" class="w-8 h-8 flex items-center justify-center text-[#7A4A10] hover:text-[#2E1A06] font-bold focus:outline-none transition rounded-lg hover:bg-[#F5E4B0]">-</button>
-                        <span class="px-3 text-xs font-extrabold text-[#2E1A06]">${item.quantity}</span>
-                        <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 flex items-center justify-center text-[#7A4A10] hover:text-[#2E1A06] font-bold focus:outline-none transition rounded-lg hover:bg-[#F5E4B0]">+</button>
-                    </div>
-                    
-                    <button onclick="deleteItem(${item.id})" class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-2.5 rounded-xl transition-all flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            itemsList.appendChild(row);
-        });
-
-        // Set summary
-        const subtotalFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(subtotal);
-        document.getElementById('summary-subtotal').textContent = subtotalFormatted;
-        document.getElementById('summary-total').textContent = subtotalFormatted;
-    }
-
-    function changeQty(productId, delta) {
-        const cart = window.getCart();
-        const item = cart.find(item => item.id == productId);
-        if(item) {
-            item.quantity += delta;
-            if(item.quantity <= 0) {
-                deleteItem(productId);
+            if (loadedCartItems.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
                 return;
             }
-            localStorage.setItem('preloved_cart', JSON.stringify(cart));
-            window.updateCartBadge();
-            renderCart();
+
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            itemsList.innerHTML = '';
+
+            let subtotal = 0;
+
+            loadedCartItems.forEach(item => {
+                const product = item.product;
+                if (!product) return;
+
+                const itemPrice = parseInt(product.price);
+                subtotal += itemPrice;
+
+                const priceFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(itemPrice);
+
+                const image = product.image_urls && product.image_urls.length > 0 
+                    ? product.image_urls[0] 
+                    : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
+                
+                const sellerName = product.seller ? product.seller.name : 'Mahasiswa Unsoed';
+
+                const row = document.createElement('div');
+                row.className = "bg-[#F5E4B0] p-5 rounded-3xl border border-[#D4A017]/25 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 card-premium";
+                row.innerHTML = `
+                    <div class="flex items-center gap-4 w-full sm:w-auto text-[#2E1A06]">
+                        <img src="${image}" alt="${product.title}" class="w-20 h-20 rounded-2xl object-cover border border-[#D4A017]/20 bg-[#FBF6EC] flex-shrink-0">
+                        <div>
+                            <span class="text-[9px] text-[#7A4A10] font-bold uppercase tracking-wider block mb-1">👤 Penjual: ${sellerName}</span>
+                            <h4 class="font-extrabold text-[#2E1A06] text-sm hover:text-[#7A4A10] transition max-w-sm line-clamp-1 font-heading">${product.title}</h4>
+                            <p class="text-sm font-black text-[#7A4A10] mt-1">${priceFormatted}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Delete Button Only -->
+                    <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-[#D4A017]/10 sm:border-t-0 pt-3 sm:pt-0">
+                        <button onclick="deleteItem(${item.id})" class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-2.5 rounded-xl transition-all flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                itemsList.appendChild(row);
+            });
+
+            // Set summary
+            const subtotalFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(subtotal);
+            document.getElementById('summary-subtotal').textContent = subtotalFormatted;
+            document.getElementById('summary-total').textContent = subtotalFormatted;
+
+        } catch (error) {
+            console.error('Error rendering cart:', error);
+            container.classList.add('hidden');
+            emptyState.classList.remove('hidden');
         }
     }
 
-    function deleteItem(productId) {
-        window.removeFromCart(productId);
-        window.showToast('Item berhasil dihapus dari keranjang.');
-        renderCart();
+    async function deleteItem(cartId) {
+        await window.removeFromCart(cartId);
+        await renderCart();
     }
 
     async function triggerCheckout() {
@@ -186,20 +200,17 @@
         if(!user || !token) {
             window.showToast('Silakan login terlebih dahulu untuk checkout.', 'error');
             setTimeout(() => {
-                window.location.href = "{{ route('login') }}";
+                window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.pathname);
             }, 1000);
             return;
         }
 
-        const cart = window.getCart();
-        if (cart.length === 0) {
+        if (loadedCartItems.length === 0) {
             window.showToast('Keranjang belanja Anda kosong.', 'error');
             return;
         }
 
-        // Untuk Phase 1, kita arahkan ke halaman checkout produk pertama di cart atau mock
-        // Karena spec minta checkout/{product}, kita ambil item pertama saja sebagai contoh
-        window.location.href = `/checkout/${cart[0].id}`;
+        window.location.href = "{{ route('checkout') }}";
     }
 
     function closeCheckoutModal() {
