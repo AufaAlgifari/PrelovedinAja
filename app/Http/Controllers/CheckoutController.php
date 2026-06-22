@@ -4,92 +4,90 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Cart;
 use Illuminate\Http\Request;
-use App\Services\MidtransService;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
-    protected $midtransService;
-
-    public function __construct(MidtransService $midtransService)
-    {
-        $this->midtransService = $midtransService;
-    }
-
     /**
-     * Display the checkout page for a specific product.
+     * Display the manual checkout page for a specific product.
      * 
      * @param Product $product
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function index(Product $product)
+    public function show(Product $product)
     {
-        return view('checkout', compact('product'));
+        // Hanya izinkan checkout jika produk masih Available
+        if (!$product->isAvailable()) {
+            return redirect()->route('home')->with('error', 'Produk ini sudah terjual atau dipesan oleh pengguna lain.');
+        }
+
+        $user = auth()->user();
+
+        // Jika tidak login, asumsikan user 1 untuk kemudahan demo (atau redirect)
+        if (!$user) {
+            $user = \App\Models\User::first();
+        }
+
+        return view('checkout.index', compact('product', 'user'));
     }
 
     /**
-     * Process payment and generate Snap Token.
+     * Process checkout form, save transaction and update product status.
+     * 
+     * @param Request $request
+     * @param Product $product
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function processPayment(Request $request, Product $product)
+    public function store(Request $request, Product $product)
     {
+        $buyerId = $request->input('buyer_id');
         $user = auth()->user();
 
-        if (!$user) {
-            $user = \App\Models\User::first(); 
+        if (!$user && $buyerId) {
+            $user = \App\Models\User::find($buyerId);
         }
 
-        $orderIdMidtrans = 'PRELOVED-' . time() . '-' . Str::random(5);
+        if (!$user) {
+            $user = \App\Models\User::first();
+        }
 
-        $transaction = Transaction::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'cart_id' => null,
-            'transaction_id' => 'TXN-' . strtoupper(Str::random(10)),
-            'order_id_midtrans' => $orderIdMidtrans,
-            'amount' => $product->price,
-            'status' => 'pending',
+        // Validasi ketersediaan produk (mencegah race condition)
+        if (!$product->isAvailable()) {
+            return redirect()->route('home')->with('error', 'Maaf, produk ini baru saja dibeli oleh pengguna lain.');
+        }
+
+        $request->validate([
+            'metode_pengiriman' => 'required|in:cod,do',
+            'alamat_pengiriman' => 'required_if:metode_pengiriman,do',
+            'metode_pembayaran' => 'required|in:qris,dana,gopay,shopeepay',
         ]);
 
-        // Midtrans Parameters
-        $params = [
-            'transaction_details' => [
-                'order_id' => $orderIdMidtrans,
-                'gross_amount' => (int) $product->price,
-            ],
-            'customer_details' => [
-                'first_name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone_number ?? '081234567890',
-            ],
-            'item_details' => [
-                [
-                    'id' => $product->id,
-                    'price' => (int) $product->price,
-                    'quantity' => 1,
-                    'name' => Str::limit($product->title, 50),
-                ]
-            ],
-        ];
+        // 1. Simpan data transaksi
+        $transaction = Transaction::create([
+            'user_id' => $user->id,
+            'buyer_id' => $user->id,
+            'seller_id' => $product->seller_id,
+            'product_id' => $product->id,
+            'transaction_id' => 'TXN-' . strtoupper(Str::random(10)),
+            'order_id_midtrans' => null, // Tidak dipakai lagi
+            'amount' => $product->price,
+            'status' => 'pending',
+            'metode_pengiriman' => $request->metode_pengiriman,
+            'alamat_pengiriman' => $request->metode_pengiriman === 'do' ? $request->alamat_pengiriman : null,
+            'metode_pembayaran' => $request->metode_pembayaran,
+        ]);
 
-        try {
-            // Generate Token
-            $snapToken = $this->midtransService->getSnapToken($params);
+        // 2. Ubah status produk menjadi Terjual ('Sold')
+        $product->update([
+            'status' => 'Sold'
+        ]);
 
-            // Update Transaction
-            $transaction->update([
-                'snap_token' => $snapToken
-            ]);
+        // 3. Hapus produk ini dari keranjang semua user
+        Cart::where('product_id', $product->id)->delete();
 
-            // Kembalikan view checkout beserta snap token dan client key
-            return view('checkout', [
-                'product' => $product,
-                'snapToken' => $snapToken,
-                'clientKey' => config('midtrans.client_key')
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Midtrans Error: ' . $e->getMessage());
-        }
+        // 4. Redirect ke halaman riwayat pesanan (transactions.history) dengan notifikasi
+        return redirect()->route('transactions.history')->with('success', 'Pemesanan berhasil! Silakan hubungi penjual untuk koordinasi pengiriman.');
     }
 }

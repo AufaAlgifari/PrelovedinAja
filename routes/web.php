@@ -471,10 +471,10 @@ Route::get('/chat', function () {
 })->name('chat.index');
 
 // ── Checkout (Beli Sekarang) ────────────────────────────────
-Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
+Route::get('/checkout/{product}', [CheckoutController::class, 'show'])
     ->name('checkout.index');
-Route::post('/checkout/{product}/process', [CheckoutController::class, 'processPayment'])
-    ->name('checkout.process');
+Route::post('/checkout/{product}', [CheckoutController::class, 'store'])
+    ->name('checkout.store');
 
 // Halaman Profil Mahasiswa
 Route::get('/profile', function () {
