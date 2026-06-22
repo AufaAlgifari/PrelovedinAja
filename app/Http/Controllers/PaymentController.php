@@ -27,8 +27,19 @@ class PaymentController extends Controller
     {
         $cartItems = $request->user()->carts()->with('product')->get();
         
+        // Proteksi: Cek jika ada produk yang sudah tidak tersedia (terjual/Reserved/Sold)
+        $unavailableCarts = $cartItems->filter(function ($cart) {
+            return !$cart->product || !$cart->product->isAvailable();
+        });
+
+        if ($unavailableCarts->isNotEmpty()) {
+            $unavailableProductIds = $unavailableCarts->pluck('product_id')->toArray();
+            \App\Models\Cart::whereIn('product_id', $unavailableProductIds)->delete();
+            return redirect('/cart')->with('error', 'Beberapa produk di keranjang Anda telah terjual dan dihapus.');
+        }
+
         if ($cartItems->isEmpty()) {
-            return redirect('/cart')->with('error', 'Cart is empty');
+            return redirect('/cart')->with('error', 'Keranjang belanja Anda kosong.');
         }
 
         $totalAmount = $cartItems->sum(function ($cart) {
@@ -46,6 +57,17 @@ class PaymentController extends Controller
         $user = $request->user();
         $cartItems = $user->carts()->with('product')->get();
         
+        // Proteksi: Cek jika ada produk yang sudah tidak tersedia (terjual/Reserved/Sold)
+        $unavailableCarts = $cartItems->filter(function ($cart) {
+            return !$cart->product || !$cart->product->isAvailable();
+        });
+
+        if ($unavailableCarts->isNotEmpty()) {
+            $unavailableProductIds = $unavailableCarts->pluck('product_id')->toArray();
+            \App\Models\Cart::whereIn('product_id', $unavailableProductIds)->delete();
+            return response()->json(['error' => 'Beberapa produk di keranjang Anda telah terjual dan dihapus.'], 400);
+        }
+
         if ($cartItems->isEmpty()) {
             return response()->json(['error' => 'Cart is empty'], 400);
         }

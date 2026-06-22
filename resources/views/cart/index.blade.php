@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+@if(session('error'))
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        window.showToast("{{ session('error') }}", 'error');
+    });
+</script>
+@endif
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="border-b border-[#D4A017]/25 pb-5 mb-8 text-[#2E1A06]">
         <h1 class="text-3xl font-extrabold tracking-tight font-heading">Keranjang Belanja</h1>
@@ -122,6 +129,21 @@
 
             if (!response.ok) {
                 throw new Error('Gagal mengambil data keranjang');
+            }
+
+            // Tampilkan notifikasi jika ada produk yang terhapus karena sudah terjual
+            const removedHeader = response.headers.get('X-Removed-Items');
+            if (removedHeader) {
+                try {
+                    const removedTitles = JSON.parse(removedHeader);
+                    if (removedTitles && removedTitles.length > 0) {
+                        removedTitles.forEach(title => {
+                            window.showToast(`Produk "${title}" sudah terjual dan dihapus dari keranjang Anda.`, 'error');
+                        });
+                    }
+                } catch (e) {
+                    console.error('Gagal memproses data produk terhapus:', e);
+                }
             }
 
             loadedCartItems = await response.json();
