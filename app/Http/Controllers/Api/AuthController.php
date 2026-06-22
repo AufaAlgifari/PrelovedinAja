@@ -38,13 +38,16 @@ class AuthController extends Controller
         // Simpan data ke tabel users
         $user = User::create($data);
 
+        // Memicu pengiriman email verifikasi bawaan Laravel
+        event(new \Illuminate\Auth\Events\Registered($user));
+
         // Sync web session login
         auth('web')->login($user);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Registrasi berhasil.',
+            'message' => 'Registrasi berhasil. Silakan cek email Anda untuk link verifikasi.',
             'token'   => $token,
             'user'    => $user,
         ], 201);
