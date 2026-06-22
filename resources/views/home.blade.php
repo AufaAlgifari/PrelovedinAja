@@ -674,6 +674,19 @@
             }
         });
         
+        // Redirect logic for start shopping/sell buttons if guest
+        const isLoggedIn = !!localStorage.getItem('preloved_token');
+
+        if (btnMulaiBelanja) {
+            btnMulaiBelanja.href = isLoggedIn ? '#catalog-section' : '{{ route("login") }}';
+        }
+        if (btnJualBarang) {
+            btnJualBarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+        }
+        if (btnMulaiJualSekarang) {
+            btnMulaiJualSekarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+        }
+        
         const navSearch = document.getElementById('navbar-search');
         const mobileNavSearch = document.getElementById('mobile-navbar-search');
 

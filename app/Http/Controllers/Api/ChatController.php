@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\Message;
+use App\Models\User;
+use App\Notifications\NewChatMessageNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -103,6 +105,15 @@ class ChatController extends Controller
             'pesan'     => $data['message'], // Kolom 'pesan' di ERD
             'is_read'   => false,
         ]);
+
+        // Set sender relation to avoid extra query
+        $message->setRelation('sender', $request->user());
+
+        // Kirim notifikasi ke penerima
+        $receiver = User::find($receiverId);
+        if ($receiver) {
+            $receiver->notify(new NewChatMessageNotification($message));
+        }
 
         return response()->json([
             'message' => 'Pesan terkirim.',

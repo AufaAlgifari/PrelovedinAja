@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Cart;
+use App\Notifications\ProductListedNotification;
+use App\Notifications\CartProductPriceChangedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -106,6 +109,9 @@ class ProductController extends Controller
             'image_urls'  => $imageUrls,
         ]);
 
+        // Kirim notifikasi ke penjual
+        $request->user()->notify(new ProductListedNotification($product));
+
         return response()->json([
             'message' => 'Produk berhasil ditambahkan.',
             'product' => $product,
@@ -135,7 +141,19 @@ class ProductController extends Controller
             'category'    => 'sometimes|string|max:100',
         ]);
 
+        $oldPrice = $product->price;
         $product->update($data);
+        $newPrice = $product->fresh()->price;
+
+        // Jika harga berubah, beri tahu semua user yang memiliki produk ini di keranjang mereka
+        if (isset($data['price']) && (int)$oldPrice !== (int)$newPrice) {
+            $carts = Cart::where('product_id', $product->id)->with('user')->get();
+            foreach ($carts as $cart) {
+                if ($cart->user) {
+                    $cart->user->notify(new CartProductPriceChangedNotification($product, $oldPrice, $newPrice));
+                }
+            }
+        }
 
         return response()->json([
             'message' => 'Produk berhasil diperbarui.',
