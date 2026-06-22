@@ -75,6 +75,27 @@
                     </div>
                 </div>
 
+                <!-- Lokasi Fakultas -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-black text-[#2E1A06] uppercase tracking-wider font-heading">Lokasi Fakultas</h3>
+                    <select id="faculty-filter" onchange="handleFacultyChange(event)"
+                            class="w-full px-3 py-2.5 bg-[#FBF6EC] border border-[#D4A017]/35 rounded-xl text-xs font-semibold text-[#2E1A06] focus:border-[#7A4A10] focus:outline-none">
+                        <option value="All">Semua Fakultas</option>
+                        <option value="Fakultas Pertanian">Fakultas Pertanian</option>
+                        <option value="Fakultas Biologi">Fakultas Biologi</option>
+                        <option value="Fakultas Ekonomi dan Bisnis">Fakultas Ekonomi dan Bisnis</option>
+                        <option value="Fakultas Peternakan">Fakultas Peternakan</option>
+                        <option value="Fakultas Hukum">Fakultas Hukum</option>
+                        <option value="Fakultas Ilmu Sosial dan Ilmu Politik">Fakultas Ilmu Sosial dan Ilmu Politik</option>
+                        <option value="Fakultas Kedokteran">Fakultas Kedokteran</option>
+                        <option value="Fakultas Teknik">Fakultas Teknik</option>
+                        <option value="Fakultas Ilmu-ilmu Kesehatan">Fakultas Ilmu-ilmu Kesehatan</option>
+                        <option value="Fakultas Ilmu Budaya">Fakultas Ilmu Budaya</option>
+                        <option value="Fakultas MIPA">Fakultas MIPA</option>
+                        <option value="Fakultas Perikanan dan Ilmu Kelautan">Fakultas Perikanan dan Ilmu Kelautan</option>
+                    </select>
+                </div>
+
                 <!-- Rentang Harga -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-black text-[#2E1A06] uppercase tracking-wider font-heading">Rentang Harga</h3>
@@ -161,8 +182,10 @@
     let minPrice = null;
     let maxPrice = null;
     let selectedCondition = null;
+    let selectedFaculty = 'All';
     let currentPage = 1;
     const itemsPerPage = 6;
+    let renderedProductsCache = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         // Read URL parameters on load
@@ -191,6 +214,12 @@
     function clearSearchFilter() {
         searchQuery = '';
         document.getElementById('page-search').value = '';
+        
+        // Reset faculty filter
+        selectedFaculty = 'All';
+        const facultySelect = document.getElementById('faculty-filter');
+        if (facultySelect) facultySelect.value = 'All';
+
         currentPage = 1;
         renderProducts();
     }
@@ -209,6 +238,18 @@
         document.getElementById('price-max').value = '';
         minPrice = null;
         maxPrice = null;
+        
+        // Reset faculty filter
+        selectedFaculty = 'All';
+        const facultySelect = document.getElementById('faculty-filter');
+        if (facultySelect) facultySelect.value = 'All';
+
+        currentPage = 1;
+        renderProducts();
+    }
+
+    function handleFacultyChange(e) {
+        selectedFaculty = e.target.value;
         currentPage = 1;
         renderProducts();
     }
@@ -279,6 +320,37 @@
         }
     }
 
+    function facultyMatches(sellerFaculty, selectedFaculty) {
+        if (!sellerFaculty) return false;
+        sellerFaculty = sellerFaculty.trim().toLowerCase();
+        selectedFaculty = selectedFaculty.trim().toLowerCase();
+
+        // Direct match
+        if (sellerFaculty === selectedFaculty) return true;
+
+        // Handle abbreviations & prefixes (e.g. FISIP <-> Fakultas Ilmu Sosial dan Ilmu Politik)
+        if (selectedFaculty.includes('sosial') && selectedFaculty.includes('politik') && sellerFaculty === 'fisip') {
+            return true;
+        }
+        if (sellerFaculty.includes('sosial') && sellerFaculty.includes('politik') && selectedFaculty === 'fisip') {
+            return true;
+        }
+
+        // Strip "fakultas " prefix to compare
+        let cleanSelected = selectedFaculty.replace(/^fakultas\s+/, '');
+        let cleanSeller = sellerFaculty.replace(/^fakultas\s+/, '');
+
+        if (cleanSelected === cleanSeller) return true;
+
+        // Check if one contains another
+        if (cleanSelected.includes(cleanSeller) || cleanSeller.includes(cleanSelected)) return true;
+
+        // Handle "Fakultas Ilmu-ilmu Kesehatan" <-> "Ilmu Kesehatan"
+        if (cleanSelected.includes('kesehatan') && cleanSeller.includes('kesehatan')) return true;
+
+        return false;
+    }
+
     function renderProducts() {
         const grid = document.getElementById('product-grid');
         const emptyState = document.getElementById('empty-state');
@@ -308,7 +380,8 @@
             seller: p.seller || { name: 'Anda', rating_cache: 5.0, unsoed_faculty: 'Mhs', unsoed_major: 'Unsoed' }
         }));
 
-        let allProducts = [...formattedCustom, ...formattedDb, ...mockProducts];
+        renderedProductsCache = [...formattedCustom, ...formattedDb, ...mockProducts];
+        let allProducts = renderedProductsCache;
 
         // 1. Search Query
         if (searchQuery.trim() !== '') {
@@ -341,6 +414,14 @@
                 else if (displayCondition === 'Well Used') displayCondition = 'Usang';
                 
                 return displayCondition === selectedCondition;
+            });
+        }
+
+        // 5. Faculty filter
+        if (selectedFaculty !== 'All') {
+            allProducts = allProducts.filter(p => {
+                const sellerFaculty = p.seller && p.seller.unsoed_faculty ? p.seller.unsoed_faculty : '';
+                return facultyMatches(sellerFaculty, selectedFaculty);
             });
         }
 
@@ -414,7 +495,7 @@
                     <!-- Baris 3: Harga + Keranjang -->
                     <div class="flex items-center justify-between mt-1">
                         <span class="text-base font-extrabold text-[#E8400C]">${formattedPrice}</span>
-                        <button onclick="quickAddCart(event, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
+                        <button onclick="quickAddCart(event, ${p.id})"
                                 class="p-2 bg-[#FBF6EC] border border-[#2E1A06]/20 text-[#2E1A06] hover:bg-[#2E1A06] hover:text-white rounded-xl transition-all duration-200 flex items-center justify-center shrink-0 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.116 60.116 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
@@ -479,11 +560,12 @@
         container.appendChild(nextBtn);
     }
 
-    function quickAddCart(event, product) {
+    async function quickAddCart(event, productId) {
         event.preventDefault();
         event.stopPropagation();
-        window.addToCart(product, false);
-        window.location.href = "{{ route('cart.index') }}";
+        const product = renderedProductsCache.find(x => x.id == productId);
+        if (!product) return;
+        await window.addToCart(product, true);
     }
 </script>
 @endsection

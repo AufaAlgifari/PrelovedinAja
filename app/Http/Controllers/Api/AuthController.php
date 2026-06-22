@@ -38,6 +38,9 @@ class AuthController extends Controller
         // Simpan data ke tabel users
         $user = User::create($data);
 
+        // Sync web session login
+        auth('web')->login($user);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -53,6 +56,9 @@ class AuthController extends Controller
         $data = $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
+            'remember' => 'required|accepted',
+        ], [
+            'remember.accepted' => 'Centang ingat saya',
         ]);
 
         $user = User::where('email', $data['email'])->first();
@@ -66,6 +72,9 @@ class AuthController extends Controller
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Sync web session login
+        auth('web')->login($user, true);
+
         return response()->json([
             'message' => 'Login berhasil.',
             'token'   => $token,
@@ -77,6 +86,9 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
+        // Sync web session logout
+        auth('web')->logout();
 
         return response()->json(['message' => 'Logout berhasil.']);
     }

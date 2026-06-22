@@ -45,14 +45,24 @@
                     
                     @php
                         $badgeClass = 'bg-[#FBF6EC] text-[#2E1A06] border-[#D4A017]/35';
-                        if($product->condition === 'New') $badgeClass = 'bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]';
-                        else if($product->condition === 'Like New') $badgeClass = 'bg-[#D4A017] text-[#2E1A06] border-[#D4A017]';
-                        else if($product->condition === 'Good') $badgeClass = 'bg-[#FBF6EC] text-[#7A4A10] border-[#D4A017]/30';
-                        else if($product->condition === 'Well Used') $badgeClass = 'bg-transparent text-[#2E1A06] border-[#2E1A06]/30';
+                        $displayCond = $product->condition;
+                        if($product->condition === 'New') {
+                            $badgeClass = 'bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]';
+                            $displayCond = 'Baru';
+                        } else if($product->condition === 'Like New') {
+                            $badgeClass = 'bg-[#D4A017] text-[#2E1A06] border-[#D4A017]';
+                            $displayCond = 'Baru';
+                        } else if($product->condition === 'Good') {
+                            $badgeClass = 'bg-[#FBF6EC] text-[#7A4A10] border-[#D4A017]/30';
+                            $displayCond = 'Bekas';
+                        } else if($product->condition === 'Well Used') {
+                            $badgeClass = 'bg-transparent text-[#2E1A06] border-[#2E1A06]/30';
+                            $displayCond = 'Usang';
+                        }
                     @endphp
                     
                     <span class="inline-block px-3 py-1.5 border {{ $badgeClass }} text-[10px] font-extrabold uppercase tracking-wider rounded-full">
-                        ✨ Kondisi: {{ $product->condition }}
+                        ✨ Kondisi: {{ $displayCond }}
                     </span>
                 </div>
 
