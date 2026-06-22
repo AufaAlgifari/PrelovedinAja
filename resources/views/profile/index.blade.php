@@ -1,8 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-[calc(100vh-80px)] py-12 px-4 sm:px-6 lg:px-8 bg-brand-50 transition-colors duration-300">
-    <div class="max-w-2xl mx-auto bg-brand-100 rounded-3xl border border-brand-500/25 shadow-xl p-6 sm:p-10 relative overflow-hidden transition-colors duration-300">
+<div class="py-12 px-4 sm:px-6 lg:px-8 bg-brand-50 transition-colors duration-300 flex flex-col items-center">
+    
+    <!-- Notification Alert Banner (Fixed Overlay below Navbar) -->
+    <div id="success-alert" class="hidden fixed top-[96px] left-1/2 transform -translate-x-1/2 z-50 w-full max-w-2xl px-4 transition-all duration-300 scale-95 opacity-0">
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-3 shadow-xl">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="text-xs font-bold text-emerald-850">Profil Anda berhasil diperbarui!</div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-2xl bg-brand-100 rounded-3xl border border-brand-500/25 shadow-xl p-6 sm:p-10 relative overflow-hidden transition-colors duration-300">
         
         <!-- Background graphics -->
         <div class="absolute -top-24 -left-24 w-48 h-48 bg-brand-500/5 rounded-full blur-3xl"></div>
@@ -13,10 +24,6 @@
                 <h1 class="text-3xl font-extrabold tracking-tight font-heading">Profil Saya</h1>
                 <p class="text-xs text-brand-600 mt-1 font-medium">Kelola informasi kartu identitas mahasiswa dan detail kontak Anda.</p>
             </div>
-            
-            <div id="verified-badge-container">
-                <!-- Filled via JS -->
-            </div>
         </div>
 
         <form id="profile-form" class="space-y-6 relative text-brand-900" onsubmit="handleUpdateProfile(event)">
@@ -24,17 +31,8 @@
             
             <!-- Avatar Display & Edit -->
             <div class="flex flex-col sm:flex-row items-center gap-6 p-5 bg-brand-50/50 rounded-2xl border border-brand-500/10">
-                <div class="relative group">
-                    <img id="profile-avatar" class="h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md" 
-                         src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80">
-                    <!-- Overlay klik -->
-                    <label for="avatar-upload" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0"></path>
-                        </svg>
-                    </label>
-                    <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                <div class="relative group" id="avatar-container">
+                    <!-- Filled dynamically via JS -->
                 </div>
 
                 <div class="space-y-1 text-center sm:text-left">
@@ -54,42 +52,42 @@
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Nama Lengkap</label>
                     <input type="text" id="name" required 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:outline-none text-brand-900">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-[5px] text-xs focus:border-brand-600 focus:outline-none text-brand-900">
                 </div>
 
                 <!-- NIM / No Kampus -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">NIM / Nomor Identitas Kampus</label>
                     <input type="text" id="no_camp" disabled 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-2xl text-sm text-brand-900/60 font-bold uppercase cursor-not-allowed">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-[5px] text-xs text-brand-900/60 font-bold uppercase cursor-not-allowed">
                 </div>
 
                 <!-- Faculty -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Fakultas</label>
                     <input type="text" id="faculty" disabled 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-2xl text-sm text-brand-900/60 cursor-not-allowed">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-[5px] text-xs text-brand-900/60 cursor-not-allowed">
                 </div>
 
                 <!-- Major -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Jurusan</label>
                     <input type="text" id="major" disabled 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-2xl text-sm text-brand-900/60 cursor-not-allowed">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-[5px] text-xs text-brand-900/60 cursor-not-allowed">
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Email Kampus</label>
                     <input type="email" id="email" disabled 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-2xl text-sm text-brand-900/60 cursor-not-allowed">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/15 rounded-[5px] text-xs text-brand-900/60 cursor-not-allowed">
                 </div>
 
                 <!-- Phone -->
                 <div>
                     <label class="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Nomor WhatsApp / HP</label>
                     <input type="text" id="phone_number" required 
-                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-2xl text-sm focus:border-brand-600 focus:outline-none text-brand-900">
+                           class="w-full px-4 py-3 bg-brand-50 border border-brand-500/30 rounded-[5px] text-xs focus:border-brand-600 focus:outline-none text-brand-900">
                 </div>
             </div>
 
@@ -119,7 +117,18 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const base64 = e.target.result;
-            document.getElementById('profile-avatar').src = base64;
+            const avatarEl = document.getElementById('profile-avatar');
+            if (avatarEl && avatarEl.tagName === 'IMG') {
+                avatarEl.src = base64;
+            } else {
+                const img = document.createElement('img');
+                img.id = 'profile-avatar';
+                img.className = 'h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md';
+                img.src = base64;
+                if (avatarEl) {
+                    avatarEl.replaceWith(img);
+                }
+            }
             document.getElementById('avatar_url').value = base64;
         };
         reader.readAsDataURL(file);
@@ -143,18 +152,28 @@
         document.getElementById('major').value = user.unsoed_major || 'UNSOED';
         document.getElementById('avatar_url').value = user.avatar_url || '';
 
-        const avatarSrc = user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
-        document.getElementById('profile-avatar').src = avatarSrc;
+        const hasCustomAvatar = user.avatar_url && !user.avatar_url.includes('unsplash.com');
+        const avatarHtml = hasCustomAvatar
+            ? `<img id="profile-avatar" class="h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md" src="${user.avatar_url}">`
+            : `<div id="profile-avatar" class="h-20 w-20 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-4 border-brand-500/50 shadow-md">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+               </div>`;
 
-        const badgeContainer = document.getElementById('verified-badge-container');
-        if (user.is_verified) {
-            badgeContainer.innerHTML = `<span class="bg-[#7A4A10] text-[#FBF6EC] text-xs font-bold px-3 py-1.5 rounded-full border border-brand-500/20">✓ Verified Student</span>`;
-        } else {
-            badgeContainer.innerHTML = `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200">Pending Verification</span>`;
-        }
+        document.getElementById('avatar-container').innerHTML = `
+            ${avatarHtml}
+            <label for="avatar-upload" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0"></path>
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+        `;
     }
 
-    async function handleUpdateProfile(e) {
+    function handleUpdateProfile(e) {
         e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
@@ -162,59 +181,82 @@
         const avatar_url = document.getElementById('avatar_url').value;
         const token = localStorage.getItem('preloved_token');
 
-        const btn = document.getElementById('btn-save');
-        const btnText = document.getElementById('btn-text');
-        btn.disabled = true;
-        btnText.textContent = 'Menyimpan...';
+        // Umpan balik notifikasi sukses instan (alert banner di atas form)
+        const alertEl = document.getElementById('success-alert');
+        if (alertEl) {
+            alertEl.classList.remove('hidden');
+            // Force reflow
+            alertEl.offsetHeight;
+            alertEl.classList.remove('scale-95', 'opacity-0');
+            alertEl.classList.add('scale-100', 'opacity-100');
+            
+            // Sembunyikan otomatis setelah 4 detik
+            setTimeout(() => {
+                alertEl.classList.remove('scale-100', 'opacity-100');
+                alertEl.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => alertEl.classList.add('hidden'), 300);
+            }, 4000);
+        }
 
-        // Selalu update localStorage dulu, apapun kondisi API
-        const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
-        user.name = name;
-        user.phone_number = phone_number;
-        if (avatar_url) user.avatar_url = avatar_url;
 
+        // Coba perbarui localStorage secara aman
         try {
+            const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
+            user.name = name;
+            user.phone_number = phone_number;
+            if (avatar_url) user.avatar_url = avatar_url;
             localStorage.setItem('preloved_user', JSON.stringify(user));
         } catch (storageError) {
-            // Kalau base64 terlalu besar, simpan tanpa foto
-            console.warn('Storage penuh, menyimpan tanpa foto baru.');
-            const userWithoutAvatar = { ...user };
-            delete userWithoutAvatar.avatar_url;
-            localStorage.setItem('preloved_user', JSON.stringify(userWithoutAvatar));
-            window.showToast('Profil disimpan, tapi foto terlalu besar untuk disimpan lokal.', 'error');
-            btn.disabled = false;
-            btnText.textContent = 'Simpan Perubahan';
-            return;
-        }
-
-        // Coba kirim ke API
-        try {
-            const response = await fetch('/api/v1/me', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ name, phone_number, avatar_url: user.avatar_url })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                localStorage.setItem('preloved_user', JSON.stringify(result.user));
+            console.warn('Gagal menyimpan foto secara lokal (Storage penuh).');
+            try {
+                const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
+                user.name = name;
+                user.phone_number = phone_number;
+                delete user.avatar_url;
+                localStorage.setItem('preloved_user', JSON.stringify(user));
+            } catch (innerError) {
+                console.error('Local storage total failure:', innerError);
             }
-        } catch (error) {
-            console.log('API offline, data sudah tersimpan lokal.');
         }
 
-        // Sync navbar/header dan tampilkan hasil
-        if (typeof window.syncAuthHeader === 'function') {
-            window.syncAuthHeader();
+        // Sinkronisasi navbar secara instan
+        try {
+            if (typeof window.syncAuthHeader === 'function') {
+                window.syncAuthHeader();
+            }
+        } catch (syncError) {
+            console.error('Navbar sync error:', syncError);
         }
 
-        window.showToast('Profil berhasil diperbarui!');
-        btn.disabled = false;
-        btnText.textContent = 'Simpan Perubahan';
+        // Kirim perubahan ke API secara asinkron di background
+        fetch('/api/v1/me', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name, phone_number, avatar_url })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Gagal sinkronisasi data ke server');
+        })
+        .then(result => {
+            try {
+                localStorage.setItem('preloved_user', JSON.stringify(result.user));
+                if (typeof window.syncAuthHeader === 'function') {
+                    window.syncAuthHeader();
+                }
+            } catch (e) {
+                console.warn('Gagal menyimpan hasil kembalian server ke lokal:', e);
+            }
+        })
+        .catch(error => {
+            console.log('Background sync profile error:', error);
+        });
     }
 
     window.addEventListener('DOMContentLoaded', () => {

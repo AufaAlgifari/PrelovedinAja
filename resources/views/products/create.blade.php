@@ -92,7 +92,7 @@
 
             <!-- Submit Buttons -->
             <div class="pt-6 border-t border-[#D4A017]/25 flex items-center justify-end gap-3">
-                <a href="{{ route('home') }}" class="px-6 py-3.5 bg-[#FBF6EC] hover:bg-[#F5E4B0] text-[#7A4A10] border border-[#D4A017]/30 font-bold text-xs rounded-2xl transition">
+                <a href="{{ route('products.index') }}" class="px-6 py-3.5 bg-[#FBF6EC] hover:bg-[#F5E4B0] text-[#7A4A10] border border-[#D4A017]/30 font-bold text-xs rounded-2xl transition">
                     Batal
                 </a>
                 <button type="submit" id="btn-upload-submit" class="px-8 py-3.5 text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] font-bold text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2">
@@ -195,6 +195,7 @@
             });
 
             if (response.ok) {
+                localStorage.setItem('has_filled_sell_form', 'true');
                 window.showToast('Barang Anda berhasil dipublikasikan!');
                 setTimeout(() => {
                     window.location.href = "{{ route('home') }}";
@@ -228,6 +229,7 @@
         const customProducts = JSON.parse(localStorage.getItem('preloved_custom_products') || '[]');
         customProducts.unshift(newProductObj);
         localStorage.setItem('preloved_custom_products', JSON.stringify(customProducts));
+        localStorage.setItem('has_filled_sell_form', 'true');
 
         setTimeout(() => {
             btnSubmit.disabled = false;
