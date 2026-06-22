@@ -565,3 +565,13 @@ Route::middleware('auth')->group(function () {
 
 // Midtrans webhook (no auth needed)
 Route::post('/payment/notification', [PaymentController::class, 'handleNotification'])->name('payment.notification');
+
+// Dashboard Penjual (butuh login)
+Route::middleware('auth')->prefix('seller')->name('seller.')->group(function () {
+    Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/products', [SellerController::class, 'products'])->name('products');
+    Route::get('/products/create', [SellerController::class, 'create'])->name('products.create');
+    Route::post('/products', [SellerController::class, 'store'])->name('products.store');
+    Route::delete('/products/{product}', [SellerController::class, 'destroy'])->name('products.destroy');
+    Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+});
