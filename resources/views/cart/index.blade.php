@@ -97,6 +97,9 @@
     </div>
 </div>
 
+<!-- Midtrans Snap SDK -->
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+
 <script>
     let loadedCartItems = [];
 
@@ -197,6 +200,7 @@
     async function triggerCheckout() {
         const user = localStorage.getItem('preloved_user');
         const token = localStorage.getItem('preloved_token');
+        
         if(!user || !token) {
             window.showToast('Silakan login terlebih dahulu untuk checkout.', 'error');
             setTimeout(() => {
@@ -210,7 +214,49 @@
             return;
         }
 
-        window.location.href = "{{ route('checkout') }}";
+        // Call API endpoint to create snap token
+        try {
+            const response = await fetch('/api/v1/payment/cart-checkout', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                window.showToast(data.error || 'Gagal membuat snap token', 'error');
+                return;
+            }
+
+            if (data.snap_token) {
+                // Open Midtrans Snap modal
+                snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        window.showToast('Pembayaran berhasil!', 'success');
+                        window.location.href = "{{ route('payment.success') }}?order_id=" + result.order_id;
+                    },
+                    onPending: function(result) {
+                        window.location.href = "{{ route('payment.pending') }}?order_id=" + result.order_id;
+                    },
+                    onError: function(result) {
+                        window.showToast('Pembayaran gagal', 'error');
+                        window.location.href = "{{ route('payment.error') }}?order_id=" + result.order_id;
+                    },
+                    onClose: function() {
+                        window.showToast('Anda menutup popup pembayaran', 'info');
+                    }
+                });
+            } else {
+                window.showToast('Error: Gagal mendapatkan snap token', 'error');
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            window.showToast('Terjadi kesalahan: ' + error.message, 'error');
+        }
     }
 
     function closeCheckoutModal() {

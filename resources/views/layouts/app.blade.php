@@ -83,7 +83,6 @@
             transform: translateY(-4px);
             box-shadow: 0 15px 30px -5px rgba(122, 74, 16, 0.15);
         }
-        /* Fluid Page Transition & Skeleton animations */
         .page-enter {
             animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -104,12 +103,10 @@
 </head>
 <body class="flex flex-col min-h-screen page-enter">
 
-    <!-- Navbar -->
     <nav class="bg-brand-100/90 backdrop-blur-md border-b border-brand-500/20 sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center gap-4">
                 
-                <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-2.5">
                         <svg class="w-9 h-9 animate-pulse" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,20 +123,14 @@
                     </a>
                 </div>
 
-                <!-- Guest Navigation Links (Desktop) -->
                 <div id="nav-guest-links" class="hidden md:flex items-center gap-10 text-sm font-semibold">
                     <a href="{{ route('home') }}" class="text-brand-900 hover:text-brand-600 transition">Beranda</a>
                     <a href="{{ route('products.index') }}" class="text-brand-900 hover:text-brand-600 transition">Produk</a>
                     <a href="{{ route('about') }}" class="text-brand-900 hover:text-brand-600 transition">Tentang Kami</a>
                 </div>
 
-
-
-                <!-- Right Nav Elements -->
                 <div class="flex items-center gap-2 sm:gap-4">
                     
-
-                    <!-- Keranjang Belanja -->
                     <div id="nav-btn-cart" class="hidden">
                         <a href="{{ route('cart.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -149,7 +140,6 @@
                         </a>
                     </div>
 
-                    <!-- Pesan / Chat Link -->
                     <div id="nav-btn-chat" class="hidden">
                         <a href="{{ route('chat.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,10 +148,8 @@
                         </a>
                     </div>
 
-                    <!-- Notification Bell Container -->
                     <div class="relative hidden sm:block" id="nav-notification-container"></div>
 
-                    <!-- Guest Authentication Actions (Desktop) -->
                     <div id="nav-guest-actions" class="hidden sm:flex items-center gap-3">
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 text-sm font-semibold rounded-full border border-brand-500/30 transition-all duration-200">
                             Masuk
@@ -171,12 +159,9 @@
                         </a>
                     </div>
 
-                    <!-- User Profile Dropdown (Logged-In Only) -->
                     <div class="relative hidden sm:block" id="nav-auth-container">
-                        <!-- Profile avatar and menu dropdown injected via JS -->
-                    </div>
+                        </div>
 
-                    <!-- Mobile Hamburger Menu Button -->
                     <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-brand-600 hover:text-brand-900 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -186,34 +171,24 @@
             </div>
         </div>
 
-        <!-- Mobile Drawer Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-brand-100 border-t border-brand-500/20 px-4 pt-2 pb-6 space-y-4 shadow-inner">
-
-            
-            <!-- Mobile Guest Links (Only Guest) -->
             <div id="mobile-guest-links" class="hidden flex flex-col gap-3 pt-2">
                 <a href="{{ route('home') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Beranda</a>
                 <a href="{{ route('products.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Produk</a>
                 <a href="{{ route('about') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Tentang Kami</a>
             </div>
 
-            <!-- Mobile Notifications Section -->
             <div id="mobile-notifications-section" class="pt-1"></div>
 
-            <!-- Mobile Authentication & Profile Actions -->
             <div class="flex flex-col gap-2.5 pt-1" id="mobile-auth-container">
-                <!-- Injected via JS -->
-            </div>
+                </div>
         </div>
-
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-grow">
         @yield('content')
     </main>
 
-    <!-- Footer -->
     <footer class="bg-[#2E1A06] text-[#FBF6EC]/70 py-16 text-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-[#FBF6EC]/10 pb-12">
             <div>
@@ -254,11 +229,10 @@
         </div>
     </footer>
 
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
-        // Mobile drawer menu
+        // Mobile drawer menu toggle
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
@@ -350,9 +324,7 @@
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        product_id: product.id
-                    })
+                    body: JSON.stringify({ product_id: product.id })
                 });
 
                 const data = await response.json();
@@ -401,7 +373,7 @@
             }
         };
 
-        // Helpers to show/hide elements overriding Tailwind utility classes
+        // UI Helpers
         window.hideNavElement = function(el) {
             if (el) el.style.setProperty('display', 'none', 'important');
         };
@@ -414,42 +386,32 @@
                 }
             }
         };
-        // Sync auth state
+
+        // Sync auth state & dynamic element generation
         window.syncAuthHeader = function() {
             const userJson = localStorage.getItem('preloved_user');
             
-            // Desktop elements
             const navGuestLinks = document.getElementById('nav-guest-links');
             const navGuestActions = document.getElementById('nav-guest-actions');
             const navBtnCart = document.getElementById('nav-btn-cart');
             const navBtnChat = document.getElementById('nav-btn-chat');
             const navAuthContainer = document.getElementById('nav-auth-container');
             
-            // Mobile elements
             const mobileGuestLinks = document.getElementById('mobile-guest-links');
             const mobileAuthContainer = document.getElementById('mobile-auth-container');
-
-            const sellBtn = document.getElementById('nav-btn-sell');
             const notifContainer = document.getElementById('nav-notification-container');
-            const mobileNotifSection = document.getElementById('mobile-notifications-section');
 
             if (userJson) {
                 const user = JSON.parse(userJson);
                 
-                // Show logged-in elements - Always show navigation links
                 window.showNavElement(navGuestLinks, 'flex');
                 window.showNavElement(mobileGuestLinks, 'flex');
-
                 window.showNavElement(navBtnCart, 'block');
                 window.showNavElement(navBtnChat, 'block');
                 window.showNavElement(navAuthContainer);
-                
-                // Hide guest actions (Masuk/Daftar)
                 window.hideNavElement(navGuestActions);
 
                 const verifyBadge = user.is_verified ? '<span class="ml-1.5 bg-brand-600 text-brand-50 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full">Verified</span>' : '';
-                
-                // Check if user has filled sell form (listed any products)
                 const hasFilledSellForm = localStorage.getItem('has_filled_sell_form') === 'true' || JSON.parse(localStorage.getItem('preloved_custom_products') || '[]').length > 0;
                 
                 let dashboardLink = '';
@@ -461,7 +423,7 @@
 
                 let mobileDashboardLink = '';
                 if (user.role === 'admin') {
-                    mobileDashboardLink = `<a href="/admin/dashboard" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Admin Dashboard</a>`;
+                    mobileDashboardLink = `<a href="{{ route('admin.dashboard') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Admin Dashboard</a>`;
                 } else if (hasFilledSellForm) {
                     mobileDashboardLink = `<a href="{{ route('seller.dashboard') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Seller Dashboard</a>`;
                 }
@@ -483,7 +445,7 @@
                             </svg>
                        </div>`;
 
-                // Render Desktop Profile Dropdown
+                // Render Desktop Profile
                 if (navAuthContainer) {
                     navAuthContainer.innerHTML = `
                         <div class="relative inline-block text-left">
@@ -514,12 +476,12 @@
                     `;
                 }
 
-                // Render Desktop Notification Bell Dropdown
+                // Render Desktop Notifications
                 if (notifContainer) {
                     notifContainer.classList.remove('hidden');
                     notifContainer.innerHTML = `
                         <div class="relative inline-block text-left">
-                            <button id="notification-bell-btn" onclick="document.getElementById('notification-dropdown').classList.toggle('hidden'); window.fetchNotifications();" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group focus:outline-none flex items-center justify-center">
+                            <button id="notification-bell-btn" onclick="document.getElementById('notification-dropdown').classList.toggle('hidden');" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group focus:outline-none flex items-center justify-center">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -528,10 +490,10 @@
                             <div id="notification-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-brand-50 border border-brand-500/25 divide-y divide-brand-500/10 focus:outline-none z-50 overflow-hidden">
                                 <div class="px-4 py-3 bg-brand-100/30 flex justify-between items-center">
                                     <span class="text-xs font-extrabold text-brand-900 font-heading">Notifikasi</span>
-                                    <button onclick="event.stopPropagation(); window.markAllNotificationsRead();" class="text-[10px] font-bold text-brand-600 hover:text-brand-900 focus:outline-none">Tandai Semua Dibaca</button>
+                                    <button class="text-[10px] font-bold text-brand-600 hover:text-brand-900 focus:outline-none">Tandai Semua Dibaca</button>
                                 </div>
                                 <div id="notification-items-list" class="max-h-64 overflow-y-auto divide-y divide-brand-500/10">
-                                    <div class="p-4 text-center text-xs text-brand-600 font-medium">Memuat notifikasi...</div>
+                                    <div class="p-4 text-center text-xs text-brand-600 font-medium">Belum ada notifikasi.</div>
                                 </div>
                             </div>
                         </div>
@@ -543,377 +505,82 @@
                     mobileAuthContainer.innerHTML = `
                         <div class="flex items-center gap-3 p-3 bg-brand-50 border border-brand-500/20 rounded-2xl">
                             ${mobileAvatarHtml}
-                            <div class="flex-1">
-                                <p class="text-xs font-extrabold text-brand-900 flex items-center">${user.name} ${verifyBadge}</p>
-                                <p class="text-[9px] text-brand-650">${user.unsoed_faculty || 'Fakultas'} / ${user.unsoed_major || 'UNSOED'}</p>
+                            <div class="text-left flex-1 min-w-0">
+                                <p class="text-sm font-bold text-brand-900 leading-tight truncate">${user.name}</p>
+                                <p class="text-xs font-medium text-brand-650 truncate">${user.unsoed_major || 'UNSOED'}</p>
                             </div>
                         </div>
-                        <a href="{{ route('profile.index') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block mt-3">
-                            Profil Saya
-                        </a>
+                        <div class="flex flex-col gap-1 py-1">
+                            <a href="{{ route('profile.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Profil Saya</a>
+                            <a href="{{ route('transactions.history') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Riwayat Transaksi</a>
+                        </div>
                         ${mobileDashboardLink}
-                        <a href="{{ route('transactions.history') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">
-                            Riwayat Transaksi
-                        </a>
-                        <button onclick="window.logoutUser()" class="w-full text-center py-2.5 bg-rose-50 text-rose-700 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 border border-rose-100">
+                        <button onclick="window.logoutUser()" class="w-full text-center py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold text-xs rounded-xl block">
                             Keluar Akun
                         </button>
                     `;
                 }
 
-                // Initialize Echo and load notifications
-                window.initEcho();
-                window.fetchNotifications();
-
             } else {
-
-                if (sellBtn) sellBtn.classList.add('hidden');
-                if (notifContainer) {
-                    notifContainer.classList.add('hidden');
-                    notifContainer.innerHTML = '';
-                }
-                if (mobileNotifSection) {
-                    mobileNotifSection.innerHTML = '';
-                }
-
-                // Hide logged-in elements
-                window.showNavElement(navGuestLinks);
-                window.showNavElement(navGuestActions);
-                window.showNavElement(mobileGuestLinks, 'flex');
-                
+                // State GUEST (Belum Login)
+                window.showNavElement(navGuestActions, 'flex');
                 window.hideNavElement(navBtnCart);
                 window.hideNavElement(navBtnChat);
                 window.hideNavElement(navAuthContainer);
+                if (notifContainer) window.hideNavElement(notifContainer);
 
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `
-                        <a href="{{ route('login') }}" class="w-full text-center py-3 bg-brand-600 text-brand-50 font-extrabold text-xs rounded-xl shadow-md block">
-                            🔑 Masuk Akun Mahasiswa
+                        <a href="{{ route('login') }}" class="w-full text-center py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 text-sm font-semibold rounded-xl border border-brand-500/30 transition">
+                            Masuk
                         </a>
-                        <a href="{{ route('register') }}" class="w-full text-center py-3 bg-brand-100 text-brand-900 border border-brand-500/30 font-extrabold text-xs rounded-xl block">
-                            🎓 Registrasi Akun Baru
+                        <a href="{{ route('register') }}" class="w-full text-center py-2.5 btn-gradient text-xs font-bold rounded-xl shadow-sm">
+                            Daftar
                         </a>
                     `;
                 }
-
-                window.disconnectEcho();
             }
         };
 
-        window.logoutUser = function() {
-            window.disconnectEcho();
-            localStorage.removeItem('preloved_user');
+        // Fungsi Penanganan Keluar / Logout Akun
+        window.logoutUser = async function() {
+            const token = localStorage.getItem('preloved_token');
+            window.showToast('Sedang keluar...', 'info');
+
+            if (token) {
+                try {
+                    // Kirim request logout ke Backend API Laravel
+                    await fetch('/api/v1/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error saat menghubungi endpoint logout:', error);
+                }
+            }
+
+            // Hapus data autentikasi lokal client-side
             localStorage.removeItem('preloved_token');
+            localStorage.removeItem('preloved_user');
+            localStorage.removeItem('has_filled_sell_form');
+
             window.showToast('Berhasil keluar akun.');
-            window.syncAuthHeader();
+
+            // Alihkan halaman ke Home dan reset state UI
             setTimeout(() => {
                 window.location.href = "{{ route('home') }}";
-            }, 500);
+            }, 800);
         };
 
-        // Real-time notifications and Laravel Echo implementation
-        window.notificationsList = [];
-
-        window.initEcho = function() {
-            const token = localStorage.getItem('preloved_token');
-            if (!token) return;
-
-            if (window.Echo) return;
-
-            if (typeof Echo === 'undefined' || typeof Pusher === 'undefined') {
-                console.warn('Echo or Pusher CDN not loaded yet.');
-                return;
-            }
-
-            window.Pusher = Pusher;
-            window.Echo = new Echo({
-                broadcaster: 'reverb',
-                key: reverbKey || 'preloved_key',
-                wsHost: reverbHost || window.location.hostname,
-                wsPort: parseInt(reverbPort) || 8080,
-                wssPort: parseInt(reverbPort) || 8080,
-                forceTLS: reverbScheme === 'https',
-                enabledTransports: ['ws', 'wss'],
-                authEndpoint: '/api/v1/broadcasting/auth',
-                auth: {
-                    headers: {
-                        Authorization: 'Bearer ' + token
-                    }
-                }
-            });
-
-            const userJson = localStorage.getItem('preloved_user');
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                window.subscribeToUserChannel(user.id);
-            }
-        };
-
-        window.disconnectEcho = function() {
-            if (window.Echo) {
-                window.Echo.disconnect();
-                window.Echo = null;
-            }
-        };
-
-        window.subscribeToUserChannel = function(userId) {
-            if (!window.Echo) return;
-
-            window.Echo.private(`App.Models.User.${userId}`)
-                .notification((notification) => {
-                    console.log('Real-time Notification received:', notification);
-                    
-                    // Show custom toast feedback
-                    window.showToast(notification.message || 'Anda memiliki notifikasi baru.');
-                    
-                    // Subtle sound feedback
-                    try {
-                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioCtx.createOscillator();
-                        const gainNode = audioCtx.createGain();
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioCtx.destination);
-                        oscillator.type = 'sine';
-                        oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
-                        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                        oscillator.start();
-                        oscillator.stop(audioCtx.currentTime + 0.3);
-                    } catch (e) {}
-
-                    // Reload notifications list
-                    window.fetchNotifications();
-                });
-        };
-
-        window.fetchNotifications = async function() {
-            const token = localStorage.getItem('preloved_token');
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/v1/notifications', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Accept': 'application/json'
-                    }
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    window.notificationsList = result.data;
-                    window.renderNotifications();
-                }
-            } catch (e) {
-                console.error('Failed to fetch notifications:', e);
-            }
-        };
-
-        window.renderNotifications = function() {
-            const itemsList = document.getElementById('notification-items-list');
-            const badge = document.getElementById('notification-badge');
-            const mobileContainer = document.getElementById('mobile-notifications-section');
-
-            const unreadNotifications = window.notificationsList.filter(n => !n.read_at);
-            const unreadCount = unreadNotifications.length;
-
-            if (badge) {
-                badge.textContent = unreadCount;
-                if (unreadCount > 0) {
-                    badge.classList.remove('scale-0');
-                    badge.classList.add('scale-100');
-                } else {
-                    badge.classList.remove('scale-100');
-                    badge.classList.add('scale-0');
-                }
-            }
-
-            if (!itemsList) return;
-
-            if (window.notificationsList.length === 0) {
-                itemsList.innerHTML = `
-                    <div class="p-6 text-center text-xs text-brand-650 font-medium flex flex-col items-center gap-1.5">
-                        <svg class="w-8 h-8 text-brand-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>
-                        <span>Belum ada notifikasi baru</span>
-                    </div>
-                `;
-                if (mobileContainer) {
-                    mobileContainer.innerHTML = '';
-                }
-                return;
-            }
-
-            let itemsHtml = '';
-            window.notificationsList.forEach(n => {
-                const data = n.data;
-                const isUnread = !n.read_at;
-                const timeAgo = window.formatTimeAgo(new Date(n.created_at));
-                const bgClass = isUnread ? 'bg-brand-500/10 hover:bg-brand-500/15' : 'hover:bg-brand-100/50';
-                const unreadDot = isUnread ? '<span class="h-2.5 w-2.5 rounded-full bg-brand-600 flex-shrink-0 animate-pulse"></span>' : '';
-                
-                itemsHtml += `
-                    <div onclick="event.stopPropagation(); window.handleNotificationClick('${n.id}', '${data.chat_id || ''}', '${data.product_id || ''}', '${data.report_id || ''}')" 
-                         class="px-4 py-3.5 text-xs cursor-pointer transition duration-150 flex items-start gap-3 border-b border-brand-500/10 ${bgClass}">
-                        <div class="flex-grow">
-                            <p class="font-extrabold text-brand-900 flex items-center justify-between gap-2">
-                                <span>${data.title || 'Pemberitahuan'}</span>
-                                <span class="text-[9px] font-normal text-brand-600 flex-shrink-0">${timeAgo}</span>
-                            </p>
-                            <p class="text-brand-700 mt-1 leading-relaxed font-semibold">${data.message}</p>
-                        </div>
-                        ${unreadDot}
-                    </div>
-                `;
-            });
-
-            itemsList.innerHTML = itemsHtml;
-
-            // Render in Mobile Drawer
-            if (mobileContainer) {
-                let mobileHtml = `
-                    <div class="px-4 py-3 bg-brand-50/50 border border-brand-500/20 rounded-2xl shadow-sm">
-                        <div class="flex justify-between items-center mb-2 px-1">
-                            <span class="text-xs font-black text-brand-900 font-heading">Notifikasi (${unreadCount} Baru)</span>
-                            ${unreadCount > 0 ? `<button onclick="window.markAllNotificationsRead()" class="text-[10px] font-extrabold text-brand-600 hover:underline">Baca Semua</button>` : ''}
-                        </div>
-                        <div class="divide-y divide-brand-500/10 max-h-48 overflow-y-auto">
-                `;
-                window.notificationsList.slice(0, 5).forEach(n => {
-                    const data = n.data;
-                    const isUnread = !n.read_at;
-                    const timeAgo = window.formatTimeAgo(new Date(n.created_at));
-                    const fontClass = isUnread ? 'font-bold' : 'font-normal';
-                    mobileHtml += `
-                        <div onclick="window.handleNotificationClick('${n.id}', '${data.chat_id || ''}', '${data.product_id || ''}', '${data.report_id || ''}')" 
-                             class="py-2.5 cursor-pointer flex justify-between items-start gap-2">
-                            <div class="flex-grow">
-                                <p class="text-xs ${fontClass} text-brand-900 leading-tight">${data.title}</p>
-                                <p class="text-[10px] text-brand-700 truncate max-w-[220px] mt-0.5">${data.message}</p>
-                            </div>
-                            <span class="text-[8px] text-brand-600 flex-shrink-0 mt-0.5">${timeAgo}</span>
-                        </div>
-                    `;
-                });
-                mobileHtml += `
-                        </div>
-                    </div>
-                `;
-                mobileContainer.innerHTML = mobileHtml;
-            }
-        };
-
-        window.handleNotificationClick = async function(id, chatId, productId, reportId) {
-            // Mark notification as read
-            await window.markNotificationRead(id);
-
-            // Close notification dropdown
-            const dropdown = document.getElementById('notification-dropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-
-            // Redirect to appropriate screen
-            if (chatId) {
-                window.location.href = `/chats?chat_id=${chatId}`;
-            } else if (productId) {
-                window.location.href = `/products/${productId}`;
-            } else if (reportId) {
-                const userJson = localStorage.getItem('preloved_user');
-                if (userJson) {
-                    const user = JSON.parse(userJson);
-                    if (user.role === 'admin') {
-                        window.location.href = `/admin/dashboard?report_id=${reportId}`;
-                    } else {
-                        window.location.href = `/profile`;
-                    }
-                }
-            } else {
-                window.location.reload();
-            }
-        };
-
-        window.markNotificationRead = async function(id) {
-            const token = localStorage.getItem('preloved_token');
-            if (!token) return;
-
-            try {
-                const response = await fetch(`/api/v1/notifications/${id}/read`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    const notification = window.notificationsList.find(n => n.id === id);
-                    if (notification) {
-                        notification.read_at = new Date().toISOString();
-                    }
-                    window.renderNotifications();
-                }
-            } catch (e) {
-                console.error('Failed to mark notification read:', e);
-            }
-        };
-
-        window.markAllNotificationsRead = async function() {
-            const token = localStorage.getItem('preloved_token');
-            if (!token) return;
-
-            try {
-                const response = await fetch('/api/v1/notifications/read-all', {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    window.notificationsList.forEach(n => {
-                        if (!n.read_at) n.read_at = new Date().toISOString();
-                    });
-                    window.renderNotifications();
-                    window.showToast('Semua notifikasi ditandai dibaca.');
-                }
-            } catch (e) {
-                console.error('Failed to mark all read:', e);
-            }
-        };
-
-        window.formatTimeAgo = function(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = Math.floor(seconds / 31536000);
-
-            if (interval >= 1) return interval + " thn";
-            interval = Math.floor(seconds / 2592000);
-            if (interval >= 1) return interval + " bln";
-            interval = Math.floor(seconds / 86400);
-            if (interval >= 1) return interval + " hari";
-            interval = Math.floor(seconds / 3600);
-            if (interval >= 1) return interval + " jam";
-            interval = Math.floor(seconds / 60);
-            if (interval >= 1) return interval + " mnt";
-            return "baru";
-        };
-
-        window.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('profile-dropdown');
-            if (dropdown && !e.target.closest('#nav-auth-container')) {
-                dropdown.classList.add('hidden');
-            }
-            
-            const notifDropdown = document.getElementById('notification-dropdown');
-            if (notifDropdown && !e.target.closest('#nav-notification-container')) {
-                notifDropdown.classList.add('hidden');
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            window.updateCartBadge();
+        // Jalankan sinkronisasi awal saat dokumen selesai dimuat
+        document.addEventListener('DOMContentLoaded', function() {
             window.syncAuthHeader();
+            window.updateCartBadge();
         });
     </script>
 </body>

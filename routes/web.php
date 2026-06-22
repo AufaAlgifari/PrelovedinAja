@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Category;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SellerController;
 
 function ensureMockProductsInDatabase() {
     $firstMockEmail = 'fadhil.ft@unsoed.ac.id';
@@ -550,10 +551,10 @@ Route::get('/transactions/waiting', function () {
 // ────────────────────────────────────────
 // Payment Routes (Midtrans)
 // ────────────────────────────────────────
+// Show checkout page (no auth middleware - handled in controller)
+Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+
 Route::middleware('auth')->group(function () {
-    // Show checkout page
-    Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
-    
     // Create snap token
     Route::post('/payment/create-snap-token', [PaymentController::class, 'createSnapToken'])->name('payment.create-snap-token');
     
