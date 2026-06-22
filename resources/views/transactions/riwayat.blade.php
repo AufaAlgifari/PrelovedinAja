@@ -231,6 +231,7 @@
                 } else {
                     const result = await response.json();
                     window.showToast(result.message || 'Gagal menyimpan ulasan.', 'error');
+                    return;
                 }
             } catch (error) {
                 console.log('Review API offline, falling back to local simulation.');
