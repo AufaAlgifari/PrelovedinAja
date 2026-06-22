@@ -151,6 +151,8 @@ class PaymentController extends Controller
             return $cart->product->price;
         });
 
+        $paymentMethod = $request->input('payment_method', 'DELIVERY');
+
         // Create transaction record
         $transaction = Transaction::create([
             'user_id' => $user->id,
@@ -159,9 +161,20 @@ class PaymentController extends Controller
             'order_id_midtrans' => 'ORDER-' . microtime(true) * 1000 . '-' . Str::random(8) . '-' . $user->id,
             'amount' => $totalAmount,
             'status' => 'pending',
-            'payment_type' => null,
+            'payment_type' => $paymentMethod,
+            'shipping_method' => $paymentMethod === 'COD' ? 'COD' : 'Delivery',
             'snap_token' => null,
         ]);
+
+        // Mark products as sold
+        foreach ($cartItems as $cartItem) {
+            if ($cartItem->product) {
+                $cartItem->product->update(['status' => 'Sold']);
+            }
+        }
+
+        // Delete cart items
+        $user->carts()->delete();
 
         // Prepare Midtrans parameter
         $params = [
@@ -232,6 +245,17 @@ class PaymentController extends Controller
                 $this->completeTransaction($transaction);
             }
         } else if ($transactionStatus == 'settlement') {
+            // Mark products as sold
+            $cartItems = \App\Models\Cart::where('user_id', $transaction->user_id)->with('product')->get();
+            foreach ($cartItems as $cartItem) {
+                if ($cartItem->product) {
+                    $cartItem->product->update(['status' => 'Sold']);
+                }
+            }
+
+            // Delete cart items after marking products as sold
+            $transaction->user->carts()->delete();
+
             $transaction->update(['status' => 'success']);
             $this->completeTransaction($transaction);
         } else if ($transactionStatus == 'pending') {

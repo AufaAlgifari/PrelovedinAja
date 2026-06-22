@@ -9,24 +9,26 @@
             <p class="text-xs text-brand-600 mt-1 font-medium font-heading">Kelola dan pantau seluruh produk preloved yang Anda pasarkan.</p>
         </div>
         <a href="{{ route('products.create') }}" class="px-5 py-3 bg-brand-600 hover:bg-brand-900 text-brand-50 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition">
-            ➕ Jual Barang Baru
+            Jual Barang Baru
         </a>
     </div>
 
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">📦</span>
+            <span class="text-2xl"></span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Total Produk Aktif</h4>
             <p id="stat-active" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">💰</span>
+            <span class="text-2xl"></span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Terjual / Sold</h4>
             <p id="stat-sold" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">👀</span>
+            <span class="text-2xl">
+                
+            </span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Total Pengunjung</h4>
             <p id="stat-views" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>

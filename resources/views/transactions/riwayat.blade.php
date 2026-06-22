@@ -12,7 +12,13 @@
         <!-- Dynamically populated via JS, with static fallback -->
     </div>
 </div>
+@endsection
 
+@section('head')
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+@endsection
+
+@push('scripts')
 <script>
     async function renderTransactions() {
         const container = document.getElementById('transactions-container');
@@ -37,16 +43,46 @@
         }
 
         // Format database transactions
-        const formattedDb = dbTrxs.map(t => ({
-            id: t.id,
-            isDb: true,
-            title: t.product ? t.product.title : 'Barang Preloved',
-            method: t.shipping_method === 'COD' ? 'COD (Fakultas Penjual)' : 'Kurir Kampus',
-            price: t.total_amount,
-            status: t.transaction_status,
-            image: t.product && t.product.image_urls ? t.product.image_urls[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=150&h=150&q=80',
-            hasReviewed: t.review !== null
-        }));
+        const formattedDb = dbTrxs.map(t => {
+            let items = [];
+            let totalPrice = 0;
+            let displayTitle = 'Barang Preloved';
+            let displayImage = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=150&h=150&q=80';
+            
+            // Handle cart transactions (single item from cart)
+            if (t.cart && t.cart.product) {
+                items = [{ 
+                    title: t.cart.product.title, 
+                    price: t.cart.product.price, 
+                    image: t.cart.product.image_urls ? t.cart.product.image_urls[0] : displayImage 
+                }];
+                displayTitle = t.cart.product.title;
+                totalPrice = t.cart.product.price;
+                displayImage = t.cart.product.image_urls ? t.cart.product.image_urls[0] : displayImage;
+            }
+            // Handle single product transactions (direct product relation)
+            else if (t.product) {
+                displayTitle = t.product.title;
+                totalPrice = t.product.price;
+                displayImage = t.product.image_urls ? t.product.image_urls[0] : displayImage;
+                items = [{ title: displayTitle, price: totalPrice, image: displayImage }];
+            }
+            
+            return {
+                id: t.id,
+                isDb: true,
+                title: displayTitle,
+                items: items,
+                method: t.shipping_method === 'COD' ? 'COD (Bayar di Tempat)' : 'Delivery Order',
+                price: totalPrice || t.amount,
+                status: t.status === 'success' ? 'Berhasil' : (t.status === 'pending' ? 'Menunggu' : t.status),
+                image: displayImage,
+                hasReviewed: t.review !== null,
+                snapToken: t.snap_token,
+                orderId: t.order_id_midtrans,
+                clientId: '{{ config("midtrans.client_key") }}'
+            };
+        });
 
         // Mock static completed transaction (default)
         const defaultTrx = {
@@ -78,8 +114,9 @@
             card.className = "bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/20 shadow-lg overflow-hidden card-premium";
             
             let statusBadgeClass = "bg-[#FBF6EC] text-[#7A4A10] border-[#D4A017]/30";
-            if(trx.status === 'Completed') statusBadgeClass = "bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]";
-            else if(trx.status === 'Cancelled') statusBadgeClass = "bg-rose-50 text-rose-700 border-rose-100";
+            if(trx.status === 'Berhasil' || trx.status === 'Completed') statusBadgeClass = "bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]";
+            else if(trx.status === 'Dibatalkan' || trx.status === 'Cancelled') statusBadgeClass = "bg-rose-50 text-rose-700 border-rose-100";
+            else if(trx.status === 'Menunggu' || trx.status === 'Pending') statusBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
 
             card.innerHTML = `
                 <!-- Card Header -->
@@ -94,14 +131,35 @@
                         <img src="${trx.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=150&h=150&q=80'}" alt="${trx.title}" class="w-16 h-16 rounded-2xl object-cover border border-[#D4A017]/20 bg-[#FBF6EC] flex-shrink-0">
                         <div>
                             <h3 class="font-extrabold text-[#2E1A06] text-sm leading-snug font-heading">${trx.title}</h3>
-                            <p class="text-xs text-[#7A4A10] mt-1 font-semibold">📍 Metode: ${trx.method}</p>
+                            <p class="text-xs text-[#7A4A10] mt-1 font-semibold">Metode: ${trx.method}</p>
                         </div>
                     </div>
                     <p class="text-base font-black text-[#7A4A10] font-heading">${priceFormatted}</p>
                 </div>
 
+                <!-- Continue Payment Section (for Pending transactions) -->
+                ${(trx.status === 'Menunggu' || trx.status === 'Pending') && trx.snapToken ? `
+                    <div class="bg-amber-50/60 p-6 border-t border-amber-200/40 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider font-heading">Pembayaran Menunggu</h4>
+                                <p class="text-xs text-amber-800 mt-1">Selesaikan pembayaran Anda untuk melanjutkan transaksi.</p>
+                            </div>
+                        </div>
+                        <button onclick="continuePayment('${trx.snapToken}', '${trx.clientId}')" 
+                                class="w-full bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-sm font-bold px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5">
+                            Lanjutkan Pembayaran
+                        </button>
+                    </div>
+                ` : ''}
+
                 <!-- Review Section -->
-                ${trx.status === 'Completed' && !trx.hasReviewed ? `
+                ${(trx.status === 'Completed' || trx.status === 'Berhasil') && !trx.hasReviewed ? `
                     <div id="review-box-${index}" class="bg-[#FBF6EC]/40 p-6 border-t border-[#D4A017]/10 space-y-4">
                         <div>
                             <h4 class="text-xs font-bold text-[#2E1A06] uppercase tracking-wider font-heading">Berikan Ulasan untuk Penjual</h4>
@@ -113,11 +171,11 @@
                                 <div class="w-full sm:w-1/3">
                                     <label class="block text-[10px] font-bold text-[#7A4A10] uppercase tracking-wider mb-1.5">Rating Penilaian</label>
                                     <select required class="w-full px-3 py-2 bg-[#FBF6EC] border border-[#D4A017]/35 rounded-xl text-xs font-bold text-[#2E1A06] focus:outline-none focus:ring-2 focus:ring-[#7A4A10]/20">
-                                        <option value="5">⭐⭐⭐⭐⭐ (5 - Sangat Puas)</option>
-                                        <option value="4">⭐⭐⭐⭐ (4 - Bagus)</option>
-                                        <option value="3">⭐⭐⭐ (3 - Cukup)</option>
-                                        <option value="2">⭐⭐ (2 - Kurang)</option>
-                                        <option value="1">⭐ (1 - Buruk)</option>
+                                        <option value="5">5 - Sangat Puas</option>
+                                        <option value="4">4 - Bagus</option>
+                                        <option value="3">3 - Cukup</option>
+                                        <option value="2">2 - Kurang</option>
+                                        <option value="1">1 - Buruk</option>
                                     </select>
                                 </div>
                                 <div class="flex-1">
@@ -129,17 +187,17 @@
 
                             <div class="flex justify-end">
                                 <button type="submit" class="bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition transform hover:-translate-y-0.5">
-                                    Kirim Ulasan Mahasiswa
+                                    Kirim Ulasan
                                 </button>
                             </div>
                         </form>
                     </div>
-                ` : `
+                ` : ((trx.status === 'Completed' || trx.status === 'Berhasil') && trx.hasReviewed ? `
                     <div class="bg-[#FBF6EC]/20 p-4 border-t border-[#D4A017]/10 flex items-center justify-between text-[10px] text-[#7A4A10] font-bold uppercase tracking-wider px-6">
                         <span>Status Ulasan:</span>
-                        <span class="text-emerald-700 font-extrabold">✓ Ulasan Telah Dikirim</span>
+                        <span class="text-emerald-700 font-extrabold">Ulasan Telah Dikirim</span>
                     </div>
-                `}
+                ` : ``)}
             `;
             container.appendChild(card);
         });
@@ -198,8 +256,42 @@
         }
     }
 
+    function continuePayment(snapToken, clientId) {
+        if (!snapToken) {
+            window.showToast('Token pembayaran tidak ditemukan.', 'error');
+            return;
+        }
+
+        // Open Midtrans payment modal
+        window.snap.pay(snapToken, {
+            onSuccess: function(result) {
+                window.showToast('Pembayaran berhasil! Transaksi Anda sedang diproses.');
+                
+                // Redirect to transaction success page after short delay
+                setTimeout(() => {
+                    window.location.href = '/transactions/history';
+                }, 1500);
+            },
+            onPending: function(result) {
+                window.showToast('Pembayaran tertunda. Silakan selesaikan pembayaran Anda.', 'info');
+                
+                // Redirect to pending transactions page
+                setTimeout(() => {
+                    window.location.href = '/transactions/waiting';
+                }, 1500);
+            },
+            onError: function(result) {
+                window.showToast('Terjadi kesalahan dalam proses pembayaran.', 'error');
+            },
+            onClose: function() {
+                // User closed the payment modal without completing
+                console.log('Payment modal closed by user');
+            }
+        });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         renderTransactions();
     });
 </script>
-@endsection
+@endpush
