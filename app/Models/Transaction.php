@@ -19,6 +19,7 @@ class Transaction extends Model
         'status',
         'payment_type',
         'snap_token',
+        'shipping_method',
     ];
 
     protected $casts = [
@@ -36,6 +37,11 @@ class Transaction extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
     }
 
     // Satu transaksi punya satu ulasan

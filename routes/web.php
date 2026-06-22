@@ -471,6 +471,14 @@ Route::get('/chat', function () {
     return view('chat.index');
 })->name('chat.index');
 
+
+// Cart Checkout (pilih metode pengiriman)
+Route::get('/checkout/cart', function () {
+    return view('checkout.from-cart');
+})->name('checkout.cart');
+Route::post('/checkout/cart/process', [PaymentController::class, 'cartCheckout'])
+    ->name('checkout.cart.process');
+
 // ── Checkout (Beli Sekarang) ────────────────────────────────
 Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
     ->name('checkout.index');

@@ -214,49 +214,51 @@
             return;
         }
 
-        // Call API endpoint to create snap token
-        try {
-            const response = await fetch('/api/v1/payment/cart-checkout', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+        // Show delivery method modal
+        showDeliveryMethodModal();
+    }
 
-            const data = await response.json();
+    function showDeliveryMethodModal() {
+        const modal = document.createElement('div');
+        modal.id = 'delivery-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm';
+        modal.innerHTML = `
+            <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-8 shadow-2xl text-[#2E1A06] space-y-6">
+                <h3 class="text-2xl font-black font-heading">Pilih Metode Pengiriman</h3>
+                
+                <div class="space-y-3">
+                    <button onclick="proceedToPayment('COD')" class="w-full p-4 bg-[#FBF6EC] hover:bg-[#F5E4B0] border-2 border-[#D4A017]/30 rounded-2xl text-left transition">
+                        <h4 class="font-black text-[#7A4A10]">COD (Cash on Delivery)</h4>
+                        <p class="text-xs text-[#7A4A10]/70 mt-1">Temui penjual di kampus, bayar saat terima barang</p>
+                        <p class="text-xs text-[#2E1A06] font-bold mt-2">Lokasi: Area publik kampus (Perpustakaan, Gazebo, GOR)</p>
+                    </button>
+                    
+                    <button onclick="proceedToPayment('DELIVERY')" class="w-full p-4 bg-[#7A4A10] hover:bg-[#5f390c] border-2 border-[#7A4A10] rounded-2xl text-left transition text-[#FBF6EC]">
+                        <h4 class="font-black">Delivery Order</h4>
+                        <p class="text-xs mt-1 opacity-90">Bayar online sekarang, barang dikirim ke lokasi Anda</p>
+                        <p class="text-xs font-bold mt-2">Tracking real-time tersedia</p>
+                    </button>
+                </div>
+                
+                <button onclick="closeDeliveryModal()" class="w-full py-3 bg-[#FBF6EC] hover:bg-[#F5E4B0] text-[#7A4A10] text-xs font-bold rounded-xl border border-[#D4A017]/30 transition">
+                    Batalkan
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
 
-            if (!response.ok) {
-                window.showToast(data.error || 'Gagal membuat snap token', 'error');
-                return;
-            }
+    function closeDeliveryModal() {
+        const modal = document.getElementById('delivery-modal');
+        if(modal) modal.remove();
+    }
 
-            if (data.snap_token) {
-                // Open Midtrans Snap modal
-                snap.pay(data.snap_token, {
-                    onSuccess: function(result) {
-                        window.showToast('Pembayaran berhasil!', 'success');
-                        window.location.href = "{{ route('payment.success') }}?order_id=" + result.order_id;
-                    },
-                    onPending: function(result) {
-                        window.location.href = "{{ route('payment.pending') }}?order_id=" + result.order_id;
-                    },
-                    onError: function(result) {
-                        window.showToast('Pembayaran gagal', 'error');
-                        window.location.href = "{{ route('payment.error') }}?order_id=" + result.order_id;
-                    },
-                    onClose: function() {
-                        window.showToast('Anda menutup popup pembayaran', 'info');
-                    }
-                });
-            } else {
-                window.showToast('Error: Gagal mendapatkan snap token', 'error');
-            }
-        } catch (error) {
-            console.error('Checkout error:', error);
-            window.showToast('Terjadi kesalahan: ' + error.message, 'error');
-        }
+    async function proceedToPayment(deliveryMethod) {
+        closeDeliveryModal();
+        
+        // Save payment method to localStorage and redirect to checkout page
+        localStorage.setItem('selected_payment_method', deliveryMethod);
+        window.location.href = "{{ route('checkout.cart') }}?method=" + deliveryMethod;
     }
 
     function closeCheckoutModal() {
