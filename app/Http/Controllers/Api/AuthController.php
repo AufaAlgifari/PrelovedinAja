@@ -56,6 +56,9 @@ class AuthController extends Controller
         $data = $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
+            'remember' => 'required|accepted',
+        ], [
+            'remember.accepted' => 'Centang ingat saya',
         ]);
 
         $user = User::where('email', $data['email'])->first();
@@ -70,7 +73,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Sync web session login
-        auth('web')->login($user);
+        auth('web')->login($user, true);
 
         return response()->json([
             'message' => 'Login berhasil.',

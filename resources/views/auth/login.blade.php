@@ -203,6 +203,12 @@
         async function handleLogin(e) {
             e.preventDefault();
             
+            const rememberMe = document.getElementById('remember-me').checked;
+            if (!rememberMe) {
+                window.showToast('Centang ingat saya', 'error');
+                return;
+            }
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const btnSubmit = document.getElementById('btn-submit');
@@ -226,7 +232,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password, remember: rememberMe })
                 });
 
                 const result = await response.json();
