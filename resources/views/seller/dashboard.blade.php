@@ -267,6 +267,14 @@
             <p class="text-xs text-gray-500 mb-1">Pendapatan Bulan Ini</p>
             <p class="text-lg font-semibold">Rp {{ number_format($stats['income'], 0, ',', '.') }}</p>
         </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Transaksi Selesai</p>
+            <p class="text-2xl font-semibold">{{ $completedTransactions }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Badge Penjual</p>
+            <p class="text-lg font-semibold text-orange-600">{{ $badge }}</p>
+        </div>
     </div>
 
     {{-- Pesanan Terbaru --}}

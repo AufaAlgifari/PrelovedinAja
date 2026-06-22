@@ -42,7 +42,7 @@ class ReviewController extends Controller
         }
 
         $transaction = Transaction::with('product.seller')
-            ->where('buyer_id', $request->user()->id)
+            ->where('user_id', $request->user()->id)
             ->findOrFail($data['transaction_id']);
 
         // Hanya bisa review jika transaksi sudah Completed
