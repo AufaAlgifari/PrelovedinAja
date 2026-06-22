@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Category;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SellerController;
 
 function ensureMockProductsInDatabase() {
     $firstMockEmail = 'fadhil.ft@unsoed.ac.id';
@@ -550,10 +551,10 @@ Route::get('/transactions/waiting', function () {
 // ────────────────────────────────────────
 // Payment Routes (Midtrans)
 // ────────────────────────────────────────
+// Show checkout page (no auth middleware - handled in controller)
+Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+
 Route::middleware('auth')->group(function () {
-    // Show checkout page
-    Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
-    
     // Create snap token
     Route::post('/payment/create-snap-token', [PaymentController::class, 'createSnapToken'])->name('payment.create-snap-token');
     
@@ -565,3 +566,13 @@ Route::middleware('auth')->group(function () {
 
 // Midtrans webhook (no auth needed)
 Route::post('/payment/notification', [PaymentController::class, 'handleNotification'])->name('payment.notification');
+
+// Dashboard Penjual (butuh login)
+Route::middleware('auth')->prefix('seller')->name('seller.')->group(function () {
+    Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/products', [SellerController::class, 'products'])->name('products');
+    Route::get('/products/create', [SellerController::class, 'create'])->name('products.create');
+    Route::post('/products', [SellerController::class, 'store'])->name('products.store');
+    Route::delete('/products/{product}', [SellerController::class, 'destroy'])->name('products.destroy');
+    Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+});

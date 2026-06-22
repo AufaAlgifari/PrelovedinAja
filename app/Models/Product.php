@@ -20,6 +20,10 @@ class Product extends Model
         'status',
         'image_urls',
         'views_count',
+        'user_id', 'name', 'description', 'price',
+    'category', 'condition', 'weight',
+    'city', 'image', 'status',
+
     ];
 
     protected $casts = [

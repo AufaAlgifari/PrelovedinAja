@@ -9,12 +9,6 @@
 @endsection
 
 @section('content')
-<script>
-    // Client-side auth protection
-    if (!localStorage.getItem('preloved_user')) {
-        window.location.href = "{{ route('login') }}";
-    }
-</script>
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Back to Product Link -->
     <div class="mb-6 flex justify-between items-center">

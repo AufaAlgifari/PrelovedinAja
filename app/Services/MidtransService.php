@@ -13,6 +13,16 @@ class MidtransService
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
+        
+        // Fix SSL certificate issue on Windows for development
+        // WARNING: Only disable SSL verification in development/sandbox mode
+        if (!Config::$isProduction) {
+            Config::$curlOptions = [
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => 0,
+                CURLOPT_HTTPHEADER => [],
+            ];
+        }
     }
 
     /**

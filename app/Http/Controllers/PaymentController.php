@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -18,6 +19,16 @@ class PaymentController extends Controller
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
+        
+        // Fix SSL certificate issue on Windows for development
+        // WARNING: Only disable SSL verification in development/sandbox mode
+        if (!Config::$isProduction) {
+            Config::$curlOptions = [
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => 0,
+                CURLOPT_HTTPHEADER => [],
+            ];
+        }
     }
 
     /**
@@ -25,6 +36,13 @@ class PaymentController extends Controller
      */
     public function checkout(Request $request)
     {
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk checkout.')
+                ->with('redirect', url()->current());
+        }
+
         $cartItems = $request->user()->carts()->with('product')->get();
         
         if ($cartItems->isEmpty()) {
@@ -58,8 +76,8 @@ class PaymentController extends Controller
         $transaction = Transaction::create([
             'user_id' => $user->id,
             'cart_id' => $cartItems->first()->id,
-            'transaction_id' => 'TXN-' . time() . '-' . $user->id,
-            'order_id_midtrans' => 'ORDER-' . time() . '-' . $user->id,
+            'transaction_id' => 'TXN-' . microtime(true) * 1000 . '-' . Str::random(8) . '-' . $user->id,
+            'order_id_midtrans' => 'ORDER-' . microtime(true) * 1000 . '-' . Str::random(8) . '-' . $user->id,
             'amount' => $totalAmount,
             'status' => 'pending',
             'payment_type' => null,
@@ -97,6 +115,84 @@ class PaymentController extends Controller
             $snapToken = Snap::getSnapToken($params);
             
             // Save snap token to transaction
+            $transaction->update([
+                'snap_token' => $snapToken,
+            ]);
+
+            return response()->json([
+                'snap_token' => $snapToken,
+                'client_key' => config('midtrans.client_key'),
+                'transaction_id' => $transaction->id,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Create Midtrans token from cart (API endpoint for Bearer token auth)
+     * Works with both real sessions and demo mode (localStorage token)
+     */
+    public function createSnapTokenFromCart(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $cartItems = $user->carts()->with('product')->get();
+        
+        if ($cartItems->isEmpty()) {
+            return response()->json(['error' => 'Cart is empty'], 400);
+        }
+
+        $totalAmount = $cartItems->sum(function ($cart) {
+            return $cart->product->price;
+        });
+
+        // Create transaction record
+        $transaction = Transaction::create([
+            'user_id' => $user->id,
+            'cart_id' => $cartItems->first()->id,
+            'transaction_id' => 'TXN-' . microtime(true) * 1000 . '-' . Str::random(8) . '-' . $user->id,
+            'order_id_midtrans' => 'ORDER-' . microtime(true) * 1000 . '-' . Str::random(8) . '-' . $user->id,
+            'amount' => $totalAmount,
+            'status' => 'pending',
+            'payment_type' => null,
+            'snap_token' => null,
+        ]);
+
+        // Prepare Midtrans parameter
+        $params = [
+            'transaction_details' => [
+                'order_id' => $transaction->order_id_midtrans,
+                'gross_amount' => (int) $totalAmount,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone ?? '08123456789',
+            ],
+            'item_details' => $cartItems->map(function ($cart) {
+                return [
+                    'id' => $cart->product->id,
+                    'price' => (int) $cart->product->price,
+                    'quantity' => 1,
+                    'name' => $cart->product->title,
+                ];
+            })->toArray(),
+            'enabled_payments' => [
+                'credit_card', 'gcg_payment', 'bank_transfer', 'bank_bca', 
+                'cimb_clicks', 'bca_klikbca', 'mandiri_clickpay', 
+                'echannel', 'permata_va', 'bri_epay', 'telkomsel_cash',
+                'gopay', 'shopeepay'
+            ],
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            
             $transaction->update([
                 'snap_token' => $snapToken,
             ]);
