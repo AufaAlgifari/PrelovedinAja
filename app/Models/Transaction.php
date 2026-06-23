@@ -19,8 +19,13 @@ class Transaction extends Model
         'status',
         'payment_type',
         'snap_token',
-        'shipping_method',
+        'buyer_id',
+        'seller_id',
+        'metode_pengiriman',
+        'alamat_pengiriman',
+        'metode_pembayaran',
     ];
+
 
     protected $casts = [
         'amount' => 'integer',

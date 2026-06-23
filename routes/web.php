@@ -466,6 +466,26 @@ Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+
+// Halaman pemberitahuan verifikasi email
+Route::get('/email/verify', function () {
+    return view('auth.verify-email'); // Anda bisa membuat view ini nanti jika butuh
+})->middleware('auth')->name('verification.notice');
+
+// Proses verifikasi email saat link di klik
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill(); // Tandai email sebagai verified
+    return redirect('/')->with('success', 'Email berhasil diverifikasi!');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+// Endpoint untuk mengirim ulang link verifikasi (opsional)
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Link verifikasi telah dikirim ulang!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 // Halaman Chat (In-App Messaging)
 Route::get('/chat', function () {
     return view('chat.index');
@@ -480,10 +500,10 @@ Route::post('/checkout/cart/process', [PaymentController::class, 'cartCheckout']
     ->name('checkout.cart.process');
 
 // ── Checkout (Beli Sekarang) ────────────────────────────────
-Route::get('/checkout/{product}', [CheckoutController::class, 'index'])
+Route::get('/checkout/{product}', [CheckoutController::class, 'show'])
     ->name('checkout.index');
-Route::post('/checkout/{product}/process', [CheckoutController::class, 'processPayment'])
-    ->name('checkout.process');
+Route::post('/checkout/{product}', [CheckoutController::class, 'store'])
+    ->name('checkout.store');
 
 // Halaman Profil Mahasiswa
 Route::get('/profile', function () {
