@@ -44,6 +44,11 @@ class Transaction extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
+    }
+
     // Satu transaksi punya satu ulasan
     public function review()
     {

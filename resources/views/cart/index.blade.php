@@ -35,6 +35,43 @@
     </div>
 </div>
 
+<!-- Checkout Success Modal -->
+<div id="checkout-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm">
+    <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-8 shadow-2xl relative overflow-hidden transform scale-95 transition-all text-center space-y-6 text-[#2E1A06]">
+        <!-- Success Graphic -->
+        <div class="inline-flex items-center justify-center p-4 bg-[#FBF6EC] text-[#7A4A10] rounded-full border border-[#D4A017]/20 mx-auto">
+            <svg class="w-12 h-12 animate-bounce text-[#7A4A10]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="text-2xl font-black font-heading text-[#2E1A06]">Pemesanan Sukses!</h3>
+            <p class="text-xs text-[#7A4A10] leading-relaxed">Pesanan Anda telah berhasil dibuat dengan sistem <strong>COD Kampus</strong>. Detail invoice telah diteruskan ke pihak penjual.</p>
+        </div>
+
+        <!-- Order Detail Summary Card -->
+        <div class="bg-[#FBF6EC] p-5 rounded-2xl border border-[#D4A017]/25 text-left space-y-2 text-xs">
+            <div class="flex justify-between"><span class="text-[#7A4A10] font-medium">ID Transaksi:</span><strong class="text-[#2E1A06]" id="modal-trx-id">TRX-XXXXXX</strong></div>
+            <div class="flex justify-between"><span class="text-[#7A4A10] font-medium">Metode Pembayaran:</span><strong class="text-[#2E1A06]">COD (Bayar di Tempat)</strong></div>
+            <div class="flex justify-between"><span class="text-[#7A4A10] font-medium">Total Tagihan:</span><strong class="text-[#7A4A10] font-black" id="modal-total-price">Rp 0</strong></div>
+            <div class="flex justify-between"><span class="text-[#7A4A10] font-medium">Status Pembelian:</span><span class="bg-[#7A4A10] text-[#FBF6EC] font-extrabold px-2.5 py-0.5 rounded-full text-[9px] uppercase border border-[#7A4A10]">Diproses</span></div>
+        </div>
+
+        <div class="pt-4 flex flex-col gap-2">
+            <a href="{{ route('transactions.history') }}" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md transition transform hover:-translate-y-0.5 text-center">
+                📦 Lihat Riwayat Transaksi
+            </a>
+            <button onclick="closeCheckoutModal()" class="w-full py-3 bg-[#FBF6EC] hover:bg-[#F5E4B0] text-[#7A4A10] text-xs font-bold rounded-xl border border-[#D4A017]/30 transition">
+                Belanja Lagi
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Midtrans Snap SDK -->
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+
 <script>
     let loadedCartItems = [];
 
@@ -143,6 +180,75 @@
     async function deleteItem(cartId) {
         await window.removeFromCart(cartId);
         await renderCart();
+    }
+
+    async function triggerCheckout() {
+        const user = localStorage.getItem('preloved_user');
+        const token = localStorage.getItem('preloved_token');
+        
+        if(!user || !token) {
+            window.showToast('Silakan login terlebih dahulu untuk checkout.', 'error');
+            setTimeout(() => {
+                window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.pathname);
+            }, 1000);
+            return;
+        }
+
+        if (loadedCartItems.length === 0) {
+            window.showToast('Keranjang belanja Anda kosong.', 'error');
+            return;
+        }
+
+        // Show delivery method modal
+        showDeliveryMethodModal();
+    }
+
+    function showDeliveryMethodModal() {
+        const modal = document.createElement('div');
+        modal.id = 'delivery-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E1A06]/60 backdrop-blur-sm';
+        modal.innerHTML = `
+            <div class="bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/25 max-w-md w-full p-8 shadow-2xl text-[#2E1A06] space-y-6">
+                <h3 class="text-2xl font-black font-heading">Pilih Metode Pengiriman</h3>
+                
+                <div class="space-y-3">
+                    <button onclick="proceedToPayment('COD')" class="w-full p-4 bg-[#FBF6EC] hover:bg-[#F5E4B0] border-2 border-[#D4A017]/30 rounded-2xl text-left transition">
+                        <h4 class="font-black text-[#7A4A10]">COD (Cash on Delivery)</h4>
+                        <p class="text-xs text-[#7A4A10]/70 mt-1">Temui penjual di kampus, bayar saat terima barang</p>
+                        <p class="text-xs text-[#2E1A06] font-bold mt-2">Lokasi: Area publik kampus (Perpustakaan, Gazebo, GOR)</p>
+                    </button>
+                    
+                    <button onclick="proceedToPayment('DELIVERY')" class="w-full p-4 bg-[#7A4A10] hover:bg-[#5f390c] border-2 border-[#7A4A10] rounded-2xl text-left transition text-[#FBF6EC]">
+                        <h4 class="font-black">Delivery Order</h4>
+                        <p class="text-xs mt-1 opacity-90">Bayar online sekarang, barang dikirim ke lokasi Anda</p>
+                        <p class="text-xs font-bold mt-2">Tracking real-time tersedia</p>
+                    </button>
+                </div>
+                
+                <button onclick="closeDeliveryModal()" class="w-full py-3 bg-[#FBF6EC] hover:bg-[#F5E4B0] text-[#7A4A10] text-xs font-bold rounded-xl border border-[#D4A017]/30 transition">
+                    Batalkan
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    function closeDeliveryModal() {
+        const modal = document.getElementById('delivery-modal');
+        if(modal) modal.remove();
+    }
+
+    async function proceedToPayment(deliveryMethod) {
+        closeDeliveryModal();
+        
+        // Save payment method to localStorage and redirect to checkout page
+        localStorage.setItem('selected_payment_method', deliveryMethod);
+        window.location.href = "{{ route('checkout.cart') }}?method=" + deliveryMethod;
+    }
+
+    function closeCheckoutModal() {
+        document.getElementById('checkout-modal').classList.add('hidden');
+        window.location.href = "{{ route('home') }}";
     }
 
     window.addEventListener('DOMContentLoaded', () => {

@@ -583,5 +583,6 @@
             window.updateCartBadge();
         });
     </script>
+    @stack('scripts')
 </body>
 </html>

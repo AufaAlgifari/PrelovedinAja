@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Api\NotificationController;
 
 // ── Public Routes (tidak perlu login) ─────────────────────
@@ -49,6 +50,9 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::patch('/transactions/{id}/confirm-payment',  [TransactionController::class, 'confirmPayment']);
     Route::patch('/transactions/{id}/complete',         [TransactionController::class, 'complete']);
     Route::patch('/transactions/{id}/cancel',           [TransactionController::class, 'cancel']);
+    
+    // Payment (Cart Checkout)
+    Route::post('/payment/cart-checkout',               [PaymentController::class, 'createSnapTokenFromCart']);
 
     // Chat
     Route::get('/chats',                [ChatController::class, 'index']);      // list semua kontak

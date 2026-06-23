@@ -29,8 +29,20 @@ class ReviewController extends Controller
             'comment'        => 'nullable|string|max:1000',
         ]);
 
+        // Cek filter kata-kata kasar (profanity filter)
+        if (!empty($data['comment'])) {
+            $badWords = ['anjing', 'bangsat', 'tolol', 'goblok', 'babi', 'bajingan', 'kontol', 'memek', 'ngentot'];
+            foreach ($badWords as $word) {
+                if (stripos($data['comment'], $word) !== false) {
+                    return response()->json([
+                        'message' => 'Ulasan tidak boleh mengandung kata-kata kasar/kotor (seperti: ' . $word . ').',
+                    ], 422);
+                }
+            }
+        }
+
         $transaction = Transaction::with('product.seller')
-            ->where('buyer_id', $request->user()->id)
+            ->where('user_id', $request->user()->id)
             ->findOrFail($data['transaction_id']);
 
         // Hanya bisa review jika transaksi sudah Completed

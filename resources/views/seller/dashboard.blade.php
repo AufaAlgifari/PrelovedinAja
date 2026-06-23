@@ -9,24 +9,26 @@
             <p class="text-xs text-brand-600 mt-1 font-medium font-heading">Kelola dan pantau seluruh produk preloved yang Anda pasarkan.</p>
         </div>
         <a href="{{ route('products.create') }}" class="px-5 py-3 bg-brand-600 hover:bg-brand-900 text-brand-50 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition">
-            ➕ Jual Barang Baru
+            Jual Barang Baru
         </a>
     </div>
 
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">📦</span>
+            <span class="text-2xl"></span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Total Produk Aktif</h4>
             <p id="stat-active" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">💰</span>
+            <span class="text-2xl"></span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Terjual / Sold</h4>
             <p id="stat-sold" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>
         <div class="bg-brand-100 p-6 rounded-3xl border border-brand-500/15 shadow-sm text-center">
-            <span class="text-2xl">👀</span>
+            <span class="text-2xl">
+                
+            </span>
             <h4 class="text-sm font-bold text-brand-600 mt-2 uppercase">Total Pengunjung</h4>
             <p id="stat-views" class="text-3xl font-black text-brand-900 mt-1">0</p>
         </div>
@@ -221,4 +223,82 @@
         loadSellerProducts();
     });
 </script>
+@extends('layouts.app')
+@section('title', 'Dashboard Penjual')
+
+@section('content')
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+    {{-- Header --}}
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-semibold text-gray-800">Dashboard Penjual</h1>
+            <p class="text-sm text-gray-500">Halo, {{ Auth::user()->name }} 👋</p>
+        </div>
+        <a href="{{ route('seller.products.create') }}"
+           class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2">
+            + Jual Barang
+        </a>
+    </div>
+
+    {{-- Flash Message --}}
+    @if(session('success'))
+    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3 mb-5">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    {{-- Statistik --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Produk Aktif</p>
+            <p class="text-2xl font-semibold">{{ $stats['active'] }}</p>
+            <p class="text-xs text-gray-400">{{ $stats['pending'] }} menunggu verifikasi</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Pesanan Masuk</p>
+            <p class="text-2xl font-semibold">{{ $stats['orders'] }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Terjual</p>
+            <p class="text-2xl font-semibold">{{ $stats['sold'] }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Pendapatan Bulan Ini</p>
+            <p class="text-lg font-semibold">Rp {{ number_format($stats['income'], 0, ',', '.') }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Transaksi Selesai</p>
+            <p class="text-2xl font-semibold">{{ $completedTransactions }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Badge Penjual</p>
+            <p class="text-lg font-semibold text-orange-600">{{ $badge }}</p>
+        </div>
+    </div>
+
+    {{-- Pesanan Terbaru --}}
+    <div class="bg-white border border-gray-100 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-gray-700 mb-4">Pesanan Terbaru</h2>
+        @forelse($recentOrders as $order)
+        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+            <div>
+                <p class="text-xs text-gray-400">#{{ $order->order_id_midtrans ?? $order->id }}</p>
+                <p class="text-sm font-medium text-gray-800">{{ $order->product->name }}</p>
+                <p class="text-xs text-gray-400">Pembeli: {{ $order->user->name }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-semibold">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
+                <span class="text-xs px-2 py-0.5 rounded-full
+                    {{ $order->status === 'success' ? 'bg-green-100 text-green-700' :
+                      ($order->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
+                    {{ ucfirst($order->status) }}
+                </span>
+            </div>
+        </div>
+        @empty
+        <p class="text-sm text-gray-400">Belum ada pesanan.</p>
+        @endforelse
+    </div>
+</div>
 @endsection

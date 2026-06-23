@@ -14,8 +14,16 @@ class TransactionController extends Controller
     // GET /transactions
     public function index(Request $request)
     {
-        $transactions = Transaction::with(['product.seller:id,name', 'product'])
-            ->where('buyer_id', $request->user()->id)
+        $userId = $request->user()->id;
+
+        // Auto-cancel pending transactions older than 24 hours
+        Transaction::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->where('created_at', '<=', now()->subHours(24))
+            ->update(['status' => 'expired']);
+
+        $transactions = Transaction::with(['product.seller', 'product', 'cart.product'])
+            ->where('user_id', $userId)
             ->latest()
             ->get();
 
