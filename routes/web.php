@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\SellerController;
 
+if (!function_exists('ensureMockProductsInDatabase')) {
 function ensureMockProductsInDatabase() {
     $firstMockEmail = 'fadhil.ft@unsoed.ac.id';
     try {
@@ -229,8 +230,10 @@ function ensureMockProductsInDatabase() {
         );
     }
 }
+}
 
 // Helper function to return beautiful mock products
+if (!function_exists('getMockProducts')) {
 function getMockProducts() {
     return [
         [
@@ -405,6 +408,7 @@ function getMockProducts() {
         ]
     ];
 }
+}
 
 // Halaman Utama / Home (Menampilkan produk preloved)
 Route::get('/', function () {
@@ -465,6 +469,10 @@ Route::get('/login', function () {
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
 
 // Halaman Chat (In-App Messaging)
 Route::get('/chat', function () {

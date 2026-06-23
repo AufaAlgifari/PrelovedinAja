@@ -131,7 +131,7 @@
                     <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-[#7A4A10] focus:ring-[#7A4A10] border-[#D4A017]/30 rounded bg-[#FBF6EC] cursor-pointer">
                     <label for="remember-me" class="ml-2 block text-[#2E1A06] font-semibold cursor-pointer">Ingat saya</label>
                 </div>
-                <a href="#" class="font-bold text-[#7A4A10] hover:text-[#2E1A06] hover:underline">Lupa Password?</a>
+                <a href="{{ route('password.request') }}" class="font-bold text-[#7A4A10] hover:text-[#2E1A06] hover:underline">Lupa Password?</a>
             </div>
 
             <div class="pt-2">

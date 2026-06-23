@@ -150,4 +150,78 @@ class AuthController extends Controller
             'user'    => $user->fresh(),
         ]);
     }
+
+    // POST /forgot-password
+    public function forgotPassword(Request $request)
+    {
+        $data = $request->validate([
+            'email' => [
+                'required',
+                'email',
+                // Hanya email institusi .ac.id
+                'regex:/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.ac\.id$/',
+            ],
+        ], [
+            'email.regex' => 'Email harus menggunakan domain institusi (.ac.id).',
+        ]);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['Email tidak terdaftar.'],
+            ]);
+        }
+
+        // Generate 6-digit OTP
+        $otp = (string) rand(100000, 999999);
+
+        // Save to user
+        $user->update([
+            'verification_token' => $otp,
+            'token_expired_at' => now()->addMinutes(15),
+        ]);
+
+        \Illuminate\Support\Facades\Log::info("Simulasi OTP Lupa Password untuk {$user->email}: {$otp}");
+
+        return response()->json([
+            'message' => 'Kode verifikasi telah dikirim ke email Anda.',
+            'demo_otp' => $otp, // Untuk mempermudah pengujian / demo tanpa cek file log
+        ]);
+    }
+
+    // POST /reset-password
+    public function resetPassword(Request $request)
+    {
+        $data = $request->validate([
+            'email'                 => 'required|email',
+            'otp'                   => 'required|string|size:6',
+            'password'              => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['Email tidak ditemukan.'],
+            ]);
+        }
+
+        if ($user->verification_token !== $data['otp'] || !$user->token_expired_at || $user->token_expired_at->isPast()) {
+            throw ValidationException::withMessages([
+                'otp' => ['Kode verifikasi salah atau telah kedaluwarsa.'],
+            ]);
+        }
+
+        // Update password and clear verification token
+        $user->update([
+            'password' => Hash::make($data['password']),
+            'verification_token' => null,
+            'token_expired_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil diperbarui. Silakan masuk kembali.',
+        ]);
+    }
 }
