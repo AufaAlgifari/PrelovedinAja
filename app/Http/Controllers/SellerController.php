@@ -22,12 +22,28 @@ class SellerController extends Controller
             'orders'   => Transaction::whereHas('product', fn($q) => $q->where('user_id', $user->id))
                             ->whereIn('status', ['pending', 'success'])
                             ->count(),
+            'completed_transactions' => Transaction::whereHas('product', fn($q) => $q->where('user_id', $user->id))
+                        ->where('status', 'success')
+                        ->count(),
         ];
         $recentOrders = Transaction::with('product')
             ->whereHas('product', fn($q) => $q->where('user_id', $user->id))
             ->latest()->take(5)->get();
+        
+        $completedTransactions = Transaction::whereHas('product', fn($q) => $q->where('user_id', $user->id))
+            ->where('status', 'success')
+            ->count();
 
-        return view('seller.dashboard', compact('stats', 'recentOrders'));
+        $badge = $completedTransactions < 5
+            ? 'Penjual Baru'
+            : 'Penjual Aktif';
+
+        return view('seller.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'completedTransactions',
+            'badge'
+        ));
     }
 
     public function create()

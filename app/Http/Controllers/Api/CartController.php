@@ -12,13 +12,39 @@ class CartController extends Controller
     // GET /cart
     public function index(Request $request)
     {
+        $userId = $request->user()->id;
+
+        // Ambil data keranjang user saat ini
+        $userCarts = Cart::where('user_id', $userId)
+            ->with('product')
+            ->get();
+
+        $unavailableProductIds = [];
+        $removedTitles = [];
+
+        foreach ($userCarts as $cart) {
+            // Jika produk tidak ditemukan (sudah dihapus) atau statusnya tidak 'Available'
+            if (!$cart->product || !$cart->product->isAvailable()) {
+                $unavailableProductIds[] = $cart->product_id;
+                $removedTitles[] = $cart->product ? $cart->product->title : 'Produk tidak dikenal';
+            }
+        }
+
+        if (!empty($unavailableProductIds)) {
+            // Hapus produk dari keranjang SEMUA user yang menyimpannya
+            Cart::whereIn('product_id', $unavailableProductIds)->delete();
+        }
+
+        // Ambil kembali keranjang terupdate
         $carts = Cart::with([
             'product.seller:id,name,avatar_url',
         ])
-        ->where('user_id', $request->user()->id)
+        ->where('user_id', $userId)
         ->get();
 
-        return response()->json($carts);
+        return response()->json($carts)
+            ->header('X-Removed-Items', json_encode($removedTitles))
+            ->header('Access-Control-Expose-Headers', 'X-Removed-Items'); // Agar JS di frontend bisa mengakses custom header ini
     }
 
     // POST /cart
