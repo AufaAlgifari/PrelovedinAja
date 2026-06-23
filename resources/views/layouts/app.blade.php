@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Preloved.in Aja - Pasar Kampus UNSOED</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
@@ -412,23 +415,21 @@
                 window.hideNavElement(navGuestActions);
 
                 const verifyBadge = user.is_verified ? '<span class="ml-1.5 bg-brand-600 text-brand-50 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full">Verified</span>' : '';
-                const hasFilledSellForm = localStorage.getItem('has_filled_sell_form') === 'true' || JSON.parse(localStorage.getItem('preloved_custom_products') || '[]').length > 0;
-                
                 let dashboardLink = '';
                 if (user.role === 'admin') {
                     dashboardLink = `<a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Admin Dashboard</a>`;
-                } else if (hasFilledSellForm) {
+                } else {
                     dashboardLink = `<a href="{{ route('seller.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Seller Dashboard</a>`;
                 }
 
                 let mobileDashboardLink = '';
                 if (user.role === 'admin') {
                     mobileDashboardLink = `<a href="{{ route('admin.dashboard') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Admin Dashboard</a>`;
-                } else if (hasFilledSellForm) {
+                } else {
                     mobileDashboardLink = `<a href="{{ route('seller.dashboard') }}" class="w-full text-center py-2.5 bg-brand-100 text-brand-900 border border-brand-500/35 font-bold text-xs rounded-xl block">Seller Dashboard</a>`;
                 }
 
-                const hasCustomAvatar = user.avatar_url && !user.avatar_url.includes('unsplash.com');
+                const hasCustomAvatar = user.avatar_url && user.avatar_url !== 'null' && user.avatar_url !== '';
                 const avatarHtml = hasCustomAvatar
                     ? `<img class="h-9 w-9 rounded-full object-cover border-2 border-brand-500 shadow-sm" src="${user.avatar_url}" alt="${user.name}">`
                     : `<div class="h-9 w-9 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-2 border-brand-500 shadow-sm">
@@ -481,23 +482,24 @@
                     notifContainer.classList.remove('hidden');
                     notifContainer.innerHTML = `
                         <div class="relative inline-block text-left">
-                            <button id="notification-bell-btn" onclick="document.getElementById('notification-dropdown').classList.toggle('hidden');" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group focus:outline-none flex items-center justify-center">
+                            <button id="notification-bell-btn" onclick="toggleNotifDropdown()" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group focus:outline-none flex items-center justify-center">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
-                                <span id="notification-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
+                                <span id="notification-badge" class="absolute -top-0.5 -right-0.5 bg-rose-600 text-white text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
                             </button>
-                            <div id="notification-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-brand-50 border border-brand-500/25 divide-y divide-brand-500/10 focus:outline-none z-50 overflow-hidden">
+                            <div id="notification-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-brand-50 border border-brand-500/25 focus:outline-none z-50 overflow-hidden">
                                 <div class="px-4 py-3 bg-brand-100/30 flex justify-between items-center">
                                     <span class="text-xs font-extrabold text-brand-900 font-heading">Notifikasi</span>
-                                    <button class="text-[10px] font-bold text-brand-600 hover:text-brand-900 focus:outline-none">Tandai Semua Dibaca</button>
+                                    <button onclick="window.markAllNotificationsRead()" class="text-[10px] font-bold text-brand-600 hover:text-brand-900 focus:outline-none transition">Tandai Semua Dibaca</button>
                                 </div>
-                                <div id="notification-items-list" class="max-h-64 overflow-y-auto divide-y divide-brand-500/10">
-                                    <div class="p-4 text-center text-xs text-brand-600 font-medium">Belum ada notifikasi.</div>
+                                <div id="notification-items-list" class="max-h-72 overflow-y-auto divide-y divide-brand-500/10">
+                                    <div class="p-5 text-center text-xs text-brand-600 font-medium">Memuat notifikasi...</div>
                                 </div>
                             </div>
                         </div>
                     `;
+                    window._onNotifContainerReady(); // starts polling + immediate fetch
                 }
 
                 // Render Mobile Profile Menu Links
@@ -550,12 +552,11 @@
             if (token) {
                 try {
                     // Kirim request logout ke Backend API Laravel
-                    await fetch('/api/v1/logout', {
+                    await fetch('/logout', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     });
@@ -565,6 +566,7 @@
             }
 
             // Hapus data autentikasi lokal client-side
+            if (window.stopNotificationPolling) window.stopNotificationPolling();
             localStorage.removeItem('preloved_token');
             localStorage.removeItem('preloved_user');
             localStorage.removeItem('has_filled_sell_form');
@@ -577,9 +579,223 @@
             }, 800);
         };
 
+        // ─── Notification System ──────────────────────────────────────────
+        let _notifPollTimer = null;
+        let _notifRendered  = false; // guard so we only start poll after DOM is ready
+
+        // Called by syncAuthHeader after it injects the bell HTML into the DOM
+        window._onNotifContainerReady = function() {
+            _notifRendered = true;
+            window.startNotificationPolling();
+        };
+
+        window.startNotificationPolling = function() {
+            if (_notifPollTimer) clearInterval(_notifPollTimer);
+            window.fetchNotifications(); // immediate first fetch
+            _notifPollTimer = setInterval(window.fetchNotifications, 12000); // every 12s
+        };
+
+        window.stopNotificationPolling = function() {
+            if (_notifPollTimer) { clearInterval(_notifPollTimer); _notifPollTimer = null; }
+        };
+
+        // Toggle open/close
+        window.toggleNotifDropdown = function() {
+            const dropdown = document.getElementById('notification-dropdown');
+            if (!dropdown) return;
+            const isOpen = !dropdown.classList.contains('hidden');
+            dropdown.classList.toggle('hidden');
+            if (!isOpen) {
+                // Just opened → refresh
+                window.fetchNotifications();
+            }
+        };
+
+        // Close when clicking outside the notification container
+        document.addEventListener('click', function(e) {
+            const container = document.getElementById('nav-notification-container');
+            const dropdown  = document.getElementById('notification-dropdown');
+            if (container && dropdown && !container.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Fetch notifications from API
+        window.fetchNotifications = async function() {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/v1/notifications', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) return;
+
+                const json = await res.json();
+                const notifications = json.data   || [];
+                const unreadCount   = json.unread_count ?? notifications.filter(n => !n.read_at).length;
+
+                window._renderNotificationBadge(unreadCount);
+                window._renderNotificationList(notifications);
+
+            } catch (_) { /* offline / server down — silently ignore */ }
+        };
+
+        // Update the red badge on the bell
+        window._renderNotificationBadge = function(count) {
+            const badge = document.getElementById('notification-badge');
+            if (!badge) return;
+            const n = parseInt(count) || 0;
+            badge.textContent = n > 9 ? '9+' : n;
+            if (n > 0) {
+                badge.classList.remove('scale-0');
+                badge.classList.add('scale-100');
+            } else {
+                badge.classList.remove('scale-100');
+                badge.classList.add('scale-0');
+            }
+        };
+
+        // Render the list of notification items
+        window._renderNotificationList = function(notifications) {
+            const list = document.getElementById('notification-items-list');
+            if (!list) return;
+
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `
+                    <div class="py-10 text-center">
+                        <div class="flex justify-center mb-2 text-brand-500/30">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-brand-600 font-medium">Belum ada notifikasi</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = notifications.slice(0, 25).map(notif => {
+                const data    = notif.data    || {};
+                const isUnread = !notif.read_at;
+                const timeAgo = window._timeAgo(notif.created_at);
+                const type    = data.type || '';
+
+                let iconHtml = '';
+                let actionUrl = '#';
+                let rowBg = isUnread ? 'bg-amber-50' : '';
+
+                // ── Message notification (buyer → seller  OR  seller → buyer) ──
+                if (type === 'new_message') {
+                    iconHtml = `<div class="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>`;
+                    // Go to chat with the sender
+                    const senderId = data.sender_id;
+                    actionUrl = senderId ? `/chat?contact_id=${senderId}` : '/chat';
+
+                // ── Order notification (buyer checkout → seller) ──
+                } else if (type === 'new_order') {
+                    iconHtml = `<div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </div>`;
+                    actionUrl = '/seller/dashboard';
+
+                // ── Generic / fallback ──
+                } else {
+                    iconHtml = `<div class="w-9 h-9 rounded-full bg-brand-500/15 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>`;
+                    actionUrl = data.url || '#';
+                }
+
+                const title   = _escHtml(data.title   || 'Notifikasi');
+                const message = _escHtml(data.message || '');
+                const notifId = notif.id || '';
+
+                return `
+                    <a href="${actionUrl}"
+                       onclick="window.markNotificationRead('${notifId}'); return true;"
+                       class="flex items-start gap-3 px-4 py-3.5 hover:bg-brand-100/50 transition-colors cursor-pointer ${rowBg} border-b border-brand-500/8 last:border-0">
+                        ${iconHtml}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[11px] font-bold text-brand-900 leading-snug">${title}</p>
+                            <p class="text-[10px] text-brand-600/80 mt-0.5 leading-relaxed line-clamp-2">${message}</p>
+                            <span class="text-[9px] text-brand-600/50 font-medium mt-1 block">${timeAgo}</span>
+                        </div>
+                        ${isUnread ? '<span class="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5 flex-none"></span>' : ''}
+                    </a>
+                `;
+            }).join('');
+        };
+
+        // Mark a single notification as read (fire & forget)
+        window.markNotificationRead = async function(id) {
+            const token = localStorage.getItem('preloved_token');
+            if (!token || !id || id === 'undefined' || id === 'null') return;
+            try {
+                await fetch(`/api/v1/notifications/${id}/read`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    }
+                });
+                // Refresh badge after a short delay
+                setTimeout(window.fetchNotifications, 400);
+            } catch (_) { /* ignore */ }
+        };
+
+        // Mark all as read
+        window.markAllNotificationsRead = async function() {
+            const token = localStorage.getItem('preloved_token');
+            if (!token) return;
+            try {
+                await fetch('/api/v1/notifications/read-all', {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    }
+                });
+                await window.fetchNotifications();
+            } catch (_) { /* ignore */ }
+        };
+
+        // Relative time helper
+        window._timeAgo = function(dateStr) {
+            if (!dateStr) return '';
+            const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+            if (diff < 60)     return 'Baru saja';
+            if (diff < 3600)   return Math.floor(diff / 60)   + ' menit lalu';
+            if (diff < 86400)  return Math.floor(diff / 3600)  + ' jam lalu';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
+            return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        };
+
+        // HTML escape helper (prevents XSS in notification content)
+        function _escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         // Jalankan sinkronisasi awal saat dokumen selesai dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            window.syncAuthHeader();
+            window.syncAuthHeader(); // this will call _onNotifContainerReady if logged in
             window.updateCartBadge();
         });
     </script>

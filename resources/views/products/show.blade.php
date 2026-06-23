@@ -20,14 +20,14 @@
         <!-- Left Side: Product Images Gallery -->
         <div class="lg:col-span-5 space-y-4">
             <div class="aspect-square bg-[#FBF6EC] rounded-2xl overflow-hidden flex items-center justify-center border border-[#D4A017]/20 relative group">
-                <img id="main-image" src="{{ $product->image_urls[0] ?? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80' }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
+                <img id="main-image" src="{{ $product->image_urls[0] ?? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80' }}" alt="{{ $product->title }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';" class="w-full h-full object-cover">
             </div>
             
             @if(isset($product->image_urls) && count($product->image_urls) > 1)
             <div class="grid grid-cols-4 gap-2">
                 @foreach($product->image_urls as $img)
                 <button onclick="document.getElementById('main-image').src = '{{ $img }}'" class="aspect-square rounded-xl bg-[#FBF6EC] border border-[#D4A017]/20 overflow-hidden hover:border-[#7A4A10] focus:outline-none transition">
-                    <img src="{{ $img }}" alt="Thumbnail" class="w-full h-full object-cover">
+                    <img src="{{ $img }}" alt="Thumbnail" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=150&h=150&q=80';" class="w-full h-full object-cover">
                 </button>
                 @endforeach
             </div>
@@ -76,7 +76,15 @@
                 <!-- Seller Profile Area -->
                 <div class="bg-[#FBF6EC] rounded-2xl p-5 border border-[#D4A017]/20 mb-8 flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <img src="{{ $product->seller->avatar_url ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80' }}" alt="Avatar Seller" class="w-12 h-12 rounded-full object-cover border-2 border-[#D4A017]">
+                        @if($product->seller && $product->seller->avatar_url && $product->seller->avatar_url !== 'null' && $product->seller->avatar_url !== '')
+                            <img src="{{ $product->seller->avatar_url }}" alt="Avatar Seller" class="w-12 h-12 rounded-full object-cover border-2 border-[#D4A017]" onerror="this.onerror=null; this.outerHTML='<div class=&quot;w-12 h-12 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-2 border-[#D4A017] shadow-sm&quot;><svg class=&quot;w-6 h-6&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;><path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2.5&quot; d=&quot;M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z&quot;></path></svg></div>';">
+                        @else
+                            <div class="w-12 h-12 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-2 border-[#D4A017] shadow-sm">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                        @endif
                         <div>
                             <p class="text-xs font-bold text-[#7A4A10] uppercase tracking-wider">Penjual Mahasiswa</p>
                             <p class="text-sm font-extrabold text-[#2E1A06] flex items-center">
@@ -132,7 +140,7 @@
                 <textarea id="inapp-message" rows="2" placeholder="Halo, barang ini masih ada? Bisa ketemuan di depan perpustakaan?" 
                           class="w-full p-3 bg-[#FBF6EC] border border-[#D4A017]/30 rounded-xl text-xs text-[#2E1A06] focus:border-[#7A4A10] focus:ring-2 focus:ring-[#7A4A10]/10 focus:outline-none"></textarea>
                 <button onclick="sendInAppMessage()" id="btn-send-msg" class="w-full py-2 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow">
-                    <span>✉ Kirim Pesan Internal</span>
+                    <span>Kirim Pesan Internal</span>
                 </button>
             </div>
 
@@ -238,6 +246,8 @@
         btn.disabled = true;
         btn.innerHTML = 'Mengirim...';
 
+        const redirectUrl = `/chat?contact_id=${sellerId}&contact_name=${encodeURIComponent(currentProduct.seller_name)}&product_title=${encodeURIComponent(currentProduct.title)}&product_id=${currentProduct.id}`;
+
         try {
             const response = await fetch('/api/v1/chats', {
                 method: 'POST',
@@ -257,6 +267,9 @@
                 window.showToast('Pesan terkirim secara in-app!');
                 document.getElementById('inapp-message').value = '';
                 closeChatModal();
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
             } else {
                 window.showToast('Gagal mengirim pesan internal.', 'error');
             }
@@ -264,9 +277,12 @@
             console.log('Chat API offline, simulating chat store.');
             window.showToast('Pesan terkirim (Simulasi Offline)!');
             closeChatModal();
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 800);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<span>✉ Kirim Pesan Internal</span>';
+            btn.innerHTML = '<span>Kirim Pesan Internal</span>';
         }
     }
 

@@ -39,21 +39,21 @@
                     <label class="block text-xs font-bold text-[#7A4A10] uppercase tracking-wider mb-2">Kategori</label>
                     <select id="category" required class="w-full px-4 py-3 bg-[#FBF6EC] border border-[#D4A017]/30 rounded-2xl text-sm focus:border-[#7A4A10] focus:ring-4 focus:ring-[#7A4A10]/10 focus:outline-none transition-all text-[#2E1A06]">
                         <option value="" disabled selected>Pilih Kategori Barang</option>
-                        <option value="Textbooks">📚 Buku Kuliah (Textbooks)</option>
-                        <option value="Electronics">🔌 Elektronik & Gadget</option>
-                        <option value="Dorm Life">🏠 Kebutuhan Kos (Furniture/Fridge)</option>
-                        <option value="Apparel">👕 Pakaian & Fashion</option>
-                        <option value="Others">📦 Lain-lain</option>
+                        <option value="Textbooks">Buku Kuliah (Textbooks)</option>
+                        <option value="Electronics">Elektronik & Gadget</option>
+                        <option value="Dorm Life">Kebutuhan Kos (Furniture/Fridge)</option>
+                        <option value="Apparel">Pakaian & Fashion</option>
+                        <option value="Others">Lain-lain</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-[#7A4A10] uppercase tracking-wider mb-2">Kondisi Barang</label>
                     <select id="condition" required class="w-full px-4 py-3 bg-[#FBF6EC] border border-[#D4A017]/30 rounded-2xl text-sm focus:border-[#7A4A10] focus:ring-4 focus:ring-[#7A4A10]/10 focus:outline-none transition-all text-[#2E1A06]">
                         <option value="" disabled selected>Pilih Kondisi Fisik</option>
-                        <option value="New">✨ Baru (Belum Pernah Dipakai)</option>
-                        <option value="Like New">💎 Sangat Mulus (Hampir Baru)</option>
-                        <option value="Good">👍 Bagus (Pemakaian Wajar)</option>
-                        <option value="Well Used">🚲 Bekas Berat (Fungsi Normal)</option>
+                        <option value="New">Baru (Belum Pernah Dipakai)</option>
+                        <option value="Like New">Sangat Mulus (Hampir Baru)</option>
+                        <option value="Good">Bagus (Pemakaian Wajar)</option>
+                        <option value="Well Used">Bekas Berat (Fungsi Normal)</option>
                     </select>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                     Batal
                 </a>
                 <button type="submit" id="btn-upload-submit" class="px-8 py-3.5 text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] font-bold text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2">
-                    <span id="btn-upload-text">🚀 Publikasikan Barang</span>
+                    <span id="btn-upload-text">Publikasikan Barang</span>
                     <span id="btn-upload-loader" class="hidden animate-spin h-4 w-4 border-2 border-[#FBF6EC] border-t-transparent rounded-full"></span>
                 </button>
             </div>
@@ -198,7 +198,7 @@
                 localStorage.setItem('has_filled_sell_form', 'true');
                 window.showToast('Barang Anda berhasil dipublikasikan!');
                 setTimeout(() => {
-                    window.location.href = "{{ route('home') }}";
+                    window.location.href = "{{ route('seller.dashboard') }}";
                 }, 1000);
                 return;
             }
@@ -233,12 +233,12 @@
 
         setTimeout(() => {
             btnSubmit.disabled = false;
-            btnText.textContent = '🚀 Publikasikan Barang';
+            btnText.textContent = 'Publikasikan Barang';
             btnLoader.classList.add('hidden');
 
             window.showToast('Barang Anda berhasil dipublikasikan!');
             setTimeout(() => {
-                window.location.href = "{{ route('home') }}";
+                window.location.href = "{{ route('seller.dashboard') }}";
             }, 1000);
         }, 1200);
     }

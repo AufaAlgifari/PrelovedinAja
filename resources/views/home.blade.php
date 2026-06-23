@@ -27,7 +27,7 @@
                 <a href="{{ route('login') }}?redirect={{ urlencode(route('products.index')) }}" id="hero-btn-shop" class="px-8 py-3.5 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-extrabold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-350 transform hover:-translate-y-0.5">
                     Mulai Belanja
                 </a>
-                <a href="{{ route('login') }}?redirect={{ urlencode(route('products.create')) }}" id="hero-btn-sell" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
+                <a href="{{ route('login') }}?redirect={{ urlencode(route('seller.dashboard')) }}" id="hero-btn-sell" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
                     Jual Barang
                 </a>
             </div>
@@ -48,7 +48,7 @@
                 <a href="#catalog-section" class="px-8 py-3.5 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-extrabold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-350 transform hover:-translate-y-0.5">
                     Mulai Belanja
                 </a>
-                <a href="{{ route('products.create') }}" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
+                <a href="{{ route('seller.dashboard') }}" id="hero-user-btn-sell" class="px-8 py-3.5 bg-transparent hover:bg-[#7A4A10]/5 text-[#7A4A10] border-2 border-[#7A4A10] font-extrabold text-sm rounded-full transition-all duration-350">
                     Jual Barang
                 </a>
             </div>
@@ -124,8 +124,27 @@
         
         <div class="relative w-full overflow-hidden pt-2 pb-6 flex justify-center">
             <div id="category-slider-track" class="flex items-center gap-6 md:gap-10 transition-all duration-500 ease-out py-8 w-max" style="transform: translateX(0px);">
+                <!-- Clone of Card 4: Fashion (at the start for infinite loop) -->
+                <a href="{{ route('products.index') }}?category=Apparel" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] via-[#7A4A10] to-[#2E1A06]" data-index="3">
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                    </div>
+                    <div class="mt-8 flex justify-center items-center flex-grow">
+                        <svg class="w-24 h-24 opacity-90 drop-shadow-md text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <h3 class="text-lg font-black font-heading text-white">Fashion</h3>
+                        <p class="text-[10px] text-white/80 leading-normal font-light">Pakaian, kaos, jaket, sepatu, & tas Unsoed</p>
+                        <div class="w-full bg-white/20 hover:bg-white/35 text-white font-bold py-2 rounded-xl text-center text-[10px] mt-2 transition duration-200">Jelajahi Kategori</div>
+                    </div>
+                </a>
+
                 <!-- Card 1: Buku Kuliah -->
-                <a href="{{ route('products.index') }}?category=Textbooks" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-all duration-350 shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] to-[#7A4A10]" data-index="0">
+                <a href="{{ route('products.index') }}?category=Textbooks" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] to-[#7A4A10]" data-index="0">
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
@@ -144,7 +163,7 @@
                 </a>
 
                 <!-- Card 2: Elektronik -->
-                <a href="{{ route('products.index') }}?category=Electronics" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-all duration-350 shadow-lg cursor-pointer bg-gradient-to-br from-[#7A4A10] to-[#2E1A06]" data-index="1">
+                <a href="{{ route('products.index') }}?category=Electronics" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#7A4A10] to-[#2E1A06]" data-index="1">
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" />
@@ -163,7 +182,7 @@
                 </a>
 
                 <!-- Card 3: Peralatan Kost -->
-                <a href="{{ route('products.index') }}?category=Dorm Life" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-all duration-350 shadow-lg cursor-pointer bg-gradient-to-br from-[#2E1A06] to-[#D4A017]" data-index="2">
+                <a href="{{ route('products.index') }}?category=Dorm Life" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#2E1A06] to-[#D4A017]" data-index="2">
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 7.5h1.5m-1.5 3h1.5m-7.5-3h1.5m-1.5 3h1.5m-3-6h16.5a1.5 1.5 0 011.5 1.5v18a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 21V3.364a1.5 1.5 0 011.5-1.5z" />
@@ -182,7 +201,7 @@
                 </a>
 
                 <!-- Card 4: Fashion -->
-                <a href="{{ route('products.index') }}?category=Apparel" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-all duration-350 shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] via-[#7A4A10] to-[#2E1A06]" data-index="3">
+                <a href="{{ route('products.index') }}?category=Apparel" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] via-[#7A4A10] to-[#2E1A06]" data-index="3">
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -196,6 +215,25 @@
                     <div class="space-y-2 text-left">
                         <h3 class="text-lg font-black font-heading text-white">Fashion</h3>
                         <p class="text-[10px] text-white/80 leading-normal font-light">Pakaian, kaos, jaket, sepatu, & tas Unsoed</p>
+                        <div class="w-full bg-white/20 hover:bg-white/35 text-white font-bold py-2 rounded-xl text-center text-[10px] mt-2 transition duration-200">Jelajahi Kategori</div>
+                    </div>
+                </a>
+
+                <!-- Clone of Card 1: Buku Kuliah (at the end for infinite loop) -->
+                <a href="{{ route('products.index') }}?category=Textbooks" class="slider-card shrink-0 w-60 h-96 rounded-3xl p-6 flex flex-col justify-between text-white relative transition-[transform,opacity] duration-500 ease-out shadow-lg cursor-pointer bg-gradient-to-br from-[#D4A017] to-[#7A4A10]" data-index="0">
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2.5">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                    </div>
+                    <div class="mt-8 flex justify-center items-center flex-grow">
+                        <svg class="w-24 h-24 opacity-90 drop-shadow-md text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <h3 class="text-lg font-black font-heading text-white">Buku Kuliah</h3>
+                        <p class="text-[10px] text-white/80 leading-normal font-light">Buku, diktat & modul kuliah Unsoed</p>
                         <div class="w-full bg-white/20 hover:bg-white/35 text-white font-bold py-2 rounded-xl text-center text-[10px] mt-2 transition duration-200">Jelajahi Kategori</div>
                     </div>
                 </a>
@@ -313,8 +351,8 @@
                 Ubah buku semester lalu, baju lama, atau elektronik lama menjadi uang saku. Sangat mudah, cukup upload gambar, tentukan harga, dan ketemuan di kampus!
             </p>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('login') }}?redirect={{ urlencode(route('products.create')) }}" class="px-6 py-3 bg-[#D4A017] hover:bg-[#b88910] text-[#2E1A06] font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5">
-                    ➕ Mulai Jual Sekarang
+                <a href="{{ route('login') }}?redirect={{ urlencode(route('seller.dashboard')) }}" id="banner-btn-sell" class="px-6 py-3 bg-[#D4A017] hover:bg-[#b88910] text-[#2E1A06] font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5">
+                    Mulai Jual Sekarang
                 </a>
                 <a href="#cara-kerja" id="banner-btn-cara-kerja" class="px-6 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] font-bold text-xs rounded-xl border border-[#D4A017]/30 transition">
                     Pelajari Cara Kerja
@@ -349,10 +387,11 @@
     let renderedProductsCache = [];
 
     // Slider State & Logic
-    let activeIndex = 0;
+    let activeIndex = 1; // Start at physical index 1 (the real first card)
     let cards = [];
     let autoPlayInterval = null;
     const autoplayDelay = 3500; // 3.5 seconds
+    let isTransitioning = false; // Prevent double click during animation
 
     function startAutoPlay() {
         stopAutoPlay();
@@ -368,13 +407,19 @@
         }
     }
 
-    function updateSlider() {
+    function updateSlider(withTransition = true) {
         const track = document.getElementById('category-slider-track');
         if (!track) return;
         if (cards.length === 0) {
             cards = document.querySelectorAll('.slider-card');
         }
         if (cards.length === 0) return;
+
+        if (!withTransition) {
+            track.style.transition = 'none';
+        } else {
+            track.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+        }
 
         const trackWidth = track.offsetWidth;
         if (trackWidth === 0) return;
@@ -383,11 +428,15 @@
         const cardWidth = activeCard.offsetWidth || 240;
         const currentGap = window.innerWidth >= 768 ? 40 : 24;
 
+        // Calculate offset to center the active card
         const cardCenterRelativeToTrackStart = activeIndex * (cardWidth + currentGap) + (cardWidth / 2);
         const trackCenter = trackWidth / 2;
         const offset = trackCenter - cardCenterRelativeToTrackStart;
 
         track.style.transform = `translateX(${offset}px)`;
+
+        // Highlight active card
+        const realIndex = activeCard.getAttribute('data-index');
 
         cards.forEach((card, idx) => {
             if (idx === activeIndex) {
@@ -404,6 +453,62 @@
                 card.classList.remove('shadow-2xl');
             }
         });
+
+        // Sync category tabs active state
+        if (realIndex !== null) {
+            const categories = ['Textbooks', 'Electronics', 'Dorm Life', 'Apparel'];
+            const activeCategory = categories[realIndex];
+            syncCategoryTabState(activeCategory);
+        }
+    }
+
+    function syncCategoryTabState(cat) {
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            if(tab.getAttribute('data-category') === cat) {
+                tab.className = "category-tab active px-4 py-2 rounded-full text-xs font-bold border transition-all duration-200 bg-[#7A4A10] border-[#7A4A10] text-[#FBF6EC] shadow-sm";
+            } else {
+                tab.className = "category-tab px-4 py-2 rounded-full text-xs font-bold border border-[#D4A017]/35 text-[#2E1A06] bg-[#FBF6EC] hover:bg-[#F5E4B0] transition-all duration-200";
+            }
+        });
+    }
+
+    function goToSlide(index, withTransition = true) {
+        if (isTransitioning) return;
+        if (cards.length === 0) cards = document.querySelectorAll('.slider-card');
+        if (cards.length === 0) return;
+
+        // Prevent out of bounds
+        if (index < 0 || index >= cards.length) return;
+
+        isTransitioning = true;
+        activeIndex = index;
+        updateSlider(withTransition);
+
+        // If transition is disabled, transitionend won't fire, so reset guard immediately.
+        if (!withTransition) {
+            isTransitioning = false;
+        }
+    }
+
+    function handleTransitionEnd(e) {
+        const track = document.getElementById('category-slider-track');
+        if (!track) return;
+        // Only trigger for track itself and for transform property
+        if (e && e.target !== track) return;
+        if (e && e.propertyName !== 'transform') return;
+
+        if (activeIndex === cards.length - 1) {
+            // Reached Clone 1 at index 5: instantly jump to Card 1 at index 1
+            activeIndex = 1;
+            updateSlider(false);
+            track.offsetHeight; // force repaint
+        } else if (activeIndex === 0) {
+            // Reached Clone 4 at index 0: instantly jump to Card 4 at index 4
+            activeIndex = cards.length - 2;
+            updateSlider(false);
+            track.offsetHeight; // force repaint
+        }
+        isTransitioning = false;
     }
 
     function nextSlide(e) {
@@ -412,10 +517,8 @@
             e.stopPropagation();
             startAutoPlay(); // Reset timer on manual click
         }
-        if (cards.length === 0) cards = document.querySelectorAll('.slider-card');
-        if (cards.length === 0) return;
-        activeIndex = (activeIndex + 1) % cards.length;
-        updateSlider();
+        if (isTransitioning) return;
+        goToSlide(activeIndex + 1, true);
     }
 
     function prevSlide(e) {
@@ -424,10 +527,8 @@
             e.stopPropagation();
             startAutoPlay(); // Reset timer on manual click
         }
-        if (cards.length === 0) cards = document.querySelectorAll('.slider-card');
-        if (cards.length === 0) return;
-        activeIndex = (activeIndex - 1 + cards.length) % cards.length;
-        updateSlider();
+        if (isTransitioning) return;
+        goToSlide(activeIndex - 1, true);
     }
 
     // Expose functions globally for HTML inline onclick
@@ -436,6 +537,8 @@
     window.updateSlider = updateSlider;
     window.startAutoPlay = startAutoPlay;
     window.stopAutoPlay = stopAutoPlay;
+    window.goToSlide = goToSlide;
+    window.handleTransitionEnd = handleTransitionEnd;
 
     function filterCategory(cat) {
         currentCategory = cat;
@@ -542,7 +645,7 @@
                 </span>
 
                 <a href="${detailUrl}" class="block aspect-square w-full bg-gray-50 overflow-hidden relative">
-                    <img src="${imageUrl}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                    <img src="${imageUrl}" alt="${p.title}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
                 </a>
 
                 <div class="p-4 flex flex-col gap-2.5">
@@ -645,8 +748,8 @@
             card.addEventListener('click', (e) => {
                 if (idx !== activeIndex) {
                     e.preventDefault();
-                    activeIndex = idx;
-                    updateSlider();
+                    if (isTransitioning) return;
+                    goToSlide(idx, true);
                     startAutoPlay(); // Reset timer on manual selection
                 }
             });
@@ -655,7 +758,7 @@
         // Initialize/update slider if logged in
         if (userJson) {
             setTimeout(() => {
-                updateSlider();
+                updateSlider(false);
                 startAutoPlay();
             }, 50);
         }
@@ -665,26 +768,35 @@
         if (sliderTrack) {
             sliderTrack.addEventListener('mouseenter', stopAutoPlay);
             sliderTrack.addEventListener('mouseleave', startAutoPlay);
+            sliderTrack.addEventListener('transitionend', handleTransitionEnd);
         }
 
         // Window resize handler
         window.addEventListener('resize', () => {
             if (localStorage.getItem('preloved_user')) {
-                updateSlider();
+                updateSlider(false);
             }
         });
         
         // Redirect logic for start shopping/sell buttons if guest
         const isLoggedIn = !!localStorage.getItem('preloved_token');
 
+        const btnMulaiBelanja = document.getElementById('hero-btn-shop');
+        const btnJualBarang = document.getElementById('hero-btn-sell');
+        const btnUserJualBarang = document.getElementById('hero-user-btn-sell');
+        const btnMulaiJualSekarang = document.getElementById('banner-btn-sell');
+
         if (btnMulaiBelanja) {
-            btnMulaiBelanja.href = isLoggedIn ? '#catalog-section' : '{{ route("login") }}';
+            btnMulaiBelanja.href = isLoggedIn ? '#catalog-section' : '{{ route("login") }}?redirect=' + encodeURIComponent('{{ route("products.index") }}');
         }
         if (btnJualBarang) {
-            btnJualBarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+            btnJualBarang.href = isLoggedIn ? '{{ route("seller.dashboard") }}' : '{{ route("login") }}?redirect=' + encodeURIComponent('{{ route("seller.dashboard") }}');
+        }
+        if (btnUserJualBarang) {
+            btnUserJualBarang.href = isLoggedIn ? '{{ route("seller.dashboard") }}' : '{{ route("login") }}?redirect=' + encodeURIComponent('{{ route("seller.dashboard") }}');
         }
         if (btnMulaiJualSekarang) {
-            btnMulaiJualSekarang.href = isLoggedIn ? '{{ route("products.create") }}' : '{{ route("login") }}';
+            btnMulaiJualSekarang.href = isLoggedIn ? '{{ route("seller.dashboard") }}' : '{{ route("login") }}?redirect=' + encodeURIComponent('{{ route("seller.dashboard") }}');
         }
         
         const navSearch = document.getElementById('navbar-search');

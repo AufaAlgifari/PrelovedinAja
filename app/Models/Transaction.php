@@ -24,6 +24,7 @@ class Transaction extends Model
         'metode_pengiriman',
         'alamat_pengiriman',
         'metode_pembayaran',
+        'shipping_method',
     ];
 
 
@@ -59,7 +60,7 @@ class Transaction extends Model
 
     public function isCompleted(): bool
     {
-        return $this->status === 'success';
+        return $this->status === 'completed';
     }
 
     public function canBeReviewed(): bool

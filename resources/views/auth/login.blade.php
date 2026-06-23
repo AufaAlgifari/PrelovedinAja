@@ -225,7 +225,7 @@
             const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : "{{ route('home') }}";
 
             try {
-                const response = await fetch('/api/v1/login', {
+                const response = await fetch('/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class NewChatMessageNotification extends Notification implements ShouldQueue
+class NewChatMessageNotification extends Notification
 {
     use Queueable;
 
@@ -29,7 +29,7 @@ class NewChatMessageNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     /**
@@ -40,13 +40,19 @@ class NewChatMessageNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $senderName = $this->message->sender ? $this->message->sender->name : 'Seseorang';
+        $preview = mb_strlen($this->message->pesan) > 60
+            ? mb_substr($this->message->pesan, 0, 60) . '...'
+            : $this->message->pesan;
+
         return [
-            'title' => 'Pesan Baru',
-            'message' => "Anda menerima pesan baru dari {$senderName}",
-            'sender_id' => $this->message->sender_id,
+            'type'        => 'new_message',
+            'title'       => 'Pesan Baru dari ' . $senderName,
+            'message'     => $preview,
+            'sender_id'   => $this->message->sender_id,
             'sender_name' => $senderName,
-            'chat_id' => $this->message->chat_id,
-            'pesan' => $this->message->pesan,
+            'chat_id'     => $this->message->chat_id,
+            'pesan'       => $this->message->pesan,
+            'url'         => '/chat?contact_id=' . $this->message->sender_id,
         ];
     }
 

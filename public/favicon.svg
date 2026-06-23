@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#7A4A10"/>
+  <!-- Shopping bag body -->
+  <path d="M42 72H158L168 175C168 181 163 185 157 185H43C37 185 32 181 32 175L42 72Z" fill="#D4A017"/>
+  <!-- Bag handle -->
+  <path d="M68 72C68 48 132 48 132 72" stroke="#FBF6EC" stroke-width="13" stroke-linecap="round"/>
+  <!-- P letter cutout -->
+  <path d="M72 98H108C122 98 132 108 132 120C132 132 122 142 108 142H72V98ZM72 142V160" stroke="#7A4A10" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Handle pin -->
+  <path d="M52 58.5V78C52 80.5 49.5 82 47 82C44.5 82 42 80.5 42 78V55" stroke="#FBF6EC" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="47" cy="82" r="6.5" fill="#2E1A06"/>
+</svg>

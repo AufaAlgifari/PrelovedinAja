@@ -71,9 +71,9 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::patch('/admin/reports/{id}/resolve', [ReportController::class, 'resolve'])->middleware('admin');
 
     // Notifications
-    Route::get('/notifications',        [NotificationController::class, 'index']);
-    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::get('/notifications',             [NotificationController::class, 'index']);
     Route::patch('/notifications/read-all',  [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
 });
 

@@ -227,10 +227,27 @@
             onSuccess: function(result) {
                 window.showToast('Pembayaran berhasil! Transaksi Anda sedang diproses.');
                 
-                // Redirect to transaction history after short delay
-                setTimeout(() => {
-                    window.location.href = '{{ route('transactions.history') }}';
-                }, 1500);
+                // Confirm payment success locally
+                fetch('/payment/confirm-success', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ order_id: result.order_id || result.id || snapToken })
+                })
+                .then(() => {
+                    setTimeout(() => {
+                        window.location.href = '{{ route('transactions.history') }}';
+                    }, 1000);
+                })
+                .catch(err => {
+                    console.error('Error confirming payment:', err);
+                    setTimeout(() => {
+                        window.location.href = '{{ route('transactions.history') }}';
+                    }, 1000);
+                });
             },
             onPending: function(result) {
                 window.showToast('Pembayaran tertunda. Silakan selesaikan pembayaran Anda.', 'info');

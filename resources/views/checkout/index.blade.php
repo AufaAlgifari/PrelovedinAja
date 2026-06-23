@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@section('head')
+<script type="text/javascript"
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('midtrans.client_key') }}"></script>
+@endsection
+
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Back to Cart Link -->
@@ -25,7 +31,7 @@
         </div>
     @endif
 
-    <form action="{{ route('checkout.store', $product->id) }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <form id="checkout-form" onsubmit="handleCheckoutSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         @csrf
 
         <!-- KOLOM KIRI: STICKY -->
@@ -114,8 +120,8 @@
                 <!-- Chat Hint for Coordination -->
                 <div class="mt-4 pt-5 border-t border-[#D4A017]/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p class="text-[11px] font-bold text-[#7A4A10] italic">Hubungi penjual untuk koordinasi pengiriman atau lokasi COD</p>
-                    <a href="{{ route('chat.index') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-[10px] font-bold uppercase tracking-wider rounded-xl transition transform hover:-translate-y-0.5 shadow-md w-full sm:w-auto">
-                        💬 Chat Penjual
+                    <a href="{{ route('chat.index') }}?contact_id={{ $product->seller_id }}&contact_name={{ urlencode($product->seller->name ?? 'Penjual') }}&product_title={{ urlencode($product->title) }}&product_id={{ $product->id }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-[10px] font-bold uppercase tracking-wider rounded-xl transition transform hover:-translate-y-0.5 shadow-md w-full sm:w-auto">
+                        Chat Penjual
                     </a>
                 </div>
             </section>
@@ -165,7 +171,7 @@
 
             <!-- 5. Konfirmasi -->
             <button type="submit" class="w-full text-[#FBF6EC] bg-[#7A4A10] hover:bg-[#5f390c] py-5 rounded-2xl font-black text-sm uppercase tracking-wider shadow-xl transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2">
-                ✅ Konfirmasi Pembelian
+                Konfirmasi Pembelian
             </button>
         </div>
     </form>
@@ -198,5 +204,117 @@
             }
         }
     });
+
+    async function handleCheckoutSubmit(e) {
+        e.preventDefault();
+        
+        const form = document.getElementById('checkout-form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+
+        const formData = {
+            buyer_id: document.getElementById('buyer_id_input').value,
+            metode_pengiriman: form.querySelector('input[name="metode_pengiriman"]:checked')?.value,
+            alamat_pengiriman: document.getElementById('alamat_pengiriman').value,
+            metode_pembayaran: form.querySelector('input[name="metode_pembayaran"]:checked')?.value,
+        };
+
+        // Basic validation checking
+        if (!formData.metode_pengiriman) {
+            window.showToast('Silakan pilih metode pengiriman.', 'error');
+            return;
+        }
+
+        if (formData.metode_pengiriman === 'do' && !formData.alamat_pengiriman.trim()) {
+            window.showToast('Alamat pengiriman wajib diisi untuk Delivery Order.', 'error');
+            return;
+        }
+
+        if (!formData.metode_pembayaran) {
+            window.showToast('Silakan pilih metode pembayaran.', 'error');
+            return;
+        }
+
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="animate-spin h-5 w-5 border-2 border-[#FBF6EC] border-t-transparent rounded-full mr-2"></span>
+            Memproses...
+        `;
+
+        try {
+            const response = await fetch("{{ route('checkout.store', $product->id) }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Gagal memproses pembelian.');
+            }
+
+            if (data.snap_token) {
+                snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        window.showToast('Pembayaran berhasil!');
+                        
+                        // Confirm payment success locally
+                        fetch('/payment/confirm-success', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ order_id: result.order_id || result.id || data.snap_token })
+                        })
+                        .then(() => {
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || "{{ route('transactions.history') }}";
+                            }, 1000);
+                        })
+                        .catch(err => {
+                            console.error('Error confirming payment:', err);
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || "{{ route('transactions.history') }}";
+                            }, 1000);
+                        });
+                    },
+                    onPending: function(result) {
+                        window.showToast('Pembayaran pending, silakan selesaikan pembayaran Anda.', 'info');
+                        setTimeout(() => {
+                            window.location.href = "{{ route('transactions.waiting') }}";
+                        }, 1000);
+                    },
+                    onError: function(result) {
+                        window.showToast('Pembayaran gagal atau terjadi kesalahan.', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    },
+                    onClose: function() {
+                        window.showToast('Pembayaran dibatalkan.', 'info');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
+                });
+            } else {
+                window.showToast('Pembayaran sukses dibuat (manual)!');
+                setTimeout(() => {
+                    window.location.href = data.redirect_url || "{{ route('transactions.history') }}";
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            window.showToast(error.message || 'Terjadi kesalahan sistem.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    }
 </script>
 @endsection

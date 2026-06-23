@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Category;
@@ -470,8 +471,95 @@ Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+Route::post('/login', function (Request $request) {
+    $credentials = $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required|string',
+    ]);
+
+    $remember = $request->has('remember');
+
+    if (Auth::attempt($credentials, $remember)) {
+        $request->session()->regenerate();
+        $user = Auth::user();
+        
+        $user->tokens()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user,
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Email atau password salah.',
+    ], 422);
+})->name('login.post');
+
+Route::post('/register', function (Request $request) {
+    $data = $request->validate([
+        'name'           => 'required|string|max:255',
+        'no_camp'      => 'nullable|string', // Support either no_camp or no_kampus from request
+        'no_kampus'      => 'nullable|string',
+        'email'          => [
+            'required',
+            'email',
+            'unique:users,email',
+            'regex:/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.ac\.id$/',
+        ],
+        'password'       => 'required|string|min:8|confirmed',
+        'phone_number'   => 'nullable|string|max:20',
+        'unsoed_faculty' => 'nullable|string|max:255',
+        'unsoed_major'   => 'nullable|string|max:255',
+    ], [
+        'email.regex' => 'Email harus menggunakan domain institusi (.ac.id).',
+    ]);
+
+    $noKampus = $data['no_kampus'] ?? $data['no_camp'] ?? ('H1D0' . rand(20000, 29999));
+    
+    // Ensure no_kampus is unique in user model context
+    $user = User::create([
+        'name' => $data['name'],
+        'no_kampus' => $noKampus,
+        'email' => $data['email'],
+        'password' => Hash::make($data['password']),
+        'phone_number' => $data['phone_number'],
+        'unsoed_faculty' => $data['unsoed_faculty'],
+        'unsoed_major' => $data['unsoed_major'],
+    ]);
+
+    event(new \Illuminate\Auth\Events\Registered($user));
+
+    Auth::login($user, true);
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Registrasi berhasil. Silakan cek email Anda untuk link verifikasi.',
+        'token'   => $token,
+        'user'    => $user,
+    ], 201);
+})->name('register.post');
+
+Route::post('/logout', function (Request $request) {
+    if (Auth::check()) {
+        Auth::user()->tokens()->delete();
+    }
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return response()->json(['message' => 'Logout berhasil.']);
+})->name('logout.post');
+
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
 
 // Halaman pemberitahuan verifikasi email
 Route::get('/email/verify', function () {
@@ -513,11 +601,6 @@ Route::post('/checkout/{product}', [CheckoutController::class, 'store'])
 Route::get('/profile', function () {
     return view('profile.index');
 })->name('profile.index');
-
-// Halaman Dashboard Penjual (Seller)
-Route::get('/seller/dashboard', function () {
-    return view('seller.dashboard');
-})->name('seller.dashboard');
 
 // Halaman Dashboard Admin
 Route::get('/admin/dashboard', function () {
@@ -594,17 +677,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
     Route::get('/payment/pending', [PaymentController::class, 'paymentPending'])->name('payment.pending');
     Route::get('/payment/error', [PaymentController::class, 'paymentError'])->name('payment.error');
+    Route::post('/payment/confirm-success', [PaymentController::class, 'confirmSuccess'])->name('payment.confirm-success');
 });
 
 // Midtrans webhook (no auth needed)
 Route::post('/payment/notification', [PaymentController::class, 'handleNotification'])->name('payment.notification');
 
-// Dashboard Penjual (butuh login)
-Route::middleware('auth')->prefix('seller')->name('seller.')->group(function () {
+// Dashboard Penjual (Akses GET publik dengan Guard Client-Side)
+Route::prefix('seller')->name('seller.')->group(function () {
     Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
-    Route::get('/products', [SellerController::class, 'products'])->name('products');
     Route::get('/products/create', [SellerController::class, 'create'])->name('products.create');
+    Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+});
+
+// Mutasi Dashboard Penjual (Wajib Login Backend)
+Route::middleware('auth')->prefix('seller')->name('seller.')->group(function () {
     Route::post('/products', [SellerController::class, 'store'])->name('products.store');
     Route::delete('/products/{product}', [SellerController::class, 'destroy'])->name('products.destroy');
-    Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
+    Route::post('/transactions/{transaction}/confirm-delivery', [SellerController::class, 'confirmDelivery'])->name('transactions.confirm-delivery');
 });

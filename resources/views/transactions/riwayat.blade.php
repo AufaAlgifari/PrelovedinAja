@@ -75,7 +75,9 @@
                 items: items,
                 method: t.shipping_method === 'COD' ? 'COD (Bayar di Tempat)' : 'Delivery Order',
                 price: totalPrice || t.amount,
-                status: t.status === 'success' ? 'Berhasil' : (t.status === 'pending' ? 'Menunggu' : t.status),
+                status: t.status === 'success' ? 'Menunggu Barang' : 
+                        (t.status === 'completed' ? 'Selesai' : 
+                        (t.status === 'pending' ? 'Menunggu Pembayaran' : t.status)),
                 image: displayImage,
                 hasReviewed: t.review !== null,
                 snapToken: t.snap_token,
@@ -91,7 +93,7 @@
             title: 'Modul Praktikum Kimia Dasar UNSOED',
             method: 'COD (Gedung Soedirman)',
             price: 35000,
-            status: 'Completed',
+            status: 'Selesai',
             image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=150&h=150&q=80',
             hasReviewed: false
         };
@@ -114,9 +116,10 @@
             card.className = "bg-[#F5E4B0] rounded-3xl border border-[#D4A017]/20 shadow-lg overflow-hidden card-premium";
             
             let statusBadgeClass = "bg-[#FBF6EC] text-[#7A4A10] border-[#D4A017]/30";
-            if(trx.status === 'Berhasil' || trx.status === 'Completed') statusBadgeClass = "bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]";
-            else if(trx.status === 'Dibatalkan' || trx.status === 'Cancelled') statusBadgeClass = "bg-rose-50 text-rose-700 border-rose-100";
-            else if(trx.status === 'Menunggu' || trx.status === 'Pending') statusBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+            if(trx.status === 'Selesai' || trx.status === 'Completed') statusBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+            else if(trx.status === 'Menunggu Barang') statusBadgeClass = "bg-sky-50 text-sky-700 border-sky-200";
+            else if(trx.status === 'Dibatalkan' || trx.status === 'Cancelled' || trx.status === 'failed') statusBadgeClass = "bg-rose-50 text-rose-700 border-rose-100";
+            else if(trx.status === 'Menunggu Pembayaran' || trx.status === 'Menunggu' || trx.status === 'Pending') statusBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
 
             card.innerHTML = `
                 <!-- Card Header -->
@@ -138,7 +141,7 @@
                 </div>
 
                 <!-- Continue Payment Section (for Pending transactions) -->
-                ${(trx.status === 'Menunggu' || trx.status === 'Pending') && trx.snapToken ? `
+                ${(trx.status === 'Menunggu Pembayaran' || trx.status === 'Menunggu' || trx.status === 'Pending') && trx.snapToken ? `
                     <div class="bg-amber-50/60 p-6 border-t border-amber-200/40 space-y-3">
                         <div class="flex items-start gap-3">
                             <div class="flex-shrink-0 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
@@ -158,8 +161,25 @@
                     </div>
                 ` : ''}
 
+                <!-- Menunggu Barang Info Section -->
+                ${trx.status === 'Menunggu Barang' ? `
+                    <div class="bg-sky-50/60 p-6 border-t border-sky-200/40 space-y-2">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-bold text-sky-900 uppercase tracking-wider font-heading">Menunggu Pengiriman</h4>
+                                <p class="text-xs text-sky-850 mt-1">Pembayaran sukses! Menunggu penjual mengirimkan barang dan mengonfirmasi bahwa barang telah sampai.</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+
                 <!-- Review Section -->
-                ${(trx.status === 'Completed' || trx.status === 'Berhasil') && !trx.hasReviewed ? `
+                ${(trx.status === 'Completed' || trx.status === 'Selesai') && !trx.hasReviewed ? `
                     <div id="review-box-${index}" class="bg-[#FBF6EC]/40 p-6 border-t border-[#D4A017]/10 space-y-4">
                         <div>
                             <h4 class="text-xs font-bold text-[#2E1A06] uppercase tracking-wider font-heading">Berikan Ulasan untuk Penjual</h4>
@@ -192,7 +212,7 @@
                             </div>
                         </form>
                     </div>
-                ` : ((trx.status === 'Completed' || trx.status === 'Berhasil') && trx.hasReviewed ? `
+                ` : ((trx.status === 'Completed' || trx.status === 'Selesai') && trx.hasReviewed ? `
                     <div class="bg-[#FBF6EC]/20 p-4 border-t border-[#D4A017]/10 flex items-center justify-between text-[10px] text-[#7A4A10] font-bold uppercase tracking-wider px-6">
                         <span>Status Ulasan:</span>
                         <span class="text-emerald-700 font-extrabold">Ulasan Telah Dikirim</span>
@@ -268,10 +288,27 @@
             onSuccess: function(result) {
                 window.showToast('Pembayaran berhasil! Transaksi Anda sedang diproses.');
                 
-                // Redirect to transaction success page after short delay
-                setTimeout(() => {
-                    window.location.href = '/transactions/history';
-                }, 1500);
+                // Confirm payment success locally
+                fetch('/payment/confirm-success', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ order_id: result.order_id || result.id || snapToken })
+                })
+                .then(() => {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                })
+                .catch(err => {
+                    console.error('Error confirming payment:', err);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                });
             },
             onPending: function(result) {
                 window.showToast('Pembayaran tertunda. Silakan selesaikan pembayaran Anda.', 'info');

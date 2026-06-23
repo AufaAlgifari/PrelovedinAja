@@ -19,10 +19,15 @@
         <div class="absolute -top-24 -left-24 w-48 h-48 bg-brand-500/5 rounded-full blur-3xl"></div>
         <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-brand-600/5 rounded-full blur-3xl"></div>
 
-        <div class="border-b border-brand-500/20 pb-5 mb-8 relative flex justify-between items-center text-brand-900">
+        <div class="border-b border-brand-500/20 pb-5 mb-8 relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-brand-900">
             <div>
                 <h1 class="text-3xl font-extrabold tracking-tight font-heading">Profil Saya</h1>
                 <p class="text-xs text-brand-600 mt-1 font-medium">Kelola informasi kartu identitas mahasiswa dan detail kontak Anda.</p>
+            </div>
+            <div>
+                <a href="{{ route('transactions.history') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md transition transform hover:-translate-y-0.5 whitespace-nowrap">
+                    Riwayat Pembelian
+                </a>
             </div>
         </div>
 
@@ -152,7 +157,7 @@
         document.getElementById('major').value = user.unsoed_major || 'UNSOED';
         document.getElementById('avatar_url').value = user.avatar_url || '';
 
-        const hasCustomAvatar = user.avatar_url && !user.avatar_url.includes('unsplash.com');
+        const hasCustomAvatar = user.avatar_url && user.avatar_url !== 'null' && user.avatar_url !== '';
         const avatarHtml = hasCustomAvatar
             ? `<img id="profile-avatar" class="h-20 w-20 rounded-full object-cover border-4 border-brand-500/50 shadow-md" src="${user.avatar_url}">`
             : `<div id="profile-avatar" class="h-20 w-20 rounded-full bg-[#7A4A10]/15 text-[#7A4A10] flex items-center justify-center border-4 border-brand-500/50 shadow-md">

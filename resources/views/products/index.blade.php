@@ -477,7 +477,7 @@
                 </span>
 
                 <a href="${detailUrl}" class="block aspect-square w-full bg-gray-50 overflow-hidden relative">
-                    <img src="${imageUrl}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                    <img src="${imageUrl}" alt="${p.title}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
                 </a>
 
                 <div class="p-4 sm:p-5 flex flex-col gap-3">

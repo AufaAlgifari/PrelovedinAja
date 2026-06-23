@@ -264,10 +264,20 @@ class PaymentController extends Controller
                 $transaction->update(['status' => 'challenge']);
             } else if ($fraudStatus == 'accept') {
                 $transaction->update(['status' => 'success']);
+                
+                // Mark single product as sold if single product checkout
+                if ($transaction->product_id) {
+                    $product = \App\Models\Product::find($transaction->product_id);
+                    if ($product) {
+                        $product->update(['status' => 'Sold']);
+                    }
+                    \App\Models\Cart::where('product_id', $transaction->product_id)->delete();
+                }
+
                 $this->completeTransaction($transaction);
             }
         } else if ($transactionStatus == 'settlement') {
-            // Mark products as sold
+            // Mark products as sold (cart items fallback)
             $cartItems = \App\Models\Cart::where('user_id', $transaction->user_id)->with('product')->get();
             foreach ($cartItems as $cartItem) {
                 if ($cartItem->product) {
@@ -278,19 +288,44 @@ class PaymentController extends Controller
             // Delete cart items after marking products as sold
             $transaction->user->carts()->delete();
 
+            // Mark single product as sold if single product checkout
+            if ($transaction->product_id) {
+                $product = \App\Models\Product::find($transaction->product_id);
+                if ($product) {
+                    $product->update(['status' => 'Sold']);
+                }
+                \App\Models\Cart::where('product_id', $transaction->product_id)->delete();
+            }
+
             $transaction->update(['status' => 'success']);
             $this->completeTransaction($transaction);
         } else if ($transactionStatus == 'pending') {
             $transaction->update(['status' => 'pending']);
         } else if ($transactionStatus == 'deny') {
             $transaction->update(['status' => 'failed']);
+            $this->restoreProductStatus($transaction);
         } else if ($transactionStatus == 'expire') {
             $transaction->update(['status' => 'expired']);
+            $this->restoreProductStatus($transaction);
         } else if ($transactionStatus == 'cancel') {
             $transaction->update(['status' => 'failed']);
+            $this->restoreProductStatus($transaction);
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Restore product status to Available if payment fails or expires.
+     */
+    private function restoreProductStatus($transaction)
+    {
+        if ($transaction->product_id) {
+            $product = \App\Models\Product::find($transaction->product_id);
+            if ($product) {
+                $product->update(['status' => 'Available']);
+            }
+        }
     }
 
     /**
@@ -299,13 +334,60 @@ class PaymentController extends Controller
     public function paymentSuccess(Request $request)
     {
         $orderId = $request->query('order_id');
-        $transaction = Transaction::where('order_id_midtrans', $orderId)->first();
+        $transaction = Transaction::where('order_id_midtrans', $orderId)
+            ->orWhere('id', $orderId)
+            ->first();
 
         if (!$transaction) {
             return redirect('/')->with('error', 'Transaction not found');
         }
 
+        // Locally force-update status to success if still pending
+        if ($transaction->status === 'pending') {
+            $transaction->update(['status' => 'success']);
+            
+            if ($transaction->product_id) {
+                $product = \App\Models\Product::find($transaction->product_id);
+                if ($product) {
+                    $product->update(['status' => 'Sold']);
+                }
+                \App\Models\Cart::where('product_id', $transaction->product_id)->delete();
+            }
+
+            $this->completeTransaction($transaction);
+        }
+
         return view('transactions.success', compact('transaction'));
+    }
+
+    /**
+     * API/AJAX callback to locally confirm payment success from Snap onSuccess
+     */
+    public function confirmSuccess(Request $request)
+    {
+        $orderId = $request->input('order_id');
+        $transaction = Transaction::where('order_id_midtrans', $orderId)
+            ->orWhere('id', $orderId)
+            ->first();
+
+        if ($transaction) {
+            if ($transaction->status === 'pending') {
+                $transaction->update(['status' => 'success']);
+                
+                if ($transaction->product_id) {
+                    $product = \App\Models\Product::find($transaction->product_id);
+                    if ($product) {
+                        $product->update(['status' => 'Sold']);
+                    }
+                    \App\Models\Cart::where('product_id', $transaction->product_id)->delete();
+                }
+
+                $this->completeTransaction($transaction);
+            }
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Transaction not found'], 404);
     }
 
     /**

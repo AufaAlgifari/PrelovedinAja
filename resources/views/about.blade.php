@@ -103,55 +103,5 @@
         </div>
     </div>
 
-    <!-- ③ Tim Pengembang -->
-    <div class="mt-32 space-y-10 text-center">
-        <div class="space-y-3">
-            <h2 class="text-2xl font-black text-[#2E1A06] font-heading">Tim Pengembang</h2>
-            <p class="text-xs text-[#7A4A10]">Mahasiswa Universitas Jenderal Soedirman yang berdedikasi membangun platform ini</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Team Member 1 -->
-            <div class="bg-[#F5E4B0] border border-[#D4A017]/25 rounded-3xl p-6 shadow-sm flex flex-col items-center space-y-4 card-premium">
-                <img class="w-24 h-24 rounded-full object-cover border-4 border-[#7A4A10]" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80" alt="Aufa Salsabila Alghifari">
-                <div>
-                    <h3 class="font-heading font-black text-[#2E1A06] text-base leading-snug">Aufa Salsabila Alghifari</h3>
-                    <p class="text-[11px] font-bold text-[#7A4A10] uppercase tracking-wider mt-0.5">Lead Developer &amp; Checkout Integration</p>
-                    <p class="text-xs text-[#2E1A06]/65 mt-2 font-light">Mahasiswa Teknik Informatika UNSOED yang mengintegrasikan sistem pembayaran Midtrans.</p>
-                </div>
-            </div>
-
-            <!-- Team Member 2 -->
-            <div class="bg-[#F5E4B0] border border-[#D4A017]/25 rounded-3xl p-6 shadow-sm flex flex-col items-center space-y-4 card-premium">
-                <img class="w-24 h-24 rounded-full object-cover border-4 border-[#7A4A10]" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80" alt="Nindya Alif Romland">
-                <div>
-                    <h3 class="font-heading font-black text-[#2E1A06] text-base leading-snug">Nindya Alif Romland</h3>
-                    <p class="text-[11px] font-bold text-[#7A4A10] uppercase tracking-wider mt-0.5">Notification Specialist &amp; Real-Time Sync</p>
-                    <p class="text-xs text-[#2E1A06]/65 mt-2 font-light">Mahasiswa Teknik Informatika UNSOED yang menangani sistem notifikasi real-time Reverb.</p>
-                </div>
-            </div>
-
-            <!-- Team Member 3 -->
-            <div class="bg-[#F5E4B0] border border-[#D4A017]/25 rounded-3xl p-6 shadow-sm flex flex-col items-center space-y-4 card-premium">
-                <img class="w-24 h-24 rounded-full object-cover border-4 border-[#7A4A10]" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80" alt="Melysa Ayu Wulansari">
-                <div>
-                    <h3 class="font-heading font-black text-[#2E1A06] text-base leading-snug">Melysa Ayu Wulansari</h3>
-                    <p class="text-[11px] font-bold text-[#7A4A10] uppercase tracking-wider mt-0.5">UI/UX Designer &amp; Frontend Developer</p>
-                    <p class="text-xs text-[#2E1A06]/65 mt-2 font-light">Mahasiswa Teknik Informatika UNSOED yang merancang desain visual dan memastikan antarmuka pengguna ramah serta responsif.</p>
-                </div>
-            </div>
-
-            <!-- Team Member 4 -->
-            <div class="bg-[#F5E4B0] border border-[#D4A017]/25 rounded-3xl p-6 shadow-sm flex flex-col items-center space-y-4 card-premium">
-                <img class="w-24 h-24 rounded-full object-cover border-4 border-[#7A4A10]" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80" alt="Yunan Faila Sofi">
-                <div>
-                    <h3 class="font-heading font-black text-[#2E1A06] text-base leading-snug">Yunan Faila Sofi</h3>
-                    <p class="text-[11px] font-bold text-[#7A4A10] uppercase tracking-wider mt-0.5">Database Administrator &amp; Backend Specialist</p>
-                    <p class="text-xs text-[#2E1A06]/65 mt-2 font-light">Mahasiswa Teknik Informatika UNSOED yang bertanggung jawab atas arsitektur basis data dan efisiensi query server.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </section>
 @endsection

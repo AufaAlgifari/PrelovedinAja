@@ -169,7 +169,23 @@
             if (data.snap_token) {
                 snap.pay(data.snap_token, {
                     onSuccess: function(result) {
-                        window.location.href = "{{ route('transactions.history') }}";
+                        // Confirm payment success locally
+                        fetch('/payment/confirm-success', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ order_id: result.order_id || result.id || data.snap_token })
+                        })
+                        .then(() => {
+                            window.location.href = "{{ route('transactions.history') }}";
+                        })
+                        .catch(err => {
+                            console.error('Error confirming payment:', err);
+                            window.location.href = "{{ route('transactions.history') }}";
+                        });
                     },
                     onPending: function(result) {
                         window.location.href = "{{ route('transactions.waiting') }}";

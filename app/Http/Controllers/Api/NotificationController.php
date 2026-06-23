@@ -9,20 +9,21 @@ class NotificationController extends Controller
 {
     /**
      * Display a listing of the notifications.
+     * Returns all notifications with proper structure.
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $unreadOnly = $request->boolean('unread');
 
-        $query = $unreadOnly ? $user->unreadNotifications() : $user->notifications();
+        // Get latest 50 notifications (read + unread)
+        $notifications = $user->notifications()->latest()->limit(50)->get();
 
-        // Get latest 50 notifications
-        $notifications = $query->latest()->limit(50)->get();
+        $unreadCount = $user->unreadNotifications()->count();
 
         return response()->json([
-            'status' => 'success',
-            'data' => $notifications
+            'status'       => 'success',
+            'unread_count' => $unreadCount,
+            'data'         => $notifications,
         ]);
     }
 
@@ -31,20 +32,23 @@ class NotificationController extends Controller
      */
     public function markAsRead(Request $request, string $id)
     {
-        $notification = $request->user()->unreadNotifications()->where('id', $id)->first();
+        // Try to find in unread first, fallback to all notifications
+        $notification = $request->user()->notifications()->where('id', $id)->first();
 
         if (!$notification) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Notification not found or already read.'
+                'status'  => 'error',
+                'message' => 'Notification not found.',
             ], 404);
         }
 
-        $notification->markAsRead();
+        if (!$notification->read_at) {
+            $notification->markAsRead();
+        }
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Notification marked as read.'
+            'status'  => 'success',
+            'message' => 'Notification marked as read.',
         ]);
     }
 
@@ -53,11 +57,14 @@ class NotificationController extends Controller
      */
     public function markAllAsRead(Request $request)
     {
-        $request->user()->unreadNotifications->markAsRead();
+        $unread = $request->user()->unreadNotifications;
+        if ($unread->isNotEmpty()) {
+            $unread->markAsRead();
+        }
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'All notifications marked as read.'
+            'status'  => 'success',
+            'message' => 'All notifications marked as read.',
         ]);
     }
 }

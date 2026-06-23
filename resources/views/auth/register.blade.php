@@ -219,7 +219,7 @@
             btnLoader.classList.remove('hidden');
 
             try {
-                const response = await fetch('/api/v1/register', {
+                const response = await fetch('/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
