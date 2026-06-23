@@ -22,8 +22,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/reset-password',  [AuthController::class, 'resetPassword']);
 
     // Browse produk (bisa dilihat tanpa login)
-    Route::get('/products',        [ProductController::class, 'index']);
-    Route::get('/products/{id}',   [ProductController::class, 'show']);
+    Route::get('/products',      [ProductController::class, 'index']);
+    Route::get('/products/{id}', [ProductController::class, 'show']);
 
 });
 
@@ -31,44 +31,43 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // Auth
-    Route::post('/logout',  [AuthController::class, 'logout']);
-    Route::get('/me',       [AuthController::class, 'me']);
-    Route::put('/me',       [AuthController::class, 'update']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me',      [AuthController::class, 'me']);
+    Route::put('/me',      [AuthController::class, 'update']);
 
     // Products (CRUD milik sendiri)
-    Route::post('/products',            [ProductController::class, 'store']);
-    Route::put('/products/{id}',        [ProductController::class, 'update']);
-    Route::delete('/products/{id}',     [ProductController::class, 'destroy']);
+    Route::post('/products',        [ProductController::class, 'store']);
+    Route::put('/products/{id}',    [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
     // Cart
-    Route::get('/cart',                 [CartController::class, 'index']);
-    Route::post('/cart',                [CartController::class, 'store']);
-    Route::delete('/cart/{id}',         [CartController::class, 'destroy']);
+    Route::get('/cart',          [CartController::class, 'index']);
+    Route::post('/cart',         [CartController::class, 'store']);
+    Route::delete('/cart/{id}',  [CartController::class, 'destroy']);
 
     // Transactions
-    Route::get('/transactions',                         [TransactionController::class, 'index']);
-    Route::post('/transactions',                        [TransactionController::class, 'store']);
-    Route::get('/transactions/{id}',                    [TransactionController::class, 'show']);
-    Route::patch('/transactions/{id}/confirm-payment',  [TransactionController::class, 'confirmPayment']);
-    Route::patch('/transactions/{id}/complete',         [TransactionController::class, 'complete']);
-    Route::patch('/transactions/{id}/cancel',           [TransactionController::class, 'cancel']);
-    
-    // Payment (Cart Checkout)
-    Route::post('/payment/cart-checkout',               [PaymentController::class, 'createSnapTokenFromCart']);
+    Route::get('/transactions',                        [TransactionController::class, 'index']);
+    Route::post('/transactions',                       [TransactionController::class, 'store']);
+    Route::get('/transactions/{id}',                   [TransactionController::class, 'show']);
+    Route::patch('/transactions/{id}/confirm-payment', [TransactionController::class, 'confirmPayment']);
+    Route::patch('/transactions/{id}/complete',        [TransactionController::class, 'complete']);
+    Route::patch('/transactions/{id}/cancel',          [TransactionController::class, 'cancel']);
+
+    // Payment
+    Route::post('/payment/cart-checkout', [PaymentController::class, 'createSnapTokenFromCart']);
 
     // Chat
-    Route::get('/chats',                [ChatController::class, 'index']);      // list semua kontak
-    Route::get('/chats/{userId}',       [ChatController::class, 'show']);       // riwayat percakapan
-    Route::post('/chats',               [ChatController::class, 'store']);      // kirim pesan
-    Route::patch('/chats/{userId}/read',[ChatController::class, 'markAsRead']); // tandai sudah dibaca
+    Route::get('/chats',                 [ChatController::class, 'index']);
+    Route::get('/chats/{userId}',        [ChatController::class, 'show']);
+    Route::post('/chats',                [ChatController::class, 'store']);
+    Route::patch('/chats/{userId}/read', [ChatController::class, 'markAsRead']);
 
     // Reviews
-    Route::post('/reviews',             [ReviewController::class, 'store']);
-    Route::get('/users/{id}/reviews',   [ReviewController::class, 'index']);
+    Route::post('/reviews',           [ReviewController::class, 'store']);
+    Route::get('/users/{id}/reviews', [ReviewController::class, 'index']);
 
-    // Reports
-    Route::post('/reports',             [ReportController::class, 'store']);
-    Route::patch('/admin/reports/{id}/resolve', [ReportController::class, 'resolve'])->middleware('admin');
+    // Reports (user biasa hanya bisa buat laporan)
+    Route::post('/reports', [ReportController::class, 'store']);
 
     // Notifications
     Route::get('/notifications',             [NotificationController::class, 'index']);
@@ -78,3 +77,31 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 });
 
 Broadcast::routes(['prefix' => 'api/v1', 'middleware' => ['auth:sanctum']]);
+
+// ── Admin Routes (wajib login + role admin) ───────────────
+Route::prefix('v1/admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+
+    Route::get('/stats', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'stats']);
+
+    // Listings
+    Route::get('/products',              [\App\Http\Controllers\Api\Admin\ProductController::class, 'index']);
+    Route::delete('/products/{product}', [\App\Http\Controllers\Api\Admin\ProductController::class, 'destroy']);
+
+    // Users
+    Route::get('/users',                     [\App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+    Route::patch('/users/{user}/suspend',    [\App\Http\Controllers\Api\Admin\UserController::class, 'suspend']);
+    Route::patch('/users/{user}/unsuspend',  [\App\Http\Controllers\Api\Admin\UserController::class, 'unsuspend']);
+
+    // Transactions
+    Route::get('/transactions',        [\App\Http\Controllers\Api\Admin\TransactionController::class, 'index']);
+    Route::get('/transactions/stats',  [\App\Http\Controllers\Api\Admin\TransactionController::class, 'stats']);
+
+    // Reports
+    Route::get('/reports',                    [\App\Http\Controllers\Api\Admin\ReportController::class, 'index']);
+    Route::patch('/reports/{report}/resolve', [\App\Http\Controllers\Api\Admin\ReportController::class, 'resolve']);
+    Route::patch('/reports/{report}/reject',  [\App\Http\Controllers\Api\Admin\ReportController::class, 'reject']);
+
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Api\Admin\AuditLogController::class, 'index']);
+
+});

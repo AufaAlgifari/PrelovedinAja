@@ -27,6 +27,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'verification_token',
         'token_expired_at',
         'last_login_at',
+        'status',
+        'suspend_reason',
+        'suspended_at',
     ];
 
     protected $hidden = [
@@ -41,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_verified'       => 'boolean',
         'token_expired_at'  => 'datetime',
         'last_login_at'     => 'datetime',
+        'suspended_at' => 'datetime',
     ];
 
     // ── Relationships ──────────────────────────────────────
