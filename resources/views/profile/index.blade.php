@@ -24,7 +24,7 @@
                 <h1 class="text-3xl font-extrabold tracking-tight font-heading">Profil Saya</h1>
                 <p class="text-xs text-brand-600 mt-1 font-medium">Kelola informasi kartu identitas mahasiswa dan detail kontak Anda.</p>
             </div>
-            <div>
+            <div id="purchase-history-btn-container">
                 <a href="{{ route('transactions.history') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md transition transform hover:-translate-y-0.5 whitespace-nowrap">
                     Riwayat Pembelian
                 </a>
@@ -148,6 +148,11 @@
         }
 
         const user = JSON.parse(userJson);
+
+        if (user.role === 'admin') {
+            const btnContainer = document.getElementById('purchase-history-btn-container');
+            if (btnContainer) btnContainer.classList.add('hidden');
+        }
 
         document.getElementById('name').value = user.name || '';
         document.getElementById('no_camp').value = user.no_kampus || 'Belum Diisi';

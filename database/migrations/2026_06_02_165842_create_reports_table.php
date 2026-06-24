@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('reported_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->text('reason');
             $table->enum('category', ['Scam', 'Inappropriate', 'Fake']);
-            $table->enum('status', ['Pending', 'Investigated', 'Resolved'])->default('Pending');
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }

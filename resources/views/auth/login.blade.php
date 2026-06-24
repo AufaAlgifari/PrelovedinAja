@@ -240,10 +240,18 @@
                 if (response.ok && result.token) {
                     localStorage.setItem('preloved_token', result.token);
                     localStorage.setItem('preloved_user', JSON.stringify(result.user));
-                    window.showToast('Login Berhasil! Selamat berbelanja.');
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1000);
+                    
+                    if (result.user.role === 'admin') {
+                        window.showToast('Login Berhasil! Selamat datang Admin.');
+                        setTimeout(() => {
+                            window.location.href = "{{ route('admin.dashboard') }}";
+                        }, 1000);
+                    } else {
+                        window.showToast('Login Berhasil! Selamat berbelanja.');
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                    }
                     return;
                 } else {
                     window.showToast(result.message || 'Email atau password salah.', 'error');
@@ -256,10 +264,11 @@
             } catch (error) {
                 console.log('Database auth offline atau terjadi error jaringan, menggunakan mode demo:', error);
 
-                let cleanName = 'Mahasiswa Unsoed';
+                const isAdmin = email.toLowerCase().includes('admin');
+                let cleanName = isAdmin ? 'Admin PrelovedinAja' : 'Mahasiswa Unsoed';
                 let emailUsername = email.split('@')[0];
                 
-                if (emailUsername) {
+                if (emailUsername && !isAdmin) {
                     cleanName = emailUsername
                         .split('.')
                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -271,17 +280,19 @@
                 const randIndex = Math.floor(Math.random() * faculties.length);
 
                 const mockUser = {
-                    id: 99,
+                    id: isAdmin ? 100 : 99,
                     name: cleanName,
                     email: email,
-                    phone_number: '0812-3456-7890',
-                    unsoed_faculty: faculties[randIndex],
-                    unsoed_major: majors[randIndex],
-                    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
+                    phone_number: isAdmin ? '0811-2222-3333' : '0812-3456-7890',
+                    unsoed_faculty: isAdmin ? 'Rektorat' : faculties[randIndex],
+                    unsoed_major: isAdmin ? 'Layanan Akademik' : majors[randIndex],
+                    avatar_url: isAdmin 
+                        ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&h=150&q=80'
+                        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
                     rating_cache: 5.0,
-                    role: 'student',
+                    role: isAdmin ? 'admin' : 'student',
                     is_verified: true,
-                    no_kampus: 'H1D024' + Math.floor(100 + Math.random() * 900)
+                    no_kampus: isAdmin ? 'ADM998811' : ('H1D024' + Math.floor(100 + Math.random() * 900))
                 };
 
                 setTimeout(() => {
@@ -292,10 +303,17 @@
                     btnText.textContent = 'Masuk Sekarang';
                     btnLoader.classList.add('hidden');
                     
-                    window.showToast('Login Berhasil (Mode Demo Kampus)!');
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1000);
+                    if (mockUser.role === 'admin') {
+                        window.showToast('Login Berhasil! Selamat datang Admin.');
+                        setTimeout(() => {
+                            window.location.href = "{{ route('admin.dashboard') }}";
+                        }, 1000);
+                    } else {
+                        window.showToast('Login Berhasil (Mode Demo Kampus)!');
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                    }
                 }, 800);
             }
         }

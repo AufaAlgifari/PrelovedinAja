@@ -9,28 +9,91 @@
 </style>
 
 <!-- Admin Navbar -->
-<nav class="bg-white border-b border-[#D4A017]/20 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-    <div class="flex items-center gap-8">
-        <span class="text-lg font-extrabold text-[#2E1A06] font-heading tracking-tight">Preloved.in</span>
-        <div class="hidden md:flex items-center gap-1 text-xs font-semibold text-[#7A4A10]">
-            <a href="#" onclick="showSection('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg bg-[#F5E4B0] text-[#2E1A06] font-bold border-b-2 border-[#7A4A10]">Dashboard</a>
-            <a href="#" onclick="showSection('users')" id="nav-users" class="px-3 py-1.5 rounded-lg hover:bg-[#F5E4B0] transition">Users</a>
-            <a href="#" onclick="showSection('listings')" id="nav-listings" class="px-3 py-1.5 rounded-lg hover:bg-[#F5E4B0] transition">Listings</a>
-            <a href="#" onclick="showSection('reports')" id="nav-reports" class="px-3 py-1.5 rounded-lg hover:bg-[#F5E4B0] transition">Reports</a>
-            <a href="#" onclick="showSection('transactions')" id="nav-transactions" class="px-3 py-1.5 rounded-lg hover:bg-[#F5E4B0] transition">Transactions</a>
+<nav class="bg-[#F5E4B0] border-b border-[#D4A017]/30 sticky top-0 z-40 w-full shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <!-- Left Side: Brand Logo and Title -->
+            <div class="flex items-center gap-3">
+                <a href="{{ route('home') }}" class="flex items-center gap-2">
+                    <svg class="w-8 h-8" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 20L165 42L100 64L35 42L100 20Z" fill="var(--primary-color)" />
+                        <path d="M52 48.5V68C52 70.5 49.5 72 47 72C44.5 72 42 70.5 42 68V45" stroke="var(--cta-color)" stroke-width="4.5" stroke-linecap="round"/>
+                        <circle cx="47" cy="72" r="6.5" fill="var(--text-color)"/>
+                        <path d="M68 62C68 38 132 38 132 62" stroke="var(--surface-color)" stroke-width="15" stroke-linecap="round"/>
+                        <path d="M42 62H158L168 165C168 171 163 175 157 175H43C37 175 32 171 32 165L42 62Z" fill="var(--primary-color)"/>
+                        <path d="M72 88H108C122 88 132 98 132 110C132 122 122 132 108 132H72V88ZM72 132V150" stroke="var(--bg-color)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-lg font-black tracking-tight leading-none text-[#2E1A06] font-heading">Preloved.in <span class="text-[#7A4A10]">Admin</span></span>
+                </a>
+            </div>
+
+            <!-- Middle: Nav Links (without Transactions) -->
+            <div class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-wider">
+                <button id="nav-dashboard" onclick="showSection('dashboard')" class="px-3 py-2 rounded-lg transition-all">Dashboard</button>
+                <button id="nav-users" onclick="showSection('users')" class="px-3 py-2 rounded-lg transition-all">Pengguna</button>
+                <button id="nav-listings" onclick="showSection('listings')" class="px-3 py-2 rounded-lg transition-all">Produk</button>
+                <button id="nav-reports" onclick="showSection('reports')" class="px-3 py-2 rounded-lg transition-all">Laporan</button>
+            </div>
+
+            <!-- Right Side: Notification Bell & Admin Profile Dropdown -->
+            <div class="flex items-center gap-4">
+                <!-- Notifications -->
+                <div class="relative">
+                    <button onclick="toggleAdminNotifDropdown()" class="relative p-2 text-[#7A4A10] hover:text-[#2E1A06] rounded-xl hover:bg-[#FAF4C8]/50 transition-all focus:outline-none flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span id="notif-badge" class="absolute top-1.5 right-1.5 bg-rose-600 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center hidden">!</span>
+                    </button>
+                    <!-- Admin Notification Dropdown -->
+                    <div id="admin-notif-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-[#FBF6EC] border border-[#D4A017]/25 focus:outline-none z-50 overflow-hidden">
+                        <div class="px-4 py-3 bg-[#F5E4B0]/55 flex justify-between items-center border-b border-[#D4A017]/10">
+                            <span class="text-xs font-extrabold text-[#2E1A06] font-heading">Notifikasi Admin</span>
+                            <button onclick="markAllAdminNotificationsRead()" class="text-[9px] font-bold text-[#7A4A10] hover:text-[#2E1A06] focus:outline-none transition">Tandai Semua Dibaca</button>
+                        </div>
+                        <div id="admin-notif-items" class="max-h-72 overflow-y-auto divide-y divide-[#D4A017]/10 text-xs">
+                            <div class="p-5 text-center text-[#7A4A10] font-medium">Memuat notifikasi...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Profile Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleAdminProfileDropdown()" class="flex items-center gap-2 focus:outline-none hover:bg-[#FAF4C8]/50 p-1.5 rounded-full transition duration-150">
+                        <div id="admin-avatar-placeholder" class="h-8 w-8 rounded-full bg-[#7A4A10] text-[#FBF6EC] flex items-center justify-center font-bold text-xs border border-[#D4A017]/30">
+                            A
+                        </div>
+                        <span id="admin-name" class="text-xs font-bold text-[#2E1A06] hidden sm:inline">Admin</span>
+                        <svg class="w-4 h-4 text-[#7A4A10]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div id="admin-profile-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-2xl shadow-xl bg-[#FBF6EC] border border-[#D4A017]/25 divide-y divide-[#D4A017]/10 focus:outline-none z-50 overflow-hidden">
+                        <div class="py-1">
+                            <a href="{{ route('profile.index') }}" class="block px-4 py-2.5 text-xs font-bold text-[#2E1A06] hover:bg-[#F5E4B0]/50">Profil Saya</a>
+                        </div>
+                        <div class="py-1">
+                            <button onclick="window.logoutUser()" class="w-full text-left block px-4 py-2.5 text-xs font-black text-rose-700 hover:bg-rose-50 flex items-center gap-2">
+                                Keluar Akun
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleAdminMobileMenu()" class="md:hidden p-2 text-[#7A4A10] hover:text-[#2E1A06] focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
-    <div class="flex items-center gap-3">
-        <button class="relative p-2 rounded-full hover:bg-[#F5E4B0] transition">
-            <svg class="w-5 h-5 text-[#7A4A10]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
-            <span id="notif-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
-        </button>
-        <div class="flex items-center gap-2 bg-[#F5E4B0] px-3 py-1.5 rounded-full border border-[#D4A017]/30">
-            <div class="w-6 h-6 rounded-full bg-[#7A4A10] flex items-center justify-center text-[#FBF6EC] text-[10px] font-black">A</div>
-            <span id="admin-name" class="text-xs font-bold text-[#2E1A06]">Admin</span>
-        </div>
+    <!-- Admin Mobile Menu -->
+    <div id="admin-mobile-menu" class="hidden md:hidden bg-[#F5E4B0] border-t border-[#D4A017]/20 px-4 py-3 flex flex-col gap-2 shadow-inner">
+        <button id="mobile-nav-dashboard" onclick="showSection('dashboard'); toggleAdminMobileMenu()" class="text-left px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-[#2E1A06] hover:bg-[#FAF4C8]/50 transition">Dashboard</button>
+        <button id="mobile-nav-users" onclick="showSection('users'); toggleAdminMobileMenu()" class="text-left px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-[#2E1A06] hover:bg-[#FAF4C8]/50 transition">Pengguna</button>
+        <button id="mobile-nav-listings" onclick="showSection('listings'); toggleAdminMobileMenu()" class="text-left px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-[#2E1A06] hover:bg-[#FAF4C8]/50 transition">Produk</button>
+        <button id="mobile-nav-reports" onclick="showSection('reports'); toggleAdminMobileMenu()" class="text-left px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-[#2E1A06] hover:bg-[#FAF4C8]/50 transition">Laporan</button>
     </div>
 </nav>
 
@@ -120,20 +183,22 @@
                 <h3 class="font-extrabold font-heading">Laporan Masuk Terbaru</h3>
                 <button onclick="showSection('reports')" class="text-xs font-bold text-[#7A4A10] hover:underline">View All Reports →</button>
             </div>
-            <table class="w-full text-xs">
-                <thead>
-                    <tr class="text-[10px] font-black uppercase text-[#7A4A10] border-b border-[#D4A017]/20">
-                        <th class="text-left pb-3 pl-2">Pelapor</th>
-                        <th class="text-left pb-3">Subjek Laporan</th>
-                        <th class="text-left pb-3">Tanggal</th>
-                        <th class="text-left pb-3">Status</th>
-                        <th class="text-left pb-3">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="reports-table-body" class="divide-y divide-[#D4A017]/10">
-                    <tr><td colspan="5" class="py-6 text-center text-[#7A4A10]">Memuat...</td></tr>
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs min-w-[600px] md:min-w-0">
+                    <thead>
+                        <tr class="text-[10px] font-black uppercase text-[#7A4A10] border-b border-[#D4A017]/20">
+                            <th class="text-left pb-3 pl-2">Pelapor</th>
+                            <th class="text-left pb-3">Subjek Laporan</th>
+                            <th class="text-left pb-3">Tanggal</th>
+                            <th class="text-left pb-3">Status</th>
+                            <th class="text-left pb-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-table-body" class="divide-y divide-[#D4A017]/10">
+                        <tr><td colspan="5" class="py-6 text-center text-[#7A4A10]">Memuat...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>{{-- end section-dashboard --}}
@@ -153,12 +218,15 @@
     <div id="section-listings" class="hidden">
         <div class="mb-6 flex items-center justify-between">
             <h2 class="text-xl font-extrabold font-heading">Manajemen Listing Produk</h2>
-            <input id="product-search" type="text" placeholder="Cari judul produk..."
-                   class="text-xs px-3 py-2 rounded-lg border border-[#D4A017]/20 bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-[#7A4A10]/20"
-                   onkeyup="if(event.key==='Enter') loadProducts(1)">
+            <div class="flex items-center gap-2">
+                <input id="product-search" type="text" placeholder="Cari judul produk..."
+                       class="text-xs px-3 py-2 rounded-lg border border-[#D4A017]/20 bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-[#7A4A10]/20"
+                       onkeyup="if(event.key==='Enter') loadProducts(1)">
+                <button onclick="resetProductFilter()" class="px-3 py-2 bg-white text-xs font-bold border border-[#D4A017]/30 text-[#7A4A10] hover:bg-[#F5E4B0] rounded-lg transition">Reset</button>
+            </div>
         </div>
-        <div class="bg-white rounded-2xl border border-[#D4A017]/20 shadow-sm overflow-hidden">
-            <table class="w-full text-xs">
+        <div class="bg-white rounded-2xl border border-[#D4A017]/20 shadow-sm overflow-x-auto">
+            <table class="w-full text-xs min-w-[600px] md:min-w-0">
                 <thead>
                     <tr class="text-[10px] font-black uppercase text-[#7A4A10] border-b border-[#D4A017]/20 bg-[#FBF6EC]">
                         <th class="text-left p-4">Judul</th>
@@ -179,12 +247,15 @@
     <div id="section-users" class="hidden">
         <div class="mb-6 flex items-center justify-between">
             <h2 class="text-xl font-extrabold font-heading">Manajemen Pengguna</h2>
-            <input id="user-search" type="text" placeholder="Cari nama/email..."
-                   class="text-xs px-3 py-2 rounded-lg border border-[#D4A017]/20 bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-[#7A4A10]/20"
-                   onkeyup="if(event.key==='Enter') loadUsers(1)">
+            <div class="flex items-center gap-2">
+                <input id="user-search" type="text" placeholder="Cari nama/email..."
+                       class="text-xs px-3 py-2 rounded-lg border border-[#D4A017]/20 bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-[#7A4A10]/20"
+                       onkeyup="if(event.key==='Enter') loadUsers(1)">
+                <button onclick="resetUserFilter()" class="px-3 py-2 bg-white text-xs font-bold border border-[#D4A017]/30 text-[#7A4A10] hover:bg-[#F5E4B0] rounded-lg transition">Reset</button>
+            </div>
         </div>
-        <div class="bg-white rounded-2xl border border-[#D4A017]/20 shadow-sm overflow-hidden">
-            <table class="w-full text-xs">
+        <div class="bg-white rounded-2xl border border-[#D4A017]/20 shadow-sm overflow-x-auto">
+            <table class="w-full text-xs min-w-[650px] md:min-w-0">
                 <thead>
                     <tr class="text-[10px] font-black uppercase text-[#7A4A10] border-b border-[#D4A017]/20 bg-[#FBF6EC]">
                         <th class="text-left p-4">Nama</th>
@@ -201,45 +272,6 @@
     </div>
 
 
-    <!-- ── SECTION: TRANSACTIONS ── -->
-    <div id="section-transactions" class="hidden">
-        <div class="mb-6">
-            <h2 class="text-xl font-extrabold font-heading">Riwayat Transaksi</h2>
-        </div>
-
-        <!-- Transaction Stat Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-            <div class="bg-white p-5 rounded-2xl border border-[#D4A017]/20 shadow-sm text-center">
-                <p class="text-[10px] font-bold text-[#7A4A10] uppercase">Total Transaksi</p>
-                <p id="stat-trx-total" class="text-3xl font-black mt-1">—</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-[#D4A017]/20 shadow-sm text-center">
-                <p class="text-[10px] font-bold text-[#7A4A10] uppercase">Transaksi Sukses</p>
-                <p id="stat-trx-success" class="text-3xl font-black mt-1">—</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-[#D4A017]/20 shadow-sm text-center">
-                <p class="text-[10px] font-bold text-[#7A4A10] uppercase">Total GMV</p>
-                <p id="stat-transactions-gmv" class="text-3xl font-black mt-1">—</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-[#D4A017]/20 shadow-sm overflow-hidden">
-            <table class="w-full text-xs">
-                <thead>
-                    <tr class="text-[10px] font-black uppercase text-[#7A4A10] border-b border-[#D4A017]/20 bg-[#FBF6EC]">
-                        <th class="text-left p-4">Produk</th>
-                        <th class="text-left p-4">Pembeli</th>
-                        <th class="text-left p-4">Jumlah</th>
-                        <th class="text-left p-4">Tanggal</th>
-                        <th class="text-left p-4">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="transactions-table" class="divide-y divide-[#D4A017]/10"></tbody>
-            </table>
-        </div>
-        <div id="transactions-pagination" class="flex justify-center gap-2 pt-4"></div>
-    </div>
-
 </div>
 
 <!-- Toast Container -->
@@ -250,6 +282,19 @@
 
 <script>
     const API_BASE = '/api/v1/admin';
+
+    // ── Client-Side Admin Guard ─────────────────────────────
+    (function() {
+        const userJson = localStorage.getItem('preloved_user');
+        if (!userJson) {
+            window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        const user = JSON.parse(userJson);
+        if (user.role !== 'admin') {
+            window.location.href = "{{ route('home') }}";
+        }
+    })();
 
     // ── Helpers ─────────────────────────────────────────────
 
@@ -327,13 +372,145 @@
         setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
     };
 
+    // ── Admin Dropdowns ──────────────────────────────────────
+    function toggleAdminNotifDropdown() {
+        const dropdown = document.getElementById('admin-notif-dropdown');
+        const profileDropdown = document.getElementById('admin-profile-dropdown');
+        if (profileDropdown) profileDropdown.classList.add('hidden');
+        if (dropdown) {
+            const isOpen = !dropdown.classList.contains('hidden');
+            dropdown.classList.toggle('hidden');
+            if (!isOpen) {
+                loadAdminNotifications();
+            }
+        }
+    }
+
+    function toggleAdminProfileDropdown() {
+        const dropdown = document.getElementById('admin-profile-dropdown');
+        const notifDropdown = document.getElementById('admin-notif-dropdown');
+        if (notifDropdown) notifDropdown.classList.add('hidden');
+        if (dropdown) {
+            dropdown.classList.toggle('hidden');
+        }
+    }
+
+    function toggleAdminMobileMenu() {
+        const menu = document.getElementById('admin-mobile-menu');
+        if (menu) {
+            menu.classList.toggle('hidden');
+        }
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        const notifContainer = document.getElementById('admin-notif-dropdown')?.parentElement;
+        const profileContainer = document.getElementById('admin-profile-dropdown')?.parentElement;
+        
+        if (notifContainer && !notifContainer.contains(e.target)) {
+            document.getElementById('admin-notif-dropdown')?.classList.add('hidden');
+        }
+        if (profileContainer && !profileContainer.contains(e.target)) {
+            document.getElementById('admin-profile-dropdown')?.classList.add('hidden');
+        }
+    });
+
+    async function loadAdminNotifications() {
+        const token = localStorage.getItem('preloved_token');
+        const container = document.getElementById('admin-notif-items');
+        if (!token || !container) return;
+
+        try {
+            const res = await fetch('/api/v1/notifications', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                container.innerHTML = `<div class="p-5 text-center text-[#7A4A10]">Gagal memuat notifikasi.</div>`;
+                return;
+            }
+
+            const json = await res.json();
+            const notifications = json.data || [];
+            
+            if (notifications.length === 0) {
+                container.innerHTML = `<div class="p-5 text-center text-[#7A4A10]">Tidak ada notifikasi baru.</div>`;
+                return;
+            }
+
+            container.innerHTML = notifications.slice(0, 10).map(notif => {
+                const data = notif.data || {};
+                const isUnread = !notif.read_at;
+                const timeStr = formatDate(notif.created_at);
+                const bg = isUnread ? 'bg-[#FAF4C8]/30 font-semibold' : '';
+
+                return `
+                    <div class="p-3 hover:bg-[#F5E4B0]/20 transition border-b border-[#D4A017]/10 ${bg}">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[#2E1A06] text-[11px] font-bold truncate">${data.title || 'Notifikasi'}</p>
+                                <p class="text-[#7A4A10] text-[10px] mt-0.5 leading-relaxed">${data.message || ''}</p>
+                                <span class="text-[9px] text-[#7A4A10]/60 block mt-1">${timeStr}</span>
+                            </div>
+                            ${isUnread ? `<button onclick="markAdminNotificationRead('${notif.id}')" class="text-[9px] font-bold text-[#7A4A10] hover:text-[#2E1A06] shrink-0">✓ Baca</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (e) {
+            container.innerHTML = `<div class="p-5 text-center text-[#7A4A10]">Gagal memuat notifikasi.</div>`;
+        }
+    }
+
+    async function markAdminNotificationRead(id) {
+        const token = localStorage.getItem('preloved_token');
+        if (!token) return;
+        try {
+            await fetch(`/api/v1/notifications/${id}/read`, {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            loadAdminNotifications();
+            loadStats();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function markAllAdminNotificationsRead() {
+        const token = localStorage.getItem('preloved_token');
+        if (!token) return;
+        try {
+            await fetch('/api/v1/notifications/read-all', {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            loadAdminNotifications();
+            loadStats();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     // ── Navigation ───────────────────────────────────────────
 
-    const sections = ['dashboard', 'users', 'listings', 'reports', 'transactions'];
+    const sections = ['dashboard', 'users', 'listings', 'reports'];
 
     function showSection(name) {
         sections.forEach(s => {
-            document.getElementById(`section-${s}`).classList.toggle('hidden', s !== name);
+            const secEl = document.getElementById(`section-${s}`);
+            if (secEl) secEl.classList.toggle('hidden', s !== name);
             const nav = document.getElementById(`nav-${s}`);
             if (nav) {
                 nav.classList.toggle('bg-[#F5E4B0]', s === name);
@@ -342,12 +519,17 @@
                 nav.classList.toggle('border-[#7A4A10]', s === name);
                 nav.classList.toggle('text-[#2E1A06]', s === name);
             }
+            const mNav = document.getElementById(`mobile-nav-${s}`);
+            if (mNav) {
+                mNav.classList.toggle('bg-[#FAF4C8]', s === name);
+                mNav.classList.toggle('font-extrabold', s === name);
+                mNav.classList.toggle('text-[#7A4A10]', s === name);
+            }
         });
 
         // Lazy load section data
         if (name === 'listings') loadProducts(1);
         if (name === 'users') loadUsers(1);
-        if (name === 'transactions') loadTransactions(1);
         if (name === 'reports') loadAllReports(1);
     }
 
@@ -356,7 +538,11 @@
     async function loadAdminDashboard() {
         // Set admin name from localStorage
         const user = JSON.parse(localStorage.getItem('preloved_user') || '{}');
-        if (user.name) document.getElementById('admin-name').textContent = user.name;
+        if (user.name) {
+            document.getElementById('admin-name').textContent = user.name;
+            const init = initials(user.name);
+            document.getElementById('admin-avatar-placeholder').textContent = init;
+        }
 
         await Promise.all([
             loadStats(),
@@ -388,11 +574,14 @@
             }
 
             // Notif badge
-            if (stats.reports_pending > 0) document.getElementById('notif-badge').classList.remove('hidden');
-
-            // Stat transaksi (untuk section transactions)
-            if (document.getElementById('stat-trx-total')) document.getElementById('stat-trx-total').textContent = stats.transactions_total.toLocaleString('id-ID');
-            if (document.getElementById('stat-transactions-gmv')) document.getElementById('stat-transactions-gmv').textContent = formatRupiah(stats.transactions_gmv);
+            const notifBadge = document.getElementById('notif-badge');
+            if (notifBadge) {
+                if (stats.reports_pending > 0) {
+                    notifBadge.classList.remove('hidden');
+                } else {
+                    notifBadge.classList.add('hidden');
+                }
+            }
         } catch (e) {
             console.error('Gagal memuat statistik:', e);
         }
@@ -447,6 +636,28 @@
         });
     }
 
+    // ── Report Status Badge Standardizer ──────────────────
+    function getStatusBadgeHtml(status) {
+        let label = status;
+        let css = '';
+        if (status === 'Pending') {
+            label = 'Menunggu';
+            css = 'bg-amber-50 text-amber-700 border-amber-200';
+        } else if (status === 'Resolved') {
+            label = 'Selesai';
+            css = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        } else if (status === 'Rejected') {
+            label = 'Rejected';
+            css = 'bg-rose-50 text-rose-700 border-rose-200';
+        } else if (status === 'Suspended') {
+            label = 'Suspended';
+            css = 'bg-rose-100 text-rose-800 border-rose-300';
+        } else {
+            css = 'bg-[#F5E4B0] text-[#7A4A10] border-[#D4A017]/30';
+        }
+        return `<span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${css}">${label}</span>`;
+    }
+
     // ── Recent Reports (dashboard table) ────────────────────
 
     async function loadRecentReports() {
@@ -461,13 +672,6 @@
             }
 
             data.data.forEach(r => {
-                const statusClass = r.status === 'Resolved'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : r.status === 'Pending'
-                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-[#F5E4B0] text-[#7A4A10] border-[#D4A017]/30';
-
-                const statusLabel = r.status === 'Resolved' ? 'Selesai' : r.status === 'Pending' ? 'Menunggu' : r.status;
                 const bg = avatarBg(r.reporter?.name);
                 const init = initials(r.reporter?.name);
 
@@ -482,7 +686,7 @@
                         <td class="p-3">${r.category}</td>
                         <td class="p-3 text-[#7A4A10]">${formatDate(r.created_at)}</td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${statusClass}">${statusLabel}</span>
+                            ${getStatusBadgeHtml(r.status)}
                         </td>
                         <td class="p-3">
                             ${r.status === 'Pending' ? `
@@ -490,7 +694,7 @@
                                     <button onclick="rejectReport(${r.id})" title="Tolak" class="px-2 py-1 text-[10px] font-bold bg-[#FAF4C8] border border-[#D4A017]/30 text-[#7A4A10] rounded-lg hover:bg-[#F5E4B0] transition">Tolak</button>
                                     <button onclick="resolveReport(${r.id})" title="Blokir" class="px-2 py-1 text-[10px] font-bold bg-[#7A4A10] text-white rounded-lg hover:bg-[#5f390c] transition">Blokir</button>
                                 </div>
-                            ` : `<span class="text-[10px] text-[#7A4A10]">—</span>`}
+                            ` : getStatusBadgeHtml(r.status)}
                         </td>
                     </tr>
                 `;
@@ -516,14 +720,11 @@
             data.data.forEach(r => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-5 rounded-2xl border border-[#D4A017]/20 shadow-sm space-y-4";
-                const badgeClass = r.status === 'Resolved'
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    : 'bg-[#7A4A10] text-[#FBF6EC] border-[#7A4A10]';
 
                 card.innerHTML = `
                     <div class="flex justify-between items-baseline">
                         <span class="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-2.5 py-0.5 rounded-full">🚨 ${r.category}</span>
-                        <span class="text-[10px] font-bold border rounded-full px-2 py-0.5 ${badgeClass}">${r.status}</span>
+                        ${getStatusBadgeHtml(r.status)}
                     </div>
                     <p class="text-xs leading-relaxed">"${r.reason}"</p>
                     <div class="grid grid-cols-2 gap-3 text-[10px] text-[#7A4A10] font-bold uppercase border-t border-[#D4A017]/10 pt-3">
@@ -639,6 +840,11 @@
         } catch (e) { window.showToast(e.message, 'error'); }
     }
 
+    function resetProductFilter() {
+        document.getElementById('product-search').value = '';
+        loadProducts(1);
+    }
+
     // ── Users ────────────────────────────────────────────────
 
     async function loadUsers(page = 1) {
@@ -703,39 +909,9 @@
         } catch (e) { window.showToast(e.message, 'error'); }
     }
 
-    // ── Transactions ─────────────────────────────────────────
-
-    async function loadTransactions(page = 1) {
-        try {
-            const data = await apiFetch(`${API_BASE}/transactions?page=${page}`);
-            const tbody = document.getElementById('transactions-table');
-            tbody.innerHTML = '';
-
-            // Load stat cards juga
-            const stats = await apiFetch(`${API_BASE}/stats`);
-            document.getElementById('stat-trx-total').textContent = stats.transactions_total.toLocaleString('id-ID');
-            document.getElementById('stat-transactions-gmv').textContent = formatRupiah(stats.transactions_gmv);
-
-            if (data.data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[#7A4A10] text-xs">Belum ada transaksi.</td></tr>`;
-                return;
-            }
-
-            data.data.forEach(t => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-[#FBF6EC] transition">
-                        <td class="p-4 font-semibold">${t.product?.title ?? '-'}</td>
-                        <td class="p-4 text-[#7A4A10]">${t.user?.name ?? '-'}</td>
-                        <td class="p-4">${formatRupiah(t.amount)}</td>
-                        <td class="p-4 text-[#7A4A10]">${formatDate(t.created_at)}</td>
-                        <td class="p-4">
-                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${t.status === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}">${t.status}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-            renderPagination('transactions-pagination', data, 'loadTransactions');
-        } catch (e) { console.error('Gagal memuat transaksi:', e); }
+    function resetUserFilter() {
+        document.getElementById('user-search').value = '';
+        loadUsers(1);
     }
 
     // ── Boot ─────────────────────────────────────────────────

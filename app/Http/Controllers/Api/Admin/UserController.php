@@ -49,6 +49,10 @@ class UserController extends Controller
             'suspended_at'    => now(),
         ]);
 
+        \App\Models\Report::where('reported_user_id', $user->id)
+            ->where('status', 'Pending')
+            ->update(['status' => 'Suspended']);
+
         AuditLogController::record(
             $request->user()->id,
             'suspend_user',

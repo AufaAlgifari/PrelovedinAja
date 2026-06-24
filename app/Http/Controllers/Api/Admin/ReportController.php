@@ -49,7 +49,7 @@ class ReportController extends Controller
 
     public function reject(Request $request, Report $report)
     {
-        $report->update(['status' => 'Resolved']);
+        $report->update(['status' => 'Rejected']);
 
         AuditLogController::record(
             $request->user()->id,

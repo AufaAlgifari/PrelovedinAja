@@ -106,6 +106,7 @@
 </head>
 <body class="flex flex-col min-h-screen page-enter">
 
+    @if(!Request::is('admin*'))
     <nav class="bg-brand-100/90 backdrop-blur-md border-b border-brand-500/20 sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center gap-4">
@@ -125,13 +126,13 @@
                         </div>
                     </a>
                 </div>
-
+ 
                 <div id="nav-guest-links" class="hidden md:flex items-center gap-10 text-sm font-semibold">
                     <a href="{{ route('home') }}" class="text-brand-900 hover:text-brand-600 transition">Beranda</a>
                     <a href="{{ route('products.index') }}" class="text-brand-900 hover:text-brand-600 transition">Produk</a>
                     <a href="{{ route('about') }}" class="text-brand-900 hover:text-brand-600 transition">Tentang Kami</a>
                 </div>
-
+ 
                 <div class="flex items-center gap-2 sm:gap-4">
                     
                     <div id="nav-btn-cart" class="hidden">
@@ -142,7 +143,7 @@
                             <span id="cart-badge" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-brand-50 text-[10px] font-bold h-5 w-5 rounded-full border-2 border-brand-100 flex items-center justify-center scale-0 transition-all duration-300">0</span>
                         </a>
                     </div>
-
+ 
                     <div id="nav-btn-chat" class="hidden">
                         <a href="{{ route('chat.index') }}" class="relative p-2 text-brand-600 hover:text-brand-900 rounded-xl hover:bg-brand-50 transition-all group block">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,9 +151,9 @@
                             </svg>
                         </a>
                     </div>
-
+ 
                     <div class="relative hidden sm:block" id="nav-notification-container"></div>
-
+ 
                     <div id="nav-guest-actions" class="hidden sm:flex items-center gap-3">
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-brand-50 hover:bg-brand-600 hover:text-brand-50 text-brand-900 text-sm font-semibold rounded-full border border-brand-500/30 transition-all duration-200">
                             Masuk
@@ -161,10 +162,10 @@
                             Daftar
                         </a>
                     </div>
-
+ 
                     <div class="relative hidden sm:block" id="nav-auth-container">
                         </div>
-
+ 
                     <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-brand-600 hover:text-brand-900 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -173,25 +174,27 @@
                 </div>
             </div>
         </div>
-
+ 
         <div id="mobile-menu" class="hidden md:hidden bg-brand-100 border-t border-brand-500/20 px-4 pt-2 pb-6 space-y-4 shadow-inner">
             <div id="mobile-guest-links" class="hidden flex flex-col gap-3 pt-2">
                 <a href="{{ route('home') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Beranda</a>
                 <a href="{{ route('products.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Produk</a>
                 <a href="{{ route('about') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2">Tentang Kami</a>
             </div>
-
+ 
             <div id="mobile-notifications-section" class="pt-1"></div>
-
+ 
             <div class="flex flex-col gap-2.5 pt-1" id="mobile-auth-container">
                 </div>
         </div>
     </nav>
+    @endif
 
     <main class="flex-grow">
         @yield('content')
     </main>
 
+    @if(!Request::is('admin*'))
     <footer class="bg-[#2E1A06] text-[#FBF6EC]/70 py-16 text-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-[#FBF6EC]/10 pb-12">
             <div>
@@ -232,6 +235,7 @@
             &copy; 2026 Preloved.in. Developed for Software Engineering coursework.
         </div>
     </footer>
+    @endif
 
     <div id="toast-container" class="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -440,19 +444,34 @@
             if (userJson) {
                 const user = JSON.parse(userJson);
                 
-                window.showNavElement(navGuestLinks, 'flex');
-                window.showNavElement(mobileGuestLinks, 'flex');
-                window.showNavElement(navBtnCart, 'block');
-                window.showNavElement(navBtnChat, 'block');
+                if (user.role === 'admin') {
+                    window.hideNavElement(navGuestLinks);
+                    window.hideNavElement(mobileGuestLinks);
+                    window.hideNavElement(navBtnCart);
+                    window.hideNavElement(navBtnChat);
+                } else {
+                    window.showNavElement(navGuestLinks);
+                    window.showNavElement(mobileGuestLinks, 'flex');
+                    window.showNavElement(navBtnCart, 'block');
+                    window.showNavElement(navBtnChat, 'block');
+                }
                 window.showNavElement(navAuthContainer);
                 window.hideNavElement(navGuestActions);
 
                 const verifyBadge = user.is_verified ? '<span class="ml-1.5 bg-brand-600 text-brand-50 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full">Verified</span>' : '';
-                let dashboardLink = '';
+                
+                let dropdownLinks = '';
                 if (user.role === 'admin') {
-                    dashboardLink = `<a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Admin Dashboard</a>`;
+                    dropdownLinks = `
+                        <a href="{{ route('profile.index') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Profil Saya</a>
+                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Admin Dashboard</a>
+                    `;
                 } else {
-                    dashboardLink = `<a href="{{ route('seller.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Seller Dashboard</a>`;
+                    dropdownLinks = `
+                        <a href="{{ route('profile.index') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Profil Saya</a>
+                        <a href="{{ route('seller.dashboard') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Seller Dashboard</a>
+                        <a href="{{ route('transactions.history') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Riwayat Transaksi</a>
+                    `;
                 }
 
                 let mobileDashboardLink = '';
@@ -496,9 +515,7 @@
                                     <p class="text-xs font-bold text-brand-900 truncate">${user.email}</p>
                                 </div>
                                 <div class="py-1">
-                                    <a href="{{ route('profile.index') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Profil Saya</a>
-                                    ${dashboardLink}
-                                    <a href="{{ route('transactions.history') }}" class="block px-4 py-2.5 text-xs font-bold text-brand-900 hover:bg-brand-100/50">Riwayat Transaksi</a>
+                                    ${dropdownLinks}
                                 </div>
                                 <div class="py-1">
                                     <button onclick="window.logoutUser()" class="w-full text-left block px-4 py-2.5 text-xs font-black text-rose-700 hover:bg-rose-50 flex items-center gap-2">
@@ -536,6 +553,18 @@
                 }
 
                 // Render Mobile Profile Menu Links
+                let mobileDropdownLinks = '';
+                if (user.role === 'admin') {
+                    mobileDropdownLinks = `
+                        <a href="{{ route('profile.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Profil Saya</a>
+                    `;
+                } else {
+                    mobileDropdownLinks = `
+                        <a href="{{ route('profile.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Profil Saya</a>
+                        <a href="{{ route('transactions.history') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Riwayat Transaksi</a>
+                    `;
+                }
+
                 if (mobileAuthContainer) {
                     mobileAuthContainer.innerHTML = `
                         <div class="flex items-center gap-3 p-3 bg-brand-50 border border-brand-500/20 rounded-2xl">
@@ -546,8 +575,7 @@
                             </div>
                         </div>
                         <div class="flex flex-col gap-1 py-1">
-                            <a href="{{ route('profile.index') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Profil Saya</a>
-                            <a href="{{ route('transactions.history') }}" class="text-sm font-semibold text-brand-900 hover:text-brand-600 transition px-2 py-1.5 rounded-xl hover:bg-brand-50">Riwayat Transaksi</a>
+                            ${mobileDropdownLinks}
                         </div>
                         ${mobileDashboardLink}
                         <button onclick="window.logoutUser()" class="w-full text-center py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold text-xs rounded-xl block">
@@ -558,7 +586,7 @@
 
             } else {
                 // State GUEST (Belum Login)
-                window.showNavElement(navGuestActions, 'flex');
+                window.showNavElement(navGuestActions);
                 window.hideNavElement(navBtnCart);
                 window.hideNavElement(navBtnChat);
                 window.hideNavElement(navAuthContainer);
