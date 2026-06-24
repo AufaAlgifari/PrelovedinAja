@@ -120,7 +120,7 @@
                 <!-- Chat Hint for Coordination -->
                 <div class="mt-4 pt-5 border-t border-[#D4A017]/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p class="text-[11px] font-bold text-[#7A4A10] italic">Hubungi penjual untuk koordinasi pengiriman atau lokasi COD</p>
-                    <a href="{{ route('chat.index') }}?contact_id={{ $product->seller_id }}&contact_name={{ urlencode($product->seller->name ?? 'Penjual') }}&product_title={{ urlencode($product->title) }}&product_id={{ $product->id }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-[10px] font-bold uppercase tracking-wider rounded-xl transition transform hover:-translate-y-0.5 shadow-md w-full sm:w-auto">
+                    <a href="{{ route('chat.index') }}?contact_id={{ $product->seller_id }}&contact_name={{ urlencode($product->seller->name ?? 'Penjual') }}&product_title={{ urlencode($product->title) }}&product_id={{ $product->id }}&return_to=checkout&checkout_product_id={{ $product->id }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#7A4A10] hover:bg-[#5f390c] text-[#FBF6EC] text-[10px] font-bold uppercase tracking-wider rounded-xl transition transform hover:-translate-y-0.5 shadow-md w-full sm:w-auto">
                         Chat Penjual
                     </a>
                 </div>

@@ -476,14 +476,14 @@
                     ${displayCondition}
                 </span>
 
-                <a href="${detailUrl}" class="block aspect-square w-full bg-gray-50 overflow-hidden relative">
+                <div class="block aspect-square w-full bg-gray-50 overflow-hidden relative">
                     <img src="${imageUrl}" alt="${p.title}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
-                </a>
+                </div>
 
                 <div class="p-4 sm:p-5 flex flex-col gap-3">
                     <!-- Baris 1: Nama penjual + Rating -->
                     <div class="flex items-center justify-between text-xs text-gray-500">
-                        <span class="font-medium truncate max-w-[70%]">${sellerName} ${isVerified}</span>
+                        <span class="font-medium truncate max-w-[70%]">${sellerName} · ${window.shortenFaculty(p.seller && p.seller.unsoed_faculty ? p.seller.unsoed_faculty : '')} ${isVerified}</span>
                         <span class="text-[#D4A017] font-bold shrink-0 flex items-center gap-0.5">★ ${rating}</span>
                     </div>
 

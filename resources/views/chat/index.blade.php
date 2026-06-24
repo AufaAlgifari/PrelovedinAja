@@ -2,6 +2,19 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-brand-900">
+    <!-- Back to Checkout Banner (shown when coming from checkout page) -->
+    <div id="checkout-return-banner" class="hidden mb-4 p-4 bg-[#7A4A10] text-[#FBF6EC] rounded-2xl flex items-center justify-between shadow-lg animate-pulse-once">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 0l3-3m-3 3l3 3M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+            </svg>
+            <span class="text-xs font-bold">Anda sedang dalam proses checkout. Selesaikan chat lalu kembali ke halaman pembayaran.</span>
+        </div>
+        <a id="checkout-return-link" href="#" class="shrink-0 px-5 py-2.5 bg-[#FBF6EC] text-[#7A4A10] font-extrabold text-xs rounded-xl hover:bg-white transition shadow-sm">
+            ← Kembali ke Checkout
+        </a>
+    </div>
+
     <div class="h-[75vh] bg-brand-100 rounded-3xl border border-brand-500/20 shadow-xl overflow-hidden flex flex-col md:flex-row relative">
         
         <!-- Left Side: Chat Rooms List -->
@@ -442,6 +455,19 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         loadConversations();
+
+        // Show "Back to Checkout" banner if coming from checkout page
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnTo = urlParams.get('return_to');
+        const checkoutProductId = urlParams.get('checkout_product_id');
+        if (returnTo === 'checkout' && checkoutProductId) {
+            const banner = document.getElementById('checkout-return-banner');
+            const link = document.getElementById('checkout-return-link');
+            if (banner && link) {
+                link.href = `/checkout/${checkoutProductId}`;
+                banner.classList.remove('hidden');
+            }
+        }
     });
 </script>
 @endsection

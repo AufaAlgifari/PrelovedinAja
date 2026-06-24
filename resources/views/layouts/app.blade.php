@@ -203,27 +203,28 @@
             <div>
                 <h4 class="font-bold text-[#FBF6EC] text-sm mb-4">Kategori Populer</h4>
                 <ul class="space-y-3 text-xs">
-                    <li><a href="/?category=Textbooks" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Buku Kuliah (Textbooks)</a></li>
-                    <li><a href="/?category=Electronics" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Elektronik & Gadget</a></li>
-                    <li><a href="/?category=Furniture" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Perabotan Kost</a></li>
-                    <li><a href="/?category=Apparel" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Pakaian & Sepatu</a></li>
+                    <li><a href="{{ route('products.index') }}?category=Textbooks" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Buku Kuliah (Textbooks)</a></li>
+                    <li><a href="{{ route('products.index') }}?category=Electronics" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Elektronik & Gadget</a></li>
+                    <li><a href="{{ route('products.index') }}?category=Dorm Life" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Perabotan Kost</a></li>
+                    <li><a href="{{ route('products.index') }}?category=Apparel" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Pakaian & Sepatu</a></li>
                 </ul>
             </div>
             <div>
                 <h4 class="font-bold text-[#FBF6EC] text-sm mb-4">Layanan & Aturan</h4>
                 <ul class="space-y-3 text-xs">
-                    <li><a href="#" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Aturan COD Kampus</a></li>
-                    <li><a href="#" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Panduan Keamanan</a></li>
+                    <li><a href="{{ route('about') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Aturan COD Kampus</a></li>
+                    <li><a href="{{ route('about') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Panduan Keamanan</a></li>
                     <li><a href="{{ route('transactions.history') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-medium">Riwayat Transaksi</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="font-bold text-[#FBF6EC] text-sm mb-4">Akses Dashboard</h4>
-                <ul class="space-y-3 text-xs">
-                    <li><a href="{{ route('seller.dashboard') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Seller Dashboard</a></li>
-                    <li><a href="{{ route('admin.dashboard') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Admin Dashboard</a></li>
+                <h4 class="font-bold text-[#FBF6EC] text-sm mb-4">Akses Cepat</h4>
+                <ul id="footer-access-links" class="space-y-3 text-xs">
+                    <li><a href="{{ route('products.index') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Katalog Produk</a></li>
                     <li><a href="{{ route('profile.index') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Profil Saya</a></li>
                     <li><a href="{{ route('chat.index') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Pesan Masuk</a></li>
+                    <li id="footer-seller-link" class="hidden"><a href="{{ route('seller.dashboard') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Seller Dashboard</a></li>
+                    <li id="footer-admin-link" class="hidden"><a href="{{ route('admin.dashboard') }}" class="text-[#FBF6EC]/70 hover:text-[#D4A017] transition font-semibold">Admin Dashboard</a></li>
                 </ul>
             </div>
         </div>
@@ -232,7 +233,7 @@
         </div>
     </footer>
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
         // Mobile drawer menu toggle
@@ -241,11 +242,39 @@
             menu.classList.toggle('hidden');
         };
 
+        // Faculty name shortening utility
+        window.shortenFaculty = function(name) {
+            if (!name) return '';
+            const map = {
+                'pertanian': 'Faperta',
+                'biologi': 'F.Bio',
+                'ekonomi dan bisnis': 'FEB',
+                'ekonomi': 'FEB',
+                'peternakan': 'Fapet',
+                'hukum': 'FH',
+                'ilmu sosial dan ilmu politik': 'FISIP',
+                'fisip': 'FISIP',
+                'kedokteran': 'FK',
+                'teknik': 'FT',
+                'ilmu-ilmu kesehatan': 'FIKes',
+                'ilmu kesehatan': 'FIKes',
+                'ilmu budaya': 'FIB',
+                'mipa': 'FMIPA',
+                'perikanan dan ilmu kelautan': 'FPIK',
+            };
+            const cleaned = name.trim().toLowerCase().replace(/^fakultas\s+/, '');
+            for (const [key, val] of Object.entries(map)) {
+                if (cleaned === key || cleaned.includes(key)) return val;
+            }
+            // Fallback: return first 6 chars
+            return name.length > 8 ? name.substring(0, 6) + '.' : name;
+        };
+
         // Toast notifications
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
+            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border text-sm font-semibold transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
             
             if (type === 'success') {
                 toast.className += ' bg-emerald-50 text-emerald-800 border-emerald-100';
@@ -259,9 +288,9 @@
             }
 
             container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => toast.classList.remove('-translate-y-10', 'opacity-0'), 10);
             setTimeout(() => {
-                toast.classList.add('translate-y-10', 'opacity-0');
+                toast.classList.add('-translate-y-10', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         };
@@ -335,7 +364,11 @@
                 if (response.ok) {
                     await window.updateCartBadge();
                     if (showFeedback) {
-                        window.showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!');
+                        if (response.status === 201) {
+                            window.showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!');
+                        } else {
+                            window.showToast(data.message || 'Produk ini sudah ada di keranjang kamu.', 'info');
+                        }
                     }
                     return true;
                 } else {
@@ -794,9 +827,27 @@
         }
 
         // Jalankan sinkronisasi awal saat dokumen selesai dimuat
+        // Render footer links based on user role
+        window.syncFooterLinks = function() {
+            const userJson = localStorage.getItem('preloved_user');
+            const sellerLink = document.getElementById('footer-seller-link');
+            const adminLink = document.getElementById('footer-admin-link');
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    if (user.role === 'admin') {
+                        if (adminLink) adminLink.classList.remove('hidden');
+                    } else {
+                        if (sellerLink) sellerLink.classList.remove('hidden');
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             window.syncAuthHeader(); // this will call _onNotifContainerReady if logged in
             window.updateCartBadge();
+            window.syncFooterLinks();
         });
     </script>
     @stack('scripts')

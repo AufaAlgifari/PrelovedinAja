@@ -96,7 +96,7 @@
                     <p class="text-xs text-[#FBF6EC]/60 font-light">Produk Terjual</p>
                 </div>
                 <div class="space-y-1">
-                    <p class="text-3xl font-black text-[#D4A017]">7</p>
+                    <p class="text-3xl font-black text-[#D4A017]">12</p>
                     <p class="text-xs text-[#FBF6EC]/60 font-light">Fakultas UNSOED</p>
                 </div>
             </div>

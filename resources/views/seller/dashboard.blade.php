@@ -249,7 +249,8 @@
 
                 if (response.ok) {
                     window.showToast('Status produk berhasil diperbarui.');
-                    setTimeout(() => { window.location.reload(); }, 800);
+                    // Re-fetch and re-render without full page reload
+                    await loadSellerProducts();
                     return;
                 }
             } catch (error) {
@@ -285,7 +286,7 @@
 
                 if (response.ok) {
                     window.showToast('Produk berhasil dihapus.');
-                    setTimeout(() => { window.location.reload(); }, 800);
+                    await loadSellerProducts();
                     return;
                 }
             } catch (error) {
